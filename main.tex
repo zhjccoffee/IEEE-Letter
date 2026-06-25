@@ -64,7 +64,7 @@ DEP-style embodied exploration. Although these direct muscle-control baselines c
 generate walking motions, their normalized gait-cycle profiles show substantial
 deviations from reference gait, especially in knee kinematics and vertical
 ground reaction force. In contrast, the residual reflex controller achieves
-higher reference-envelope gait-cycle scores across the tested speeds and
+higher reference-based gait-cycle similarity scores across the tested speeds and
 produces more symmetric and repeatable gait cycles. These
 results suggest that reducing the effective action space through residual
 reflex modulation can improve the physiological plausibility of learned
@@ -130,7 +130,7 @@ The main contributions of this letter are as follows:
     direct muscle-control baselines on controlled walking tasks.
     \item The learned gaits are evaluated using normalized gait-cycle
     kinematics and vertical ground reaction force (GRF) profiles. The results
-    show that residual reflex modulation improves reference gait-cycle similarity,
+    show that residual reflex modulation improves reference-based gait similarity,
     especially for knee kinematics, ankle kinematics, and GRF morphology.
     \item The comparison demonstrates that successful walking alone is not
     sufficient evidence of physiologically plausible musculoskeletal gait,
@@ -343,13 +343,13 @@ stride length and stride time describe the gait strategy used to achieve the
 target speed. The stride measures were computed from the detected gait cycles
 in each evaluated trajectory.
 
-\subsubsection{Reference-based gait naturalness}
-To quantify whether the generated motion follows normative gait-cycle shapes,
+\subsubsection{Reference-based gait similarity}
+To quantify whether the generated motion follows reference gait-cycle shapes,
 we computed reference-envelope scores for pelvic tilt, hip angle, knee angle,
-ankle angle, and vertical GRF. The reference envelopes were obtained from the
-post-hoc gait-analysis template and provide lower and upper bounds for each
-normalized gait-cycle profile; these envelopes were not used during policy
-training. For each quantity, left and right gait cycles were time-normalized
+ankle angle, and vertical GRF. The gray reference envelopes in the profile
+figures denote lower and upper bounds from the post-hoc gait-analysis template.
+They were used only for evaluation and were not included in the policy reward.
+For each quantity, left and right gait cycles were time-normalized
 and averaged to obtain a mean simulated profile $\bar{y}(x)$, where $x$
 denotes gait-cycle percentage. Let $y_{\min}(x_k)$ and $y_{\max}(x_k)$ denote
 the lower and upper reference-envelope values at sample point $x_k$. The
@@ -410,7 +410,7 @@ $\mathrm{CV}_z$ indicates more repeatable gait cycles.
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
 The results are organized according to the evaluation metrics defined above:
-speed tracking and stride measures, reference-based gait naturalness, GRF
+speed tracking and stride measures, reference-based gait similarity, GRF
 morphology, symmetry/repeatability, and complete gait-cycle visualization.
 
 \subsection{Speed Tracking and Stride Measures}
@@ -421,7 +421,7 @@ that the comparison is made between policies that can complete the target-speed
 walking task. The direct muscle-control baselines generally produced less consistent
 stride measures, whereas the residual reflex controller generated longer and
 more regular strides. These task-level metrics establish task completion before
-gait naturalness is evaluated.
+gait-cycle morphology is evaluated.
 
 \begin{table}[!t]
 \centering
@@ -453,19 +453,11 @@ speed.}
 }
 \end{table}
 
-\begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{spatiotemporal_metrics_bars.png}}
-\caption{Speed tracking and stride measures across target speeds. The speed
-error evaluates task tracking, while stride length and stride time summarize
-the gait pattern used to achieve the target speed.}
-\label{fig:spatiotemporal_metrics}
-\end{figure}
-
-\subsection{Reference-Based Gait Naturalness}
+\subsection{Reference-Based Gait Similarity}
 Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle
 scores for the three policy interfaces. Across the three target speeds, the
 proposed Residual-Reflex RL controller achieved the highest overall
-reference-based gait naturalness. The average overall score over the three
+reference-based gait similarity. The average overall score over the three
 speeds was 89.9\% for Residual-Reflex RL, 63.7\% for E2E-RL, and 51.3\% for
 DEP-RL. Fig.~\ref{fig:gait_score_bars} visualizes the main component
 scores and shows that the largest residual-reflex improvements appear in knee
@@ -477,7 +469,7 @@ necessarily imply reference-consistent joint and contact dynamics.
 
 \begin{table}[!t]
 \centering
-\caption{Reference-based gait naturalness scores in controlled walking
+\caption{Reference-based gait similarity scores in controlled walking
 validation. Scores are computed from normalized gait-cycle kinematics and
 vertical GRF.}
 \label{tab:gait_similarity}
@@ -507,7 +499,7 @@ vertical GRF.}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
-\caption{Reference-based gait naturalness scores across target speeds. Numeric
+\caption{Reference-based gait similarity scores across target speeds. Numeric
 labels indicate the score of each bar. The residual reflex controller achieves
 the highest overall score and especially improves knee, ankle, and GRF
 components.}
@@ -648,7 +640,7 @@ space and preserves a structured neuromechanical prior within the control loop.
 
 As an initial validation, experiments in a Hyfydy-based planar musculoskeletal
 model showed that the residual reflex controller produced gait cycles with
-higher reference-envelope gait-cycle scores than both direct muscle-control
+higher reference-based gait-cycle similarity scores than both direct muscle-control
 baselines at 0.8, 1.0, and 1.2~m/s.
 The improvement was most evident in knee kinematics, ankle kinematics, and
 vertical GRF morphology. Additional cycle-level analysis showed lower
