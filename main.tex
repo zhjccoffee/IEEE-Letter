@@ -11,8 +11,8 @@
 \usepackage{array}
 
 
-\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}} % 左对齐 + 垂直居中 + 固定宽
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}       % 左对齐 + 自动伸缩
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
   % 左对齐+自动伸缩
 
 \usepackage{tabularx} 
@@ -20,8 +20,8 @@
 \usepackage{booktabs}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-\markboth{\hskip25pc IEEE TRANSACTIONS AND JOURNALS TEMPLATE}
-{Author \MakeLowercase{\textit{et al.}}: Title}
+\markboth{\hskip25pc REFLEX-INFORMED DRL FOR MUSCULOSKELETAL GAIT}
+{Author \MakeLowercase{\textit{et al.}}: Reflex-Informed DRL for Musculoskeletal Gait}
 \begin{document}
 \title{Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation}
 \author{First A. Author, \IEEEmembership{Fellow, IEEE}, Second B. Author, and Third C. Author Jr., \IEEEmembership{Member, IEEE}
@@ -45,85 +45,101 @@ Tsukuba, Japan (e-mail: author@nrim.go.jp).}}
 \maketitle
 
 \begin{abstract}
-These instructions give you guidelines for preparing papers for 
-IEEE Transactions and Journals. Use this document as a template if you are 
-using \LaTeX. Otherwise, use this document as an 
-instruction set. The electronic file of your paper will be formatted further 
-at IEEE. Paper titles should be written in uppercase and lowercase letters, 
-not all uppercase. Avoid writing long formulas with subscripts in the title; 
-short formulas that identify the elements are fine (e.g., "Nd--Fe--B"). Do 
-not write ``(Invited)'' in the title. Full names of authors are preferred in 
-the author field, but are not required. Put a space between authors' 
-initials. The abstract must be a concise yet comprehensive reflection of 
-what is in your article. In particular, the abstract must be self-contained, 
-without abbreviations, footnotes, or references. It should be a microcosm of 
-the full article. The abstract must be between 150--250 words. Be sure that 
-you adhere to these limits; otherwise, you will need to edit your abstract 
-accordingly. The abstract must be written as one paragraph, and should not 
-contain displayed mathematical equations or tabular material. The abstract 
-should include three or four different keywords or phrases, as this will 
-help readers to find it. It is important to avoid over-repetition of such 
-phrases as this can result in a page being rejected by search engines. 
-Ensure that your abstract reads well and is grammatically correct.
+Deep reinforcement learning (DRL) has shown promise for controlling
+musculoskeletal locomotion, but direct muscle-level control requires
+exploration in a high-dimensional and highly redundant action space. This
+paper investigates an alternative action representation for fixed-speed
+musculoskeletal gait generation. Instead of directly commanding all muscle
+excitations, the proposed residual reflex framework uses an existing
+reflex-based controller as a structured neuromechanical prior and trains a
+DRL policy to modulate four selected reflex parameters through residual
+actions. The policy therefore operates in a compact reflex-parameter space
+while preserving the biomechanical feedback structure embedded in the
+reflex controller. Experiments are conducted in a SCONE/Hyfydy planar
+musculoskeletal model at target walking speeds of 0.8, 1.0, and
+1.2~m/s. The proposed controller is compared with an end-to-end baseline
+that directly controls muscle-level actions. Although the end-to-end
+baseline can generate walking motions, its normalized gait-cycle profiles
+show substantial deviations from reference gait, especially in knee
+kinematics and vertical ground reaction force. In contrast, the residual
+reflex controller achieves higher SCONE gait analysis scores across the
+tested speeds and produces more symmetric and repeatable gait cycles. These
+results suggest that reducing the effective action space through residual
+reflex modulation can improve the physiological plausibility of learned
+musculoskeletal walking beyond what is indicated by task reward alone.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Enter key words or phrases in alphabetical order, separated by commas. Using the IEEE Thesaurus can help you find the best standardized keywords to fit your article. Use the thesaurus access request form for free access to the IEEE Thesaurus: \underline{https://www.ieee.org/publications/services/thesaurus-}\discretionary{}{}{}\underline{access-page.com.}
+Deep reinforcement learning, gait generation, musculoskeletal simulation,
+reflex control, residual reinforcement learning.
 \end{IEEEkeywords}
 
 \section{Introduction}
 \label{sec:introduction}
 
-% 人类下肢运动是一种高度复杂且高鲁棒性的运动形式，其神经控制系统具有明显的层级特征：脊髓反射通路负责快速反馈，而上位中枢调控节律与目标。近年来，肌骨（MSK）模型被广泛用于人类运动仿真。该类模型在生理层面耦合了骨骼动力学与肌肉生物力学，可由肌肉激活预测关节力矩与运动轨迹，为理解神经控制机制提供了可解释的建模平台。基于此模型研究运动的稳定性与生理合理性，对于康复工程、仿生机器人与虚拟人运动生成均具有重要意义。然而，如何在保证生理合理性的前提下生成稳定且能量高效的运动，仍是当前研究的关键挑战。
+\IEEEPARstart{H}{uman} walking is generated by the interaction of neural
+feedback, muscle--tendon dynamics, skeletal mechanics, and contact with the
+environment. Neuromusculoskeletal and musculoskeletal models provide a useful
+platform for studying this interaction because they explicitly connect muscle
+activation to joint motion and ground reaction forces. However, controlling
+such models remains difficult. The system is highly overactuated, the muscle
+dynamics are strongly coupled, and many different activation patterns can
+produce similar task-level motion. As a result, a controller that achieves a
+locomotion objective may still produce gait that is irregular, asymmetric, or
+physiologically implausible.
 
-% 为实现具有生理合理性的稳定步态生成，研究者提出了多种控制策略。现有控制策略主要包括反射控制、中央模式发生器（CPG）以及肌肉协同（muscle synergy）方法。反射控制以生物反射机制为基础，通过模拟肌梭、腱器官及足底触觉等反馈通路，构建局部感知–反应式控制律（如 Geyer 与 Herr 提出的脊髓反射模型），能够在特定条件下生成稳定的行走模式，并较好地解释人类步态的神经调控机制。然而，这类模型通常依赖经验参数或离线优化，对任务或环境变化的响应能力有限。CPG利用神经振荡网络产生节律性输出，并在外部反馈的调节下驱动周期运动。该模型能够有效生成连续的步态节律，但在应对扰动和地形变化时，往往缺乏快速的适应与稳定恢复能力。此外，部分研究基于**肌肉协同（muscle synergy）**理论，通过降低肌肉激活空间的维度，将复杂的肌群控制简化为若干协同模式的线性组合。这类方法在一定程度上提高了计算效率，并揭示了肌肉协调的内在结构，但其协同模式多来源于数据驱动分解或经验假设，缺乏在线调节与生理反馈机制的支持。
+Biologically inspired reflex controllers provide one way to address this
+problem. Muscle reflex models encode local sensory--motor feedback pathways
+inspired by spinal reflex mechanisms and have been shown to generate
+human-like walking dynamics \cite{geyer2010}. Tools such as SCONE further make
+it possible to optimize and evaluate such controllers in predictive
+simulations of biological motion \cite{scone2019}. Nevertheless, reflex-based
+controllers typically depend on carefully selected gains, thresholds, and
+offsets. These parameters are often tuned manually or optimized offline, and
+their effects can be sensitive to the musculoskeletal model and task condition.
 
-% 随着深度强化学习（Deep Reinforcement Learning, DRL）的发展，出现了大量基于策略学习的运动生成研究。此类方法通过与仿真环境的交互学习控制策略，能够在端到端框架下实现行走、跑步等多种运动形式。尽管强化学习在运动控制任务中展现出强大的策略优化能力，但其在神经肌骨系统中的应用仍面临显著挑战：高维控制变量、强耦合的肌肉动力学以及缺乏生理约束，使得策略学习过程容易陷入非生理、低效率的探索。与此形成对比，生理启发的反射机制为运动控制提供了丰富的结构先验，能够在局部反馈层面保证稳定与可解释性。因此，本文提出了一种Reflex-Informed Deep Reinforcement Learning 框架,在 off-policy 的 Actor–Critic 学习结构下引入生理反射的神经控制规律。该框架以反射模型作为低层控制结构，Actor 网络生成反射参数候选，Critic 网络根据运动性能评估策略价值，并通过基于概率推断的策略优化算法（Maximum a Posteriori Policy Optimization, MPO）实现稳定的策略更新,使策略学习过程在生理合理的空间中进行约束与优化。该方法在保证反射控制稳定性的同时，提升了参数调整的效率与全局性能，从而在仿真步态生成中展现出更稳定且能量合理的运动特征。
+Deep reinforcement learning (DRL) offers a complementary route by learning
+closed-loop policies directly from interaction with simulation. Recent work on
+musculoskeletal reinforcement learning has highlighted the difficulty of
+exploration in high-dimensional muscle-level action spaces. For example,
+DEP-RL addresses this issue by improving embodied exploration while still
+operating in the original overactuated control space \cite{deprl2023}. This
+raises a related question: rather than improving exploration in the full muscle
+excitation space, can the effective action space itself be reduced by learning
+at the level of structured reflex modulation?
 
+This paper investigates that question through a residual reflex DRL framework
+for fixed-speed musculoskeletal walking. Instead of replacing the reflex
+controller with an end-to-end policy, the proposed method keeps the reflex
+controller as a low-level biomechanical prior and trains a policy to output
+residual adjustments to a small set of selected reflex parameters. The role of
+DRL is therefore changed from direct muscle excitation control to modulation of
+an interpretable neuromechanical controller. This idea is related in spirit to
+residual reinforcement learning \cite{residualrl2019}, but is applied here to
+reflex-parameter modulation in a muscle-driven gait environment.
 
-% 本文的主要贡献如下：
-% （1）从神经启发视角出发，提出 Reflex-Informed DRL 框架，在 MSK 模型上实现结构化神经反馈控制，实现稳定、可解释的学习；
-% （2）采用并论证 Maximum a Posteriori Policy Optimization (MPO) 在高维肌骨系统中的适用性，实现反射参数的高效更新与稳定策略学习；
-% （3）基于公开步态数据验证框架的生理一致性，模型生成的关节角度在不同速度下与健康受试者步态趋势一致，证明了该方法在生理合理性与学习效率上的优势。
-% 本文余下部分结构如下：第二节介绍方法原理及模型设计；第三节描述实验设置与评估指标；第四节展示结果并进行分析；第五节总结全文与展望。
+The main contributions of this paper are as follows:
+\begin{enumerate}
+    \item A residual reflex action representation is formulated for
+    musculoskeletal gait generation. The learned policy modulates four selected
+    reflex parameters instead of directly commanding all muscle excitations.
+    \item The proposed controller is implemented in a SCONE/Hyfydy-based planar
+    musculoskeletal environment and compared with an end-to-end muscle-level
+    DRL baseline at three fixed walking speeds.
+    \item The learned gaits are evaluated using normalized gait-cycle
+    kinematics and vertical ground reaction force (GRF) profiles. The results
+    show that residual reflex modulation improves SCONE gait similarity,
+    especially for knee kinematics, ankle kinematics, and GRF morphology.
+    \item The comparison demonstrates that high task reward or successful
+    walking alone is not sufficient evidence of physiologically plausible
+    musculoskeletal gait, motivating gait-quality evaluation beyond reward.
+\end{enumerate}
 
-
-\IEEEPARstart{H}{uman} gait is a highly complex yet robust form of motion, characterized by a hierarchical control architecture in which fast spinal reflex pathways regulate local feedback responses, while higher-level neural structures modulate movement rhythms and task goals over longer temporal scales. Neuromusculoskeletal (NMSK) models, together with their simplified musculoskeletal variants, have therefore been widely adopted for the dynamic simulation of human locomotion, as they explicitly couple skeletal dynamics with muscle biomechanics and physiological control mechanisms. Such models provide an interpretable framework for investigating the neural regulation of human movement and are particularly valuable in applications where physiological plausibility and closed-loop stability are essential, such as rehabilitation engineering, bionic robotics, and computer animation. Despite these advantages, achieving stable and energy-efficient gait in NMSK systems remains challenging in practice. In many existing models, locomotion performance critically depends on carefully tuned control parameters, whose effects are highly sensitive to the complex interactions between sensory feedback, musculoskeletal dynamics, and environmental conditions. As a result, current approaches often rely on manual tuning or offline search, making it difficult to develop control strategies that are systematic, reproducible, and scalable in closed-loop locomotion control.
-
-To address the difficulty of tuning control parameters in neuromusculoskeletal locomotion, a variety of biologically inspired control strategies have been proposed, including reflex-based control, central pattern generators (CPG), and muscle synergy-based approaches. Reflex-based control models encode local sensory–motor feedback loops inspired by spinal reflex mechanisms, enabling stable and physiologically interpretable gait generation. However, their performance typically depends on a large number of control parameters that are strongly coupled with musculoskeletal dynamics, and are often determined through manual tuning or offline optimization, which limits reproducibility and makes systematic scaling to different model configurations or conditions challenging.
-
-CPG-based approaches employ coupled neural oscillators to generate rhythmic locomotion patterns with compact structure. While effective for rhythm generation, their parameters are primarily designed to ensure oscillatory stability and often require careful manual design and tuning, making systematic adjustment in closed-loop NMSK systems non-trivial.
-
-Muscle synergy-based methods reduce the dimensionality of muscle coordination by representing activations as combinations of a limited number of synergies. Although this simplification alleviates some tuning complexity, synergy structures are  mainly derived from data-driven decompositions or empirical assumptions, and systematic adaptation in closed-loop control remains challenging.
-
-%Reflex control is based on biological reflex mechanisms, simulating feedback pathways such as muscle spindles, Golgi tendon organs, and plantar tactile sensors to construct local perception–reaction control laws. Such models can generate stable walking patterns under specific conditions and effectively explain the neural regulation of human gait. However, these models typically rely on empirical parameters or offline optimization, which limits their scalability and makes systematic parameter adaptation within learning frameworks challenging. The CPG approach employs neural oscillatory networks to generate rhythmic outputs, driving periodic movements under the modulation of external feedback. This model can effectively produce continuous gait rhythms but often lacks rapid adaptability and stable recovery when facing perturbations or terrain variations. In addition, some studies have been inspired by the muscle synergy theory, which reduces the dimensionality of the muscle activation space by simplifying complex muscle group control into a linear combination of several coordinated patterns. Such methods improve computational efficiency to some extent and reveal the intrinsic structure of muscle coordination; however, their synergy patterns are mainly derived from data-driven decompositions or empirical assumptions, lacking online adaptability and the support of physiological feedback mechanisms.
-
-
-Recently, with the rapid development of Deep Reinforcement Learning (DRL), a growing number of studies have explored DRL on motion generation based. These methods learn control policies through interactions with simulated environments, enabling the realization of various motion forms such as walking and running within an end-to-end framework. Although reinforcement learning demonstrates strong policy optimization capabilities in motor control tasks, end-to-end learning of actuator-level control commands in closed-loop NMSK locomotion remains difficult to stabilize and scale.Its application within NMSK systems still faces substantial challenges. The high-dimensional control variables, strongly coupled muscle dynamics, and the lack of physiological constraints often lead to the learning process to drift into non-physiological and inefficient exploration. 
-
-Existing studies tend to emphasize either physiologically grounded control structure or learning-based optimization, but rarely consider both aspects simultaneously within a single neuromusculoskeletal locomotion framework. As a result, current approaches often involve trade-offs among physiological interpretability, closed-loop stability, and the ability to perform systematic parameter optimization.
-
-Inspired by biological reflex mechanisms, this work propose a Reflex-informed Deep Reinforcement Learning framework that seeks to mitigate this trade-off. Rather than replacing physiologically based reflex control, the proposed approach treats reinforcement learning as a parameter inference mechanism for reflex modulation. This formulation enables systematic and data-driven adjustment of reflex parameters, addressing the limitations of manual tuning and end-to-end policy learning while preserving the stability and interpretability of reflex-based control.
-
-Unlike existing approaches that either rely on hand-tuned reflex gains or employ end-to-end policy learning, the proposed method reformulates locomotion control as structured reflex modulation within a neuro-inspired hierarchical control framework, bridging biological motor control principles and data-driven policy optimization.The main contributions of this paper are as follows:
-
-(1) A neuro-inspired hierarchical control framework for musculoskeletal gait generation is proposed. The method embeds physiologically grounded reflex mechanisms into a structured control architecture, where reinforcement learning operates as a high-level modulation mechanism over low-level feedback pathways, enabling stable and interpretable locomotion control.
-
-(2) A low-dimensional and structured policy formulation for stable learning is introduced. By constraining policy optimization to a small set of reflex modulation parameters, the proposed approach reduces the effective control dimensionality and improves training stability compared with less structured control strategies.
-
-(3) The proposed framework is validated in a musculoskeletal simulation environment, demonstrating stable and physiologically plausible gait generation with improved learning efficiency.
-
-To the best of our knowledge, this is the first work that integrates a physiologically based reflex controller with an off-policy reinforcement learning algorithm within a musculoskeletal simulation framework. Unlike existing studies that either hand-tune reflex gains or employ end-to-end policy learning, our method optimizes reflex parameters through probabilistic policy inference, bridging the gap between biological motor control and deep reinforcement learning. The main contributions of this paper are as follows:
-
-(1) A Reflex-Informed DRL framework is proposed from a neuro-inspired perspective, achieving structured neural feedback control on the MSK model for stable and interpretable learning.
-
-(2) The MPO algorithm implemented within an off-policy Actor–Critic framework is adopted and validated for high-dimensional MSK control, demonstrating efficient reflex-parameter updates and stable policy learning.
-
-(3) The proposed framework is validated using public gait data, where the generated joint trajectories across different speeds align with healthy gait trends, demonstrating advantages in both physiological plausibility and learning efficiency.
-
-The remainder of this paper is organized as follows: Section II presents the methodology and model design; Section III describes the experimental setup and evaluation metrics; Section IV reports and analyzes the results; and Section V concludes the paper and outlines future work.
-
-
+The remainder of this paper is organized as follows: Section II presents the
+residual reflex control formulation and learning framework; Section III
+describes the experimental setup and evaluation metrics; Section IV reports
+and analyzes the results; and Section V concludes the paper and outlines
+future work.
 
 \section{Methodology}
 \subsection{Overview of the Reflex-Informed DRL Framework}\label{formats}
@@ -148,7 +164,7 @@ A physiologically consistent environment is essential for enabling the learning 
 
 \subsubsection{Neurophysiological Basis of Reflex Mechanisms}\label{formats}
 In human locomotion, sensory feedback plays a crucial role in regulating muscle activation and joint stability.
-The proprioceptive system relies primarily on two sensors: the muscle spindle, which detects changes in muscle length and velocity, and the Golgi tendon organ, which monitors muscle tension (Fig. 2).
+The proprioceptive system relies primarily on two sensors: the muscle spindle, which detects changes in muscle length and velocity, and the Golgi tendon organ, which monitors muscle tension, as illustrated in Fig.~\ref{ muscle spindle}.
 These feedback signals are transmitted through spinal pathways to modulate motor neuron excitability, forming the physiological basis of reflex control that maintains balance and smooth gait transitions.
 
 \begin{figure}[!t]
@@ -174,7 +190,7 @@ In addition to the spinal proprioceptive reflexes, the RIC also integrates a Pro
 
 
 \noindent
-\textbf{ Control Laws and Formulation:} While the mathematical forms of the control laws (Equations 1–5) are universal and potentially applicable to all muscles, their actual engagement is sparse and targeted to adhere to physiological realism. This phase-dependent activation defines a structured action space that is grounded in neurophysiological evidence. We selectively activate these pathways for nine major lower-limb muscle groups crucial for gait: Tibialis Anterior (TA), Soleus (SOL), Gastrocnemius (GAS), Vastus (VAS), Biceps Femoris (BIF), Iliopsoas (ILI), Hamstrings (HAM), Gluteus Maximus (GLU), and Rectus Femoris (FEM). Furthermore, the application is gait-phase-dependent: all gains ($k_{C, i}$ and $k_{X, i \leftarrow j}$) and offsets ($\tilde{l}_{0, i \leftarrow j}$, $\tilde{v}_{0, i \leftarrow j}$ and $\tilde{f}_{0, i \leftarrow j}$) are phase-dependent parameters whose non-zero values are defined specifically for each combination of muscle pair, reflex type, and active gait subphase (as detailed in Figure X). All parameters are subject to dynamic modulation by the DRL policy (detailed in Section C). The stimulation terms are formulated as follows:
+\textbf{ Control Laws and Formulation:} While the mathematical forms of the control laws (Equations 1–5) are universal and potentially applicable to all muscles, their actual engagement is sparse and targeted to adhere to physiological realism. This phase-dependent activation defines a structured action space that is grounded in neurophysiological evidence. We selectively activate these pathways for nine major lower-limb muscle groups crucial for gait: Tibialis Anterior (TA), Soleus (SOL), Gastrocnemius (GAS), Vastus (VAS), Biceps Femoris (BIF), Iliopsoas (ILI), Hamstrings (HAM), Gluteus Maximus (GLU), and Rectus Femoris (FEM). Furthermore, the application is gait-phase-dependent: all gains ($k_{C, i}$ and $k_{X, i \leftarrow j}$) and offsets ($\tilde{l}_{0, i \leftarrow j}$, $\tilde{v}_{0, i \leftarrow j}$ and $\tilde{f}_{0, i \leftarrow j}$) are phase-dependent parameters whose non-zero values are defined specifically for each combination of muscle pair, reflex type, and active gait subphase (while the current residual policy modulates a selected subset of four reflex parameters. The stimulation terms are formulated as follows:
 
 Feedforward Stimulation: Provides a baseline, phase-dependent muscle drive.
 \begin{equation}u_{C, i} = k_{C, i} \label{eq:feedforward} \end{equation}
@@ -393,562 +409,245 @@ task:
 
 \end{enumerate}
 
-In summary, the adoption of the EM-based MPO approach is critical for learning complex reflex modulation strategies due to its inherent Stability and Data Efficiency. The KL-divergence constraint implemented in the M-Step limits the magnitude of policy changes in each update, thereby preventing the "policy collapse" commonly observed in high-dimensional muscle control. Furthermore, as an off-policy method, MPO utilizes the Replay Buffer $\mathcal{D}$ for the extensive reuse of historical data, which provides high Data Efficiency. This efficiency is paramount given the high computational cost of the detailed musculoskeletal simulation. Ultimately, this decoupled, off-policy optimization loop enables the DRL policy to learn complex, adaptive modulation strategies without requiring excessive interaction time with the computationally expensive physiological environment, thus significantly accelerating the learning process.
+In summary, MPO provides a practical off-policy optimization framework for residual reflex modulation. The KL-divergence constraint limits the magnitude of each policy update, while the replay buffer enables reuse of previously collected simulation data. In this work, MPO is used as the policy optimizer for both the residual reflex controller and the end-to-end baseline; the main comparison therefore focuses on the control representation rather than on the optimizer itself.
+
 
 
 
 \section{Experiments}
-\subsection{Environments and Tasks}\label{formats}
-\subsubsection{Simulation Environment} The learning environment consists of a 2D planar musculoskeletal model implemented within the Scone/Hyfydy simulator. This model features 9 Degrees of Freedom (DoF), allowing motion exclusively in the sagittal plane, and includes the pelvis, leg segments, and a rigidly connected trunk which serves to accurately model the overall center of mass dynamics. These DoFs are comprised of three pelvic base freedoms and six rotational freedoms corresponding to one DoF at each of the hip, knee, and ankle joints in both legs. Actuation is provided by a total of 18 Hill-type muscles (9 per leg) at the lower extremities. Foot-ground interaction is modeled using discrete contact spheres (radius $0.03$ m) placed at the heel and toe segments. The interaction forces are governed by a Hunt-Crossley-like continuous contact model, defined by a static friction coefficient of $0.9$ and a dynamic friction coefficient of $0.6$.
+\subsection{Environments and Tasks}\label{sec:experiments}
+\subsubsection{Simulation Environment}
+The experiments were conducted in a two-dimensional planar musculoskeletal
+model implemented in SCONE/Hyfydy. The model contains the pelvis, trunk, and
+bilateral lower-limb segments, with sagittal-plane hip, knee, and ankle motion.
+Actuation is provided by 18 Hill-type muscles, with nine muscles per leg. Foot--ground interaction is modeled through discrete contact elements, and the
+resulting vertical ground reaction forces are recorded for gait analysis.
+
 \begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{Body.png}}
-\caption{ 2D planar musculoskeletal model.}
-\label{2D planar musculoskeletal modelHY}
+\centerline{\includegraphics[width=\columnwidth]{body.png}}
+\caption{Planar musculoskeletal model used for fixed-speed walking experiments.}
+\label{fig:body_model}
 \end{figure}
 
-\subsubsection{Policy Interface} The DRL strategy's interface is defined by its State and Action spaces. The State Space $\boldsymbol{s} \in \mathcal{S}$ is comprised of a continuous vector of biomechanical and physiological metrics, including joint angles, angular velocities, muscle fiber states, ground reaction forces, and critically, the target speed command for the required gait. The Action Space $\boldsymbol{a} \in \mathcal{A}$ is defined by the $D_a$ continuous, adjustable reflex parameters. Policy outputs are appropriately normalized to ensure they map correctly to the effective physical range of the underlying reflex parameters, thus maintaining physiological plausibility.
-% ===== in preamble =====
+\subsubsection{Compared Control Interfaces}
+Two policy interfaces were compared. The proposed \emph{Residual Reflex}
+controller uses a reflex-based controller as the low-level control structure.
+The DRL policy outputs four normalized residual actions, each modulating one
+selected reflex parameter around its nominal value:
+\begin{equation}
+    K_i(t)=K_{i,0}\left(1 + \alpha a_i(t)\right), \quad \alpha=0.5,
+\end{equation}
+where $K_{i,0}$ is the nominal reflex parameter and $a_i(t)$ is the policy
+output. In the current implementation, the four modulated parameters are the
+hamstrings length gain, iliopsoas reference length, soleus force gain, and
+vasti force gain.
 
+The baseline controller is an \emph{End-to-End} muscle-control policy without
+the reflex modulation structure. It directly outputs muscle-level control
+actions for the same musculoskeletal model. Both controllers were trained with
+MPO-based off-policy reinforcement learning. The current experiments do not use
+DEP; DEP-RL is discussed as related work because it motivates the difficulty of
+high-dimensional musculoskeletal action spaces.
 
-
-\newcolumntype{M}[1]{>{\raggedright\arraybackslash}m{#1}} % 左对齐+垂直居中
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-
-
-
-\newcolumntype{L}{>{\raggedright\arraybackslash}X}
-\begin{table}[t]
+\begin{table}[!t]
 \centering
-\caption{DRL Policy Interface Detail (State and Action Spaces)}
-\label{tab:interface}
-
+\caption{Policy interfaces compared in the fixed-speed experiments.}
+\label{tab:policy_interface}
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.15}
-
-\begin{tabularx}{\linewidth}{@{}c L c L@{}}
+\begin{tabularx}{\linewidth}{l c X}
 \toprule
-\textbf{Space} & \textbf{Feature / Component} & \textbf{D} & \textbf{Description} \\
+\textbf{Controller} & \textbf{Action dim.} & \textbf{Policy output} \\
 \midrule
-
-\multirow{5}{*}{\textbf{State} ($\mathcal{S}$)}
-& Joint Kinematics $(q,\dot{q})$ & 12
-& Hip, knee, and ankle angles and angular velocities (R/L). \\
-
-& Muscle States $(l,\dot{l})$ & 36
-& Fiber length and velocity for 18 muscles. \\
-
-& Ground Contact / GRF $(p_{\text{feet}})$ & 6
-& Foot contact state and ground reaction forces. \\
-
-& Pelvic State $(\theta,\dot{\theta})$ & 2
-& Pelvic height and horizontal velocity. \\
-
-& \textbf{Task Command} $(v_{\text{target}})$ & 1
-& External target horizontal speed command. \\
-
-\midrule
-\multicolumn{2}{l}{\textbf{Total Dimension} ($\mathbf{D_s}$)} & \textbf{57} & \\
-
-\midrule
-\textbf{Action} ($\mathcal{A}$)
-& Reflex Parameters (Gains / Thresholds) & 53
-& Continuous, adjustable parameters of the reflex topology. \\
-
-\midrule
-\multicolumn{2}{l}{\textbf{Total Dimension} ($\mathbf{D_a}$)} & \textbf{53} & \\
+Residual Reflex & 4 & Residual modulation of selected reflex parameters. \\
+End-to-End & 18 & Direct muscle-level control actions. \\
 \bottomrule
 \end{tabularx}
-
 \end{table}
 
+\subsection{Evaluation Protocol}
+Policies were evaluated at three fixed target speeds: 0.8, 1.0, and
+1.2~m/s. For each trained policy, a representative walking trajectory was
+exported as an STO file and analyzed using the SCONE gait analysis procedure.
+The gait cycle was normalized to 0--100\%, and the following profiles were
+computed for both legs: pelvic tilt, hip angle, knee angle, ankle angle, and
+vertical GRF. The SCONE gait score measures whether the mean simulated profile
+lies within the reference gait envelope; higher values indicate closer
+agreement with reference gait.
 
-
-
-\subsubsection{DRL Task: Multi-Speed Gait Generation} The purpose of the experimental setup is to validate the capability of the MPO policy to learn adaptive reflex modulation strategies for multi-speed locomotion. This validation is conducted by training the DRL Agent to achieve three distinct locomotor patterns: Slow Walk, Normal Walk, and Fast Walk. While each speed is learned by a separate policy, the DRL Agent's primary task remains Adaptive Reflex Parameter Modulation, wherein the policy outputs are mapped directly to key parameters (such as gains and thresholds) within the pre-defined reflex structure. This successful application across distinct speed requirements demonstrates the generalizability of the MPO-based reflex modulation framework for generating complex gait dynamics.
-
-\subsection{Training Procedure}\label{formats}
-\subsubsection{Reward Function} 
-The overall reward function $R(s, a)$ is formulated as a weighted sum of several terms designed to maximize the desired performance while maintaining biological plausibility and control smoothness. The primary incentive is the velocity tracking term with a coefficient ($\omega_{v}$) of 10.0, which drives the policy to match the external target speed. The function incorporates multiple penalty terms to ensure stability and efficiency: metabolic efficiency is promoted by penalizing the muscle activation level ($\lambda_{act} = -1.57929$); gait smoothness is encouraged by a coefficient of $\lambda_{smooth} = -0.097$; and stability is maintained by penalizing excessive Ground Reaction Forces ($\lambda_{grf} = -0.17281$) and motion near joint limits ($\lambda_{joint} = -0.1307$). The total reward is computed at every timestep, and an episode terminates if the agent falls (e.g., pelvis height drops below a set threshold) or the maximum episode length is reached. The full mathematical formulation for $R$, including the specific weights for all terms (e.g., $\omega_v$, $\lambda_{effort}$, $\lambda_{torso}$), is provided in Table II.
-
-\newcolumntype{L}{>{\raggedright\arraybackslash}X}
-\begin{table}[t]
-\centering
-\caption{Reward Function Parameters and Weights}
-\label{tab:reward_params}
-
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-
-% 关键：Component 和 Objective 都是 X
-\begin{tabularx}{\linewidth}{@{}L c c L@{}}
-\toprule
-\textbf{Component} & \textbf{Symbol} & \textbf{Coefficient} & \textbf{Objective} \\
-\midrule
-
-Velocity Tracking
-& $\omega_{v}$ & 10.0
-& Maximize match to target velocity $v_{\text{target}}$. \\
-
-Muscle Activation Penalty
-& $\lambda_{\text{act}}$ & $-1.57929$
-& Encourage low metabolic cost. \\
-
-Joint Limit Penalty
-& $\lambda_{\text{joint}}$ & $-0.1307$
-& Enforce physiological joint range. \\
-
-GRF Penalty
-& $\lambda_{\text{grf}}$ & $-0.17281$
-& Encourage smooth ground contact. \\
-
-Action Smoothness Penalty
-& $\lambda_{\text{smooth}}$ & $-0.097$
-& Discourage rapid changes in control signals. \\
-
-Trunk Stability Penalty
-& $\lambda_{\text{torso}}$ &  $-1.0$
-& Minimize upper-body pitch and lateral sway. \\
-\bottomrule
-\end{tabularx}
-
-\end{table}
-
-
-
-%  The MPO algorithm is configured with the following key hyperparameters: The actor and critic networks are optimized using the Adam optimizer [Placeholder: Cite Adam paper] with a learning rate of [Placeholder: $L_R$] for the policy and [Placeholder: $L_R$] for the value function. The KL-divergence policy constraint is set to [Placeholder: $\epsilon_{KL}$] to regulate the policy update size, ensuring stability as described in Section II.C. The discount factor $\gamma$ is set to [Placeholder: $\gamma$].
-
-
-\subsubsection{Network Architecture and Hyperparameters} 
-The MPO policy ($\pi$) and value ($q$) networks are implemented as fully connected neural networks. Each network utilizes 2 hidden layers with 256 units per layer. The ReLU activation function is used for the hidden layers. The algorithm employs an Adaptive Energy Buffer for experience replay, utilizing a batch size of $\mathbf{256}$ and performing $\mathbf{30}$ batch iterations per update cycle. Key specific hyperparameters are summarized in Table \ref{tab:hyperparams}.
-
-\begin{table}[t]
-\centering
-\caption{MPO Training Hyperparameters (Partial)}
-\label{tab:hyperparams}
-
-\small
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.15}
-
-\begin{tabularx}{\linewidth}{l c Y}
-\toprule
-\textbf{Parameter Name} & \textbf{Value} & \textbf{Description} \\
-\midrule
-
-Total Timesteps
-& $5 \times 10^8$
-& Total training steps per policy. \\
-
-Parallel Environments
-& 20
-& Number of concurrently running environments. \\
-
-Sequential Steps
-& 10
-& Steps collected per parallel environment before each update. \\
-
-Batch Size
-& 256
-& Size of the experience mini-batch. \\
-
-Batch Iterations
-& 30
-& Number of iterations per update cycle. \\
-
-Environment Step Size ($\Delta t$)
-& $0.025\,\text{s}$
-& Simulation time step controlling fidelity. \\
-
-
-
-\multicolumn{3}{p{\linewidth}}{\textit{Policy / Critic learning rates, discount factor $\gamma$, and MPO $\epsilon_{\mathrm{KL}}$ are TBD.}} \\
-\bottomrule
-\end{tabularx}
-
-\end{table}
-
-
-\subsubsection{Training Protocol}
-Three distinct policies were trained, each optimized for one of the target speeds: Slow Walk ($v_{target}=0.8 \text{ m/s}$), Normal Walk ($v_{target}=1.2 \text{ m/s}$), and Fast Walk ($v_{target}=1.8 \text{ m/s}$). Each policy was trained for a total of 500 million ($5 \times 10^8$) timesteps. The training process saves checkpoints every 1 million steps. An episode terminates if the agent falls or if the maximum episode length is reached. Given the computationally expensive nature of the simulation (step size $\Delta t = 0.025 \text{ s}$), this extensive training regimen ensures convergence to highly optimized policies. An episode terminates if the agent falls (pelvis height drops below a set threshold, $h_{min}=0.6 \text{ m}$) or if the maximum episode length of [Placeholder: $T_{max}$] timesteps is reached.
-
-
-\subsection{Evaluation Metrics}\label{formats}
-
-\label{sec:evaluation-metrics}
-
-The performance of the learned policies was rigorously assessed using a suite of metrics focused on three primary areas: \textbf{locomotor performance and stability}, \textbf{metabolic efficiency}, and \textbf{robustness to perturbations}.
-
-\subsubsection{Locomotor Performance and Stability}
-Locomotor performance is primarily quantified by the \textbf{Speed Tracking Error} ($E_{\text{speed}}$), which measures the mean absolute error (MAE) between the agent's actual average horizontal velocity ($\bar{v}_{x}$) and the target velocity ($v_{\text{target}}$) over the duration of the evaluation episode ($T$).
-$$
-E_{\text{speed}} = \frac{1}{T} \sum_{t=1}^{T} | \bar{v}_{x}(t) - v_{\text{target}} |
-$$
-Lower values indicate a better control fidelity in achieving the commanded gait speed. To validate the physiological realism of the generated gait, the \textbf{Joint Trajectory Root Mean Square Error} ($\text{RMSE}_{\text{traj}}$) is employed, comparing the simulated joint angle trajectories ($\theta_{\text{sim}}$) to experimental human gait data ($\theta_{\text{exp}}$):
-$$
-\text{RMSE}_{\text{traj}} = \sqrt{\frac{1}{N_{j} T} \sum_{j=1}^{N_{j}} \sum_{t=1}^{T} (\theta_{\text{sim}, j}(t) - \theta_{\text{exp}, j}(t))^2}
-$$
-where $N_{j}$ is the number of joints evaluated. Furthermore, stability is assessed by measuring the \textbf{Fall Rate} ($R_{\text{fall}}$), defined as the percentage of evaluation episodes that terminated early because the pelvis height dropped below the safety threshold ($h_{\text{min}} = 0.6 \text{ m}$).
-
-\subsubsection{Metabolic Efficiency}
-\textbf{Metabolic Efficiency} ($E_{\text{metabolic}}$) serves as the key measure of energy expenditure and physiological plausibility. It is calculated by summing the total muscle mechanical work over a given distance, typically normalized by body mass ($M$) and distance traveled ($D$):
-$$
-E_{\text{metabolic}} = \frac{1}{M D} \sum_{i=1}^{N_{m}} \int_{0}^{T} (F_{f, i}(t) \dot{L}_{f, i}(t)) dt
-$$
-where $N_{m}$ is the number of muscles, $F_{f, i}$ is the $i$-th muscle fiber force, and $\dot{L}_{f, i}$ is the $i$-th muscle fiber velocity. This value is expressed in units of $\text{J}/(\text{kg}\cdot\text{m})$. Critically, lower metabolic efficiency values correspond to a more energy-efficient and biologically realistic gait, which is a core objective of the DRL training.
-
-\subsubsection{Robustness to Perturbations}
-To assess the adaptability and robustness of the learned reflex modulation strategy, the policies are subjected to external impulsive forces (perturbations) during walking. The primary metric in this context is the \textbf{Recovery Time} ($T_{\text{recover}}$). This duration, measured in seconds, represents the time required for the agent's horizontal velocity to return to and stabilize within a $\pm 5\%$ tolerance band of the original $v_{\text{target}}$ after a perturbation is applied.
-
-\subsection{Test Conditions}\label{formats}
-The robustness and adaptive capability of the learned policies were rigorously tested under two primary conditions:
-
-\begin{enumerate}
-    \item \textbf{Nominal Condition:} Policies were evaluated on a perfectly flat ground surface to quantify baseline performance and efficiency at the target speeds.
-    \item \textbf{Perturbation/Robustness Test:} To assess the in-task adaptivity of the reflex modulation, the policies were subjected to \textbf{sudden external impulses applied directly to the pelvis body}. The impulses, with a magnitude randomly sampled from $[100, 200] \text{ N}$ and lasting $50 \text{ ms}$, were applied in the forward direction at randomized intervals (ranging from $1 \text{ s}$ to $3 \text{ s}$) during steady walking.
-\end{enumerate}
-
+In addition to the SCONE component scores, we computed two descriptive gait
+quality measures from the detected gait cycles. First, left--right waveform
+symmetry was quantified as the root-mean-square difference between the average
+left and right normalized profiles. Second, stride-to-stride repeatability was
+quantified using the coefficient of variation (CV) of stride time and stride
+length. These measures are used to describe gait regularity and bilateral
+symmetry rather than fall robustness.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
 
-\subsection{Learning Performance and Convergence}
-\label{sec:learning-performance}
+\subsection{Gait Similarity Across Fixed Speeds}
+Table~\ref{tab:gait_similarity} summarizes the SCONE gait analysis scores for
+Residual Reflex and End-to-End controllers. Across the three matched target
+speeds, the proposed residual reflex controller achieved higher overall gait
+similarity than the end-to-end baseline. The average overall score over the
+three speeds was 89.9\% for Residual Reflex and 63.7\% for End-to-End. The
+largest improvements appeared in knee kinematics and vertical GRF morphology,
+which are two components where the end-to-end baseline often produced walking
+motions that completed the task but deviated strongly from reference gait.
 
-The training stability and learning efficacy of the Maximum A Posteriori Policy Optimization (MPO) algorithm were evaluated by tracking the average episode return across all three target velocities: Slow Walk ($v_{\text{target}}=0.8 \text{ m/s}$), Normal Walk ($v_{\text{target}}=1.2 \text{ m/s}$), and Fast Walk ($v_{\text{target}}=1.8 \text{ m/s}$). All three policies demonstrated rapid initial improvement followed by stable convergence towards highly optimized performance objectives. The training was conducted for an extensive total of $500 \text{ million } (5 \times 10^8)$ timesteps per policy, ensuring that the agents fully exploited the environment dynamics and achieved their maximum potential reward. A visualization of the learning curves confirms the consistent convergence across all speeds.  This stability indicates that the inherent reflex structure provides a robust and learnable control basis, preventing catastrophic failures often seen in end-to-end DRL locomotion tasks.
+\begin{table}[!t]
+\centering
+\caption{SCONE gait analysis scores for fixed-speed walking. Scores are
+computed from normalized gait-cycle kinematics and vertical GRF.}
+\label{tab:gait_similarity}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{l l r r r r r r}
+\toprule
+\textbf{Target} & \textbf{Method} & \textbf{Real.} & \textbf{Overall} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} \\
+\midrule
+0.8 & Residual Reflex & 0.79 & 84.2 & 96.6 & 68.9 & 78.5 & 76.7 \\
+0.8 & End-to-End & 0.87 & 50.5 & 98.3 & 18.6 & 0.0 & 35.9 \\
+1.0 & Residual Reflex & 1.05 & 92.3 & 100.0 & 82.6 & 88.9 & 89.8 \\
+1.0 & End-to-End & 1.01 & 70.9 & 99.9 & 45.4 & 61.5 & 48.0 \\
+1.2 & Residual Reflex & 1.21 & 93.2 & 99.6 & 88.7 & 88.6 & 89.1 \\
+1.2 & End-to-End & 1.26 & 69.6 & 88.4 & 52.4 & 85.9 & 21.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Gait Kinematics and Stability}
-\label{sec:gait-kinematics}
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
+\caption{Comparison of SCONE gait analysis scores across target speeds. The
+residual reflex controller improves overall gait similarity and especially
+knee, ankle, and GRF components.}
+\label{fig:gait_score_bars}
+\end{figure}
 
-The generated gaits were analyzed to validate their physiological realism and overall stability. Consistent with human locomotion, the simulated ground reaction force (GRF) profiles exhibited the characteristic bimodal pattern during the stance phase for all three speeds . Furthermore, the periodic nature of the generated gait was confirmed through analysis of the joint phase portraits (e.g., pelvic height versus vertical velocity).
+\subsection{Gait-Cycle Profiles at 1.2 m/s}
+Figure~\ref{fig:gait_profiles_12} shows the SCONE-style gait-cycle profiles at
+the 1.2~m/s target speed. The residual reflex controller produced compact and
+consistent left--right gait cycles, with hip, knee, ankle, and GRF curves that
+closely followed the reference envelopes. By contrast, the end-to-end baseline
+showed larger cycle-to-cycle variation and less physiological GRF morphology.
+The end-to-end controller was still able to generate forward walking, but the
+resulting gait pattern was less consistent with the reference gait, especially
+in the knee and GRF profiles.
 
-The physiological fidelity was quantified by comparing the simulated joint angular trajectories to experimental human gait data using the Joint Trajectory Root Mean Square Error ($\text{RMSE}_{\text{traj}}$). The results show a low $\text{RMSE}_{\text{traj}}$ across the hip, knee, and ankle joints, indicating a close resemblance between the learned motion patterns and natural human kinematics.  For stability, the Fall Rate ($R_{\text{fall}}$) was recorded, demonstrating that all policies maintained high stability, successfully completing over [Placeholder: 99\%] of evaluation episodes under nominal conditions.
+\begin{figure*}[!t]
+\centerline{\includegraphics[width=0.98\textwidth]{gait_analysis_residual_vs_e2e_1p2.png}}
+\caption{SCONE-style gait analysis at target speed 1.2~m/s. Blue and red
+curves denote left and right gait cycles, respectively; the black curve is the
+cycle average and the gray band is the reference envelope.}
+\label{fig:gait_profiles_12}
+\end{figure*}
 
-\subsection{Energy Efficiency and Muscle Activation}
-\label{sec:energy-efficiency}
+\subsection{Symmetry and Cycle-to-Cycle Consistency}
+Table~\ref{tab:symmetry_variability} reports left--right waveform differences
+and stride variability. The residual reflex controller consistently produced
+lower left--right RMSE and lower stride time/length CV than the end-to-end
+baseline. This supports the qualitative observation that the residual reflex
+policy generates a more regular and bilaterally symmetric gait pattern. We
+therefore use the term gait regularity or gait symmetry rather than perturbation
+robustness, since no external perturbation experiments are included in the
+current evaluation.
 
-A primary objective of this study was to achieve energy-efficient locomotion. This was assessed using the Metabolic Efficiency ($E_{\text{metabolic}}$), expressed in $\text{J}/(\text{kg}\cdot\text{m})$. The results are presented in [Table of Metabolic Efficiency vs Speed], confirming that the policies learned to minimize energy expenditure while maintaining the commanded velocity. Crucially, the $E_{\text{metabolic}}$ values scaled appropriately with speed, showing the highest efficiency at the Normal Walk speed ($1.2 \text{ m/s}$), which aligns perfectly with experimental data for the human preferred transition speed. 
-
-Detailed analysis of the muscle activation patterns further revealed biologically plausible control strategies. The temporal activation of major muscle groups (e.g., vasti, soleus, tibialis anterior) across the gait cycle closely mirrored patterns observed in human electromyography (EMG) studies. The DRL policy successfully modulated the reflex gains and thresholds to shift activation timing, optimizing muscle mechanical work to minimize $E_{\text{metabolic}}$ across different speeds. 
-
-\subsection{Ablation Study}
-\label{sec:ablation-study}
-To rigorously evaluate the contribution of the bi-level control structure—specifically, the combination of the fixed reflex topology and the adaptive MPO policy—an ablation study was conducted. We compared the performance of our Full Model against two key baseline configurations.
-
-
-
-The results, summarized in Table \ref{tab:ablation}, clearly demonstrate the necessity of the proposed bi-level architecture.
-
-\begin{itemize}
-    \item Full Model Performance: Our complete framework achieves the lowest speed error and metabolic cost, coupled with near-perfect stability ($0.0\%$ fall rate).
-    \item End-to-End DRL Baseline: The pure DRL approach, which controls the muscles directly without the underlying reflex structure, exhibits significantly degraded performance, marked by a high speed error ($0.150 \text{ m/s}$) and the highest metabolic cost, indicating failure to learn an efficient, stable gait. The substantial Fall Rate ($15.3\%$) further confirms the instability of this control paradigm.
-    \item Fixed Reflex Baseline: The Fixed Reflex policy, relying solely on initial, non-adaptive reflex parameters, shows better stability than the End-to-End DRL, but its performance is sub-optimal. The higher speed error and metabolic cost compared to the Full Model confirm that the MPO policy's adaptive modulation is essential for optimizing the physiological parameters for peak efficiency and tracking accuracy.
-\end{itemize}
-
+\begin{table}[!t]
+\centering
+\caption{Cycle-level left--right waveform differences and stride variability.
+Lower values indicate more symmetric or more repeatable gait.}
+\label{tab:symmetry_variability}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{l l r r r r r r}
+\toprule
+\textbf{Target} & \textbf{Method} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} & \textbf{Time CV} & \textbf{Length CV} \\
+\midrule
+0.8 & Residual Reflex & 0.80 & 1.03 & 0.89 & 0.04 & 1.98 & 5.66 \\
+0.8 & End-to-End & 2.92 & 5.75 & 6.36 & 0.10 & 9.05 & 14.88 \\
+1.0 & Residual Reflex & 1.78 & 1.85 & 0.97 & 0.03 & 1.51 & 1.86 \\
+1.0 & End-to-End & 2.97 & 4.08 & 2.18 & 0.08 & 6.05 & 8.27 \\
+1.2 & Residual Reflex & 0.87 & 0.87 & 0.46 & 0.02 & 0.70 & 0.74 \\
+1.2 & End-to-End & 3.43 & 3.00 & 9.84 & 0.04 & 3.87 & 5.83 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Discussion}
-\label{sec:discussion}
+The results indicate that the main benefit of residual reflex learning is not
+necessarily a higher episodic reward, but a more structured and physiologically
+plausible gait pattern. In the current data, end-to-end policies can achieve
+successful walking and high task-level returns, yet their gait-cycle profiles
+may deviate substantially from reference kinematics and GRF. This observation
+suggests that reward optimization alone is insufficient for evaluating learned
+musculoskeletal gait. A controller should also be assessed through gait-cycle
+kinematics, GRF morphology, bilateral symmetry, and cycle-to-cycle
+repeatability.
 
-The results robustly validate the hypothesis that combining a biologically inspired reflex foundation with adaptive DRL modulation is an effective framework for learning multi-speed locomotion. The policies successfully navigated the challenges of a complex musculoskeletal environment, yielding gaits that satisfy both engineering objectives (speed tracking, stability) and physiological constraints (metabolic efficiency, kinematic fidelity).
-
-The primary limitation of the current work remains the use of a 2D planar model. Future work will focus on extending the methodology to a full 3D musculoskeletal model to validate the robustness against coronal and frontal plane instabilities. Furthermore, direct comparison of the learned reflex parameters with experimental neural recordings could provide deeper insight into the biological relevance of the DRL-derived control patterns.
+The current study has several limitations. First, all reported experiments use
+a single training seed for each configuration, so the results should be
+interpreted as trajectory-level evidence rather than training-seed statistics.
+Second, the comparison focuses on fixed-speed walking and does not yet include
+external perturbation recovery or true metabolic cost estimation. Third, the
+model is planar, and extension to three-dimensional locomotion remains future
+work. These limitations define the next experimental steps, but they do not
+affect the central finding that a low-dimensional residual reflex action space
+can improve gait plausibility relative to direct muscle-level control in the
+current fixed-speed setting.
 
 
 \section{Conclusion}
-This paper proposed a Reflex-Informed Deep Reinforcement Learning framework for musculoskeletal gait generation. By integrating a biologically inspired reflex controller with a probabilistic policy optimization algorithm (MPO), the proposed method achieves stable and physiologically plausible locomotion in a muscle-driven simulation.The hierarchical design enables efficient learning of reflex modulation, bridging biological motor control and reinforcement learning.
+This paper presented a residual reflex DRL framework for fixed-speed
+musculoskeletal gait generation. Rather than directly commanding all muscle
+excitations, the learned policy modulates four selected reflex parameters
+around a reflex-based controller. This formulation reduces the effective action
+space and preserves a structured neuromechanical prior within the control loop.
 
-Extensive experiments on slow walking, normal walking, and running demonstrated the robustness and adaptability of the proposed controller.Compared with reflex-only and end-to-end DRL baselines, our method achieved faster convergence, improved gait stability, and more realistic muscle activation patterns. Ablation studies further confirmed that both the reflex structure and the MPO-based optimization contribute critically to overall performance.
+Experiments in a SCONE/Hyfydy planar musculoskeletal model showed that the
+residual reflex controller produced gait cycles with higher SCONE gait analysis
+scores than an end-to-end muscle-control baseline at 0.8, 1.0, and 1.2~m/s.
+The improvement was most evident in knee kinematics, ankle kinematics, and
+vertical GRF morphology. Additional cycle-level analysis showed lower
+left--right waveform differences and lower stride variability, indicating more
+regular and symmetric gait patterns.
 
-Future work will focus on extending the framework toward online speed adaptation and perturbation recovery, as well as validating the learned reflex modulation patterns with experimental EMG data.
-The proposed approach provides a promising foundation for physiologically consistent motion simulation in rehabilitation robotics and neuro-musculoskeletal research.
-.
+The results support the view that task reward or successful walking alone is
+not sufficient for evaluating learned musculoskeletal locomotion. Future work
+will include multi-seed training statistics, controlled perturbation-recovery
+tests, and effort or metabolic-cost analysis using validated biomechanical
+energy models.
 
 \section*{Acknowledgment}
+The authors would like to thank the developers of SCONE and Hyfydy for making
+musculoskeletal simulation tools available for locomotion research.
 
-The preferred spelling of the word ``acknowledgment'' in American English is 
-without an ``e'' after the ``g.'' Use the singular heading even if you have 
-many acknowledgments. Avoid expressions such as ``One of us (S.B.A.) would 
-like to thank $\ldots$ .'' Instead, write ``F. A. Author thanks $\ldots$ .'' In most 
-cases, sponsor and financial support acknowledgments are placed in the 
-unnumbered footnote on the first page, not here.
-
-\section*{REFERENCES}
-
-\def\refname{\vadjust{\vspace*{-2.5em}}} %Please don't do this in a real paper.
-
-\noindent\textit{Basic format for books:}
-
-\noindent J. K. Author, ``Title of chapter in the book,'' in {\it Title of His Published Book, x}th ed. City of Publisher,
-(only U.S. State), Country: Abbrev. of Publisher, year, ch. $x$, sec. $x$,\break pp.~{\it xxx--xxx.}
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
 \begin{thebibliography}{00}
-\bibitem{bib1} G. O. Young, ``Synthetic structure of industrial plastics,'' in {\it Plastics,}2$^{\mathrm{nd}}$ ed., vol. 3, J. Peters, Ed. New York, NY, USA: McGraw-Hill, 1964, pp. 15--64.
-\bibitem{bib2} W.-K. Chen, {\it Linear Networks and Systems.}Belmont, CA, USA: Wadsworth, 1993, pp. 123--135.
+\bibitem{geyer2010}
+H. Geyer and H. Herr, ``A muscle-reflex model that encodes principles of
+legged mechanics produces human walking dynamics and muscle activities,''
+\textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
+vol. 18, no. 3, pp. 263--273, 2010.
+
+\bibitem{scone2019}
+T. Geijtenbeek, ``SCONE: Open source software for predictive simulation of
+biological motion,'' \textit{Journal of Open Source Software}, vol. 4, no. 38,
+Art. no. 1421, 2019.
+
+\bibitem{deprl2023}
+F. Paulus, L. N. Haab, T. Geng, C. Pinneri, N. Reimers, S. Schmitt, and
+G. Martius, ``DEP-RL: Embodied exploration for reinforcement learning in
+overactuated and musculoskeletal systems,'' in \textit{International
+Conference on Learning Representations}, 2023.
+
+\bibitem{residualrl2019}
+T. Johannink, S. Bahl, A. Nair, J. Luo, A. Singh, M. Loskyll,
+J. A. Ojea, E. Solowjow, and S. Levine, ``Residual reinforcement learning for
+robot control,'' in \textit{IEEE International Conference on Robotics and
+Automation}, 2019, pp. 6023--6029.
 \end{thebibliography}
-
-\noindent {\it Basic format for periodicals:}
-
-\noindent J. K. Author, ``Name of paper,'' {\it Abbrev. Title of Periodical}, vol. {\it x, no}. $x, $pp{\it . xxx-xxx,}Abbrev. Month, year, DOI.
- {10.1109.} {{\it XXX}} {.123456}.
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib3} J. U. Duncombe, ``Infrared navigation---Part I: An assessment of feasibility,'' {\it IEEE Trans. Electron Devices}, vol. ED-11, no. 1, pp. 34--39, Jan. 1959, doi:.  {10.1109/TED.2016.2628402}.
-\bibitem{bib4} E. P. Wigner, ``Theory of traveling-wave optical laser,''
-{\it Phys. Rev}., vol. 134, pp. A635--A646, Dec. 1965, doi:  {10.1109.} {{\it XXX}} {.123456}.
-\bibitem{bib5} E. H. Miller, ``A note on reflector arrays,'' {\it IEEE Trans. Antennas Propagat}., to be published.
-\end{thebibliography}
-
-\noindent {\it Basic format for reports:}
-
-\noindent J. K. Author, ``Title of report,'' Abbrev. Name of Co., City of Co., Abbrev.
-State, Country, Rep. {\it xxx}, year.
-
-{\it Examples:}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib6} E. E. Reber, R. L. Michell, and C. J. Carter, ``Oxygen absorption in the earth's atmosphere,'' Aerospace Corp., Los Angeles, CA, USA, Tech. Rep. TR-0200 (4230-46)-3, Nov. 1988.
-\bibitem{bib7} J. H. Davis and J. R. Cogdell, ``Calibration program for the 16-foot antenna,'' Elect. Eng. Res. Lab., Univ. Texas, Austin, TX, USA, Tech. Memo. NGL-006-69-3, Nov. 15, 1987.
-\end{thebibliography}
-
-\noindent {\it Basic format for handbooks:}
-
-\noindent {\it Name of Manual/Handbook, x} ed., Abbrev. Name of Co., City of Co., Abbrev. State, Country, year, pp.
-{\it xxx-xxx.}
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib8} {\it Transmission Systems for Communications}, 3rd ed., Western Electric Co., Winston-Salem, NC, USA, 1985, pp. 44--60.
-\bibitem{bib9} {\it Motorola Semiconductor Data Manual}, Motorola Semiconductor Products Inc., Phoenix, AZ, USA, 1989.
-\end{thebibliography}
-
-\noindent {\it Basic format for books (when available online):}
-
-\noindent J. K. Author, ``Title of chapter in the book,'' in {\it Title of Published Book}, $x$th ed. City of
-Publisher, State, Country: Abbrev. of Publisher, year, ch.$x$, sec. $x$, pp.
-{\it xxx--xxx}. [Online]. Available:  {http://www.web.com}
-
-
-
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib10} G. O. Young, ``Synthetic structure of industrial plastics,'' in Plastics, vol. 3, Polymers of Hexadromicon, J. Peters, Ed., 2nd ed. New York, NY, USA: McGraw-Hill, 1964, pp. 15-64. [Online]. Available:  {http://www.bookref.com}.
-\bibitem{bib11} {\it The Founders' Constitution}, Philip B. Kurland and Ralph Lerner, eds., Chicago, IL, USA: Univ. Chicago Press, 1987. [Online]. Available:  {http://press-pubs.uchicago.edu/founders/}
-\bibitem{bib12} The Terahertz Wave eBook. ZOmega Terahertz Corp., 2014. [Online]. Available:  {http://dl.z-thz.com/eBook/zomega\_ebook\_pdf\_1206\_sr.pdf}. Accessed on: May 19, 2014.
-\bibitem{bib13} Philip B. Kurland and Ralph Lerner, eds., {\it The Founders' Constitution.}Chicago, IL, USA: Univ. of Chicago Press, 1987, Accessed on: Feb. 28, 2010, [Online] Available:  {http://press-pubs.uchicago.edu/founders/}
-\end{thebibliography}
-
-\noindent {\it Basic format for journals (when available online):}
-
-\noindent J. K. Author, ``Name of paper,'' {\it Abbrev. Title of Periodical}, vol. $x$, no. $x$, pp. {\it xxx-xxx}, Abbrev. Month, year.
-Accessed on: Month, Day, year, doi:  {10.1109.} {{\it
-XXX}} {.123456}, [Online].
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib14} J. S. Turner, ``New directions in communications,'' {\it IEEE J. Sel. Areas Commun}., vol. 13, no. 1, pp. 11-23, Jan. 1995. DOI.  {10.1109.} {{\it XXX}} {.123456}.
-\bibitem{bib15} W. P. Risk, G. S. Kino, and H. J. Shaw, ``Fiber-optic frequency shifter using a surface acoustic wave incident at an oblique angle,'' {\it Opt. Lett.}, vol. 11, no. 2, pp. 115--117, Feb. 1986, doi: {10.1109.} {{\it XXX}} {.123456}.
-\bibitem{bib16} P. Kopyt {\it \textit{et al.}, ``}Electric properties of graphene-based conductive layers from DC up to terahertz range,'' {\it IEEE THz Sci. Technol.,}to be published, doi:  {10.1109/TTHZ.2016.2544142}.
-\end{thebibliography}
-
-\noindent {\it Basic format for papers presented at conferences (when available online):}
-
-\noindent J.K. Author. (year, month). Title. presented at abbrev. conference title.
-[Type of Medium]. Available: site/path/file
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib17} PROCESS Corporation, Boston, MA, USA. Intranets: Internet technologies deployed behind the firewall for corporate productivity. Presented at INET96 Annual Meeting. [Online]. Available:  {http://home.process.com/Intranets/wp2.htp}
-\end{thebibliography}
-
-\noindent {\it Basic format for reports and handbooks (when available online):}
-
-\noindent J. K. Author. ``Title of report,'' Company. City, State, Country. Rep. no.,
-(optional: vol./issue), Date. [Online] Available:
-{site/path/file}
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib18} R. J. Hijmans and J. van Etten, ``Raster: Geographic analysis and modeling with raster data,'' R Package Version 2.0-12, Jan. 12, 2012. [Online]. Available:  {http://CRAN.R-project.org/package$=$raster} {}
-\bibitem{bib19} Teralyzer. Lytera UG, Kirchhain, Germany [Online]. Available: http://www.lytera.de/Terahertz\_THz\_Spectroscopy.php?id$=$home, Accessed on: Jun. 5, 2014
-\end{thebibliography}
-
-\noindent {\it Basic format for computer programs and electronic documents (when available online):}
-
-\noindent Legislative body. Number of Congress, Session. (year, month day). {\it Number of bill or resolution}, {\it Title}. [Type
-of medium]. Available: site/path/file
-
-\noindent {\bf {\it NOTE:}} ISO recommends that capitalization follow the accepted
-practice for the language or script in which the information is given.
-
-
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib20} U.S. House. 102nd Congress, 1st Session. (1991, Jan. 11). {\it H. Con. Res. 1, Sense of the Congress on Approval of Military Action}. [Online]. Available: LEXIS Library: GENFED File: BILLS
-\end{thebibliography}
-
-\noindent {\it Basic format for patents (when available online):}
-
-\noindent Name of the invention, by inventor's name. (year, month day). Patent Number  [Type
-of medium]. Available:  {site/path/file}
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib21} Musical toothbrush with mirror, by L.M.R. Brooks. (1992, May 19). Patent D 326 189 [Online]. Available: NEXIS Library: LEXPAT File: DES
-\end{thebibliography}
-
-
-\noindent {\it Basic format for conference proceedings (published):}
-
-\noindent J. K. Author, ``Title of paper,'' in {\it Abbreviated Name of Conf.}, City of Conf., Abbrev. State (if
-given), Country, year, pp. {\it xxxxxx.}
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib22} D. B. Payne and J. R. Stern, ``Wavelength-switched passively coupled single-mode optical network,'' in {\it Proc. IOOC-ECOC,}Boston, MA, USA,  1985,
-pp. 585--590, doi:  {10.1109.} {{\it XXX}} {.123456}.
-\end{thebibliography}
-
-{\it Example for papers presented at conferences (unpublished):}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib23} D. Ebehard and E. Voges, ``Digital single sideband detection for interferometric sensors,'' presented at the {\it 2nd Int. Conf. Optical Fiber Sensors,} Stuttgart, Germany, Jan. 2-5, 1984.
-\end{thebibliography}
-
-\noindent {\it Basic format for patents:}
-
-\noindent J. K. Author, ``Title of patent,'' U.S. Patent {\it x xxx xxx}, Abbrev. Month, day, year.
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib24} G. Brandli and M. Dick, ``Alternating current fed power supply,'' U.S. Patent 4 084 217, Nov. 4, 1978.
-\end{thebibliography}
-
-\noindent {\it Basic format} {\it for theses (M.S.) and dissertations (Ph.D.):}
-
-\noindent a) J. K. Author, ``Title of thesis,'' M.S. thesis, Abbrev. Dept., Abbrev.
-Univ., City of Univ., Abbrev. State, year.
-
-\noindent b) J. K. Author, ``Title of dissertation,'' Ph.D. dissertation, Abbrev.
-Dept., Abbrev. Univ., City of Univ., Abbrev. State, year.
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib25} J. O. Williams, ``Narrow-band analyzer,'' Ph.D. dissertation, Dept. Elect. Eng., Harvard Univ., Cambridge, MA, USA, 1993.
-\bibitem{bib26} N. Kawasaki, ``Parametric study of thermal and chemical nonequilibrium nozzle flow,'' M.S. thesis, Dept. Electron. Eng., Osaka Univ., Osaka, Japan, 1993.
-\end{thebibliography}
-
-\noindent {\it Basic format for the most common types of unpublished references:}
-
-\noindent a) J. K. Author, private communication, Abbrev. Month, year.
-
-\noindent b) J. K. Author, ``Title of paper,'' unpublished.
-
-\noindent c) J. K. Author, ``Title of paper,'' to be published.
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib27} A. Harrison, private communication, May 1995.
-\bibitem{bib28} B. Smith, ``An approach to graphs of linear forms,'' unpublished.
-\bibitem{bib29} A. Brahms, ``Representation error for real numbers in binary computer arithmetic,'' IEEE Computer Group Repository, Paper R-67-85.
-\end{thebibliography}
-
-\noindent {\it Basic formats for standards:}
-
-\noindent a) {\it Title of Standard}, Standard number, date.
-
-\noindent b) {\it Title of Standard}, Standard number, Corporate author, location, date.
-
-{\it Examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib30} IEEE Criteria for Class IE Electric Systems, IEEE Standard 308, 1969.
-\bibitem{bib31} Letter Symbols for Quantities, ANSI Standard Y10.5-1968.
-\end{thebibliography}
-
-{\it Article number in~reference examples:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib32} R. Fardel, M. Nagel, F. Nuesch, T. Lippert, and A. Wokaun, ``Fabrication of organic light emitting diode pixels by laser-assisted forward transfer,'' {\it Appl. Phys. Lett.}, vol. 91, no. 6, Aug. 2007, Art. no. 061103, doi:  {10.1109.} {{\it XXX}} {.123456}.
-\bibitem{bib33} J. Zhang and N. Tansu, ``Optical gain and laser characteristics of InGaN quantum wells on ternary InGaN substrates,'' {\it IEEE Photon. J.}, vol. 5, no. 2, Apr. 2013, Art. no. 2600111, doi:  {10.1109.} {{\it XXX}} {.123456}.
-\end{thebibliography}
-
-{\it Example when using \textit{et al.}:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib34} S. Azodolmolky~{{et al.}}, Experimental demonstration of an impairment aware network planning and operation tool for transparent/translucent optical networks,''~{\it J. Lightw. Technol.}, vol. 29, no. 4, pp. 439--448, Sep. 2011,doi:  {10.1109.} {{\it XXX}} {.123456}.
-\end{thebibliography}
-
-\noindent {\it Basic format for datasets:}
-
-\noindent Author,  Date, Year. ``Title of Dataset,'' distributed by Publisher/Distributor, http://url.com (or if DOI is used, end with a period)
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib35} U.S. Department of Health and Human Services, Aug. 2013, ``Treatment Episode Dataset: Discharges (TEDS-D): Concatenated, 2006 to 2009,'' U.S. Department of Health and Human Services, Substance Abuse and Mental Health Services Administration, Office of Applied Studies, doi: 10.3886/ICPSR30122.v2.
-\end{thebibliography}
-
-\noindent {\it Basic format for code:}
-
-\noindent Author,  Date published or disseminated, Year. ``Complete title, including ed./vers.\#,'' distributed by Publisher/Distributor, http://url.com (or if DOI is used, end with a period)
-
-{\it Example:}{\vadjust{\vspace*{-2.5em}}}
-
-\begin{thebibliography}{00}\leftskip1pc
-\bibitem{bib36} T. D'Martin and S. Soares, 2019, ``Code for Assessment of Markov Decision Processes in Long-Term Hydrothermal Scheduling of Single-Reservoir Systems (Version 1.0),'' Code Ocean, doi: \_1.24433/CO.7212286.v1
-\end{thebibliography}
-
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{a1.png}}]{First A. Author} (Fellow, IEEE) and all authors may include 
-biographies. Biographies are
-often not included in conference-related papers.
-This author is an IEEE Fellow. The first paragraph
-may contain a place and/or date of birth (list
-place, then date). Next, the author’s educational
-background is listed. The degrees should be listed
-with type of degree in what field, which institution,
-city, state, and country, and year the degree was
-earned. The author’s major field of study should
-be lower-cased.
-
-The second paragraph uses the pronoun of the person (he or she) and
-not the author’s last name. It lists military and work experience, including
-summer and fellowship jobs. Job titles are capitalized. The current job must
-have a location; previous positions may be listed without one. Information
-concerning previous publications may be included. Try not to list more than
-three books or published articles. The format for listing publishers of a book
-within the biography is: title of book (publisher name, year) similar to a
-reference. Current and previous research interests end the paragraph.
-
-The third paragraph begins with the author’s title and last name (e.g.,
-Dr. Smith, Prof. Jones, Mr. Kajor, Ms. Hunter). List any memberships in
-professional societies other than the IEEE. Finally, list any awards and work
-for IEEE committees and publications. If a photograph is provided, it should
-be of good quality, and professional-looking.
-\end{IEEEbiography}
-
-\begin{IEEEbiographynophoto}{Second B. Author,} photograph and biography not available at the
-time of publication.
-\end{IEEEbiographynophoto}
-
-\begin{IEEEbiographynophoto}{Third C. Author Jr.} (Member, IEEE), photograph and biography not available at the
-time of publication.
-\end{IEEEbiographynophoto}
 
 \end{document}
