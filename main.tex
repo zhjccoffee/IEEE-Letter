@@ -441,9 +441,9 @@ speed.}
  & DEP-RL & 0.83 & 0.03 & 1.09 & 1.31 & 33 \\
  & Residual-Reflex RL & 0.79 & \textbf{0.01} & 0.99 & 1.26 & 35 \\
 \midrule
-1.0 & E2E-RL & 1.01 & \textbf{0.01} & 0.87 & 0.87 & 53 \\
+1.0 & E2E-RL & 1.18 & 0.18 & 1.39 & 1.18 & 37 \\
  & DEP-RL & 1.14 & 0.14 & 1.29 & 1.13 & 39 \\
- & Residual-Reflex RL & 1.05 & 0.05 & 1.23 & 1.17 & 37 \\
+ & Residual-Reflex RL & 1.05 & \textbf{0.05} & 1.23 & 1.17 & 37 \\
 \midrule
 1.2 & E2E-RL & 1.26 & 0.06 & 1.23 & 0.97 & 46 \\
  & DEP-RL & 1.30 & 0.10 & 1.37 & 1.06 & 42 \\
@@ -458,7 +458,7 @@ Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle
 scores for the three policy interfaces. Across the three target speeds, the
 proposed Residual-Reflex RL controller achieved the highest overall
 reference-based gait similarity. The average overall score over the three
-speeds was 89.9\% for Residual-Reflex RL, 63.7\% for E2E-RL, and 51.3\% for
+speeds was 89.9\% for Residual-Reflex RL, 64.9\% for E2E-RL, and 51.3\% for
 DEP-RL. Fig.~\ref{fig:gait_score_bars} visualizes the main component
 scores and shows that the largest residual-reflex improvements appear in knee
 kinematics, ankle kinematics, and vertical GRF morphology. Compared with both
@@ -485,9 +485,9 @@ vertical GRF.}
  & DEP-RL & 0.83 & 54.4 & 72.7 & 50.8 & 8.7 & 39.8 \\
  & Residual-Reflex RL & 0.79 & \textbf{84.2} & 96.6 & \textbf{68.9} & \textbf{78.5} & \textbf{76.7} \\
 \midrule
-1.0 & E2E-RL & 1.01 & 70.9 & 99.9 & 45.4 & 61.5 & 48.0 \\
+1.0 & E2E-RL & 1.18 & 74.7 & 81.2 & 72.7 & \textbf{91.8} & 27.6 \\
  & DEP-RL & 1.14 & 55.1 & 62.5 & 64.2 & 48.7 & 0.0 \\
- & Residual-Reflex RL & 1.05 & \textbf{92.3} & \textbf{100.0} & \textbf{82.6} & \textbf{88.9} & \textbf{89.8} \\
+ & Residual-Reflex RL & 1.05 & \textbf{92.3} & \textbf{100.0} & \textbf{82.6} & 88.9 & \textbf{89.8} \\
 \midrule
 1.2 & E2E-RL & 1.26 & 69.6 & 88.4 & 52.4 & 85.9 & 21.5 \\
  & DEP-RL & 1.30 & 44.5 & 44.5 & 33.4 & 44.5 & 0.0 \\
@@ -591,7 +591,7 @@ Lower values indicate more symmetric or more repeatable gait.}
  & DEP-RL & 11.20 & 11.73 & 11.59 & 0.12 & 7.96 & 11.04 \\
  & Residual-Reflex RL & \textbf{0.80} & \textbf{1.03} & \textbf{0.89} & \textbf{0.04} & \textbf{1.98} & \textbf{5.66} \\
 \midrule
-1.0 & E2E-RL & 2.97 & 4.08 & 2.18 & 0.08 & 6.05 & 8.27 \\
+1.0 & E2E-RL & 6.12 & 10.61 & 6.69 & 0.07 & 5.03 & 5.63 \\
  & DEP-RL & 4.54 & 10.12 & 16.27 & 0.28 & 2.62 & 5.27 \\
  & Residual-Reflex RL & \textbf{1.78} & \textbf{1.85} & \textbf{0.97} & \textbf{0.03} & \textbf{1.51} & \textbf{1.86} \\
 \midrule
