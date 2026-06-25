@@ -411,7 +411,7 @@ $\mathrm{CV}_z$ indicates more repeatable gait cycles.
 \label{sec:results-and-analysis}
 The results are organized according to the evaluation metrics defined above:
 speed tracking and stride measures, reference-based gait similarity, GRF
-morphology, symmetry/repeatability, and complete gait-cycle visualization.
+morphology, and symmetry/repeatability.
 
 \subsection{Speed Tracking and Stride Measures}
 Table~\ref{tab:spatiotemporal_metrics} reports realized speed, absolute speed
@@ -452,6 +452,17 @@ speed.}
 \end{tabular}%
 }
 \end{table}
+
+\begin{figure*}[!t]
+\centerline{\includegraphics[width=0.86\textwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
+\caption{Qualitative gait snapshots over one detected gait cycle at
+1.2~m/s. Frames were sampled at 0\%, 25\%, 50\%, 75\%, and 100\% of the gait
+cycle detected from the corresponding STO trajectory and synchronized video.
+The visualization provides a qualitative view of posture progression for the
+two direct muscle-control baselines and the proposed Residual-Reflex RL
+controller.}
+\label{fig:qualitative_snapshots}
+\end{figure*}
 
 \subsection{Reference-Based Gait Similarity}
 Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle
