@@ -286,10 +286,6 @@ center-of-mass velocity ($r_{com}$), and residual-action changes
 r_t = r_t^{base} + w_{\theta}r_{\theta}
 +w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
 \end{equation}
-Some terms may have zero weight in a given experiment; the fixed-speed
-experiments reported here used the same base reward structure for the
-residual-reflex and end-to-end policies, with the additional posture and
-residual-action regularization applied to the residual-reflex controller.
 The reward is used for policy learning only. Final gait quality is assessed
 using gait-cycle kinematics, GRF morphology, left--right symmetry, and
 cycle-to-cycle repeatability rather than episodic reward alone.
