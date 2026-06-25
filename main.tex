@@ -267,13 +267,10 @@ At each time step, the policy samples an action from a Gaussian action
 distribution conditioned on $\mathbf{s}_t$. The action is applied to the
 controller, the simulator advances one step, and the transition
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored for off-policy
-updates. The base reward combines target-speed tracking with regularization
-terms for excessive contact load, abrupt excitation changes, muscle usage,
-joint-limit torques, and unwanted self-contact. Specifically, $r_{vel}$ rewards
-target-speed tracking, $r_{grf}$ penalizes excessive ground reaction force,
-$r_{smooth}$ penalizes abrupt changes in muscle excitation, $r_{musc}$
-penalizes excessive muscle recruitment, $r_{constr}$ penalizes joint-limit
-torques, and $r_{self}$ penalizes non-foot self-contact:
+updates. The base reward combines target-speed tracking ($r_{vel}$) with
+regularization terms for excessive ground reaction force ($r_{grf}$), abrupt
+excitation changes ($r_{smooth}$), muscle usage ($r_{musc}$), joint-limit
+torques ($r_{constr}$), and non-foot self-contact ($r_{self}$):
 \begin{equation}
 \begin{aligned}
 r_t^{base} =\,
@@ -281,20 +278,18 @@ r_t^{base} =\,
 &+w_{musc}r_{musc}+w_{constr}r_{constr}+w_{self}r_{self}.
 \end{aligned}
 \end{equation}
-For the residual-reflex controller, additional posture and residual-action
-regularization terms are included:
+For the residual-reflex controller, additional terms regularize pelvis pitch
+($r_{\theta}$), pelvis pitch rate ($r_{\dot{\theta}}$), vertical or non-forward
+center-of-mass velocity ($r_{com}$), and residual-action changes
+($r_{\Delta a}$):
 \begin{equation}
 r_t = r_t^{base} + w_{\theta}r_{\theta}
 +w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
 \end{equation}
-Here, $r_{\theta}$ penalizes deviation from the target pelvis pitch,
-$r_{\dot{\theta}}$ penalizes pelvis pitch rate, $r_{com}$ penalizes excessive
-vertical or non-forward center-of-mass velocity, and $r_{\Delta a}$ penalizes
-rapid changes in the residual reflex action. Some
-terms may have zero weight in a given experiment; the fixed-speed experiments
-reported here used the same base reward structure for the residual-reflex and
-end-to-end policies, with the additional posture and residual-action
-regularization applied to the residual-reflex controller.
+Some terms may have zero weight in a given experiment; the fixed-speed
+experiments reported here used the same base reward structure for the
+residual-reflex and end-to-end policies, with the additional posture and
+residual-action regularization applied to the residual-reflex controller.
 The reward is used for policy learning only. Final gait quality is assessed
 using gait-cycle kinematics, GRF morphology, left--right symmetry, and
 cycle-to-cycle repeatability rather than episodic reward alone.
