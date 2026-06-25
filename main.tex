@@ -44,8 +44,9 @@ while preserving the biomechanical feedback structure embedded in the
 reflex controller. The pipeline is validated in a Hyfydy-based planar
 musculoskeletal model using target-speed walking tasks at 0.8, 1.0, and
 1.2~m/s. The proposed controller is compared with two direct muscle-control
-baselines: E2E-RL with standard policy exploration and DEP-RL with
-DEP-style embodied exploration. Although these direct muscle-control baselines can
+baselines: end-to-end reinforcement learning (E2E-RL) with standard policy
+exploration and DEP-RL with DEP-style embodied exploration. Although these
+direct muscle-control baselines can
 generate walking motions, their normalized gait-cycle profiles show substantial
 deviations from reference gait, especially in knee kinematics and vertical
 ground reaction force. In contrast, the residual reflex controller achieves
@@ -311,8 +312,9 @@ rectus femoris (FEM). Foot--ground contact elements are used to compute
 vertical ground reaction forces for gait analysis.
 
 \subsubsection{Compared Control Interfaces}
-Three DRL policy interfaces were compared. \emph{E2E-RL} directly outputs
-muscle-level control actions, following the direct muscle-control setting
+Three DRL policy interfaces were compared. \emph{E2E-RL} denotes an
+end-to-end reinforcement learning policy that directly outputs muscle-level
+control actions, following the direct muscle-control setting
 commonly used in musculoskeletal DRL studies
 \cite{weng2021,devree2021,ogum2024}. \emph{DEP-RL}
 uses the same direct muscle-level action space, but adds DEP-style embodied
@@ -420,19 +422,22 @@ $\mathrm{CV}_z$ indicates more repeatable gait cycles.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
-The results are organized according to the evaluation metrics defined above:
-speed tracking and stride measures, reference-based gait similarity, GRF
-morphology, and symmetry/repeatability.
+The comparison is designed to separate task completion from gait quality. We
+therefore first verify that all controllers generate forward walking near the
+commanded speeds, and then examine whether the resulting gait cycles preserve
+reference-like kinematics, contact loading, bilateral symmetry, and
+cycle-to-cycle repeatability.
 
 \subsection{Speed Tracking and Stride Measures}
-Table~\ref{tab:spatiotemporal_metrics} reports realized speed, absolute speed
-error, stride length, stride time, and the number of analyzed gait cycles. All
-three policies generated forward walking near the commanded speeds, showing
-that the comparison is made between policies that can complete the target-speed
-walking task. The direct muscle-control baselines generally produced less consistent
-stride measures, whereas the residual reflex controller generated longer and
-more regular strides. These task-level metrics establish task completion before
-gait-cycle morphology is evaluated.
+All three policy interfaces were able to generate sustained forward walking in
+the controlled speed tasks. As summarized in
+Table~\ref{tab:spatiotemporal_metrics}, Residual-Reflex RL tracked the commanded
+speed most closely at all three target speeds, with absolute speed errors of
+0.01, 0.05, and 0.01~m/s. The direct muscle-control baselines also produced
+walking trials, but their realized speeds and stride measures varied more across
+conditions. These task-level results establish that the subsequent comparisons
+are made among controllers that can complete the basic walking objective, rather
+than between walking and failure cases.
 
 \begin{table}[!t]
 \centering
@@ -465,18 +470,16 @@ speed.}
 \end{table}
 
 \subsection{Reference-Based Gait Similarity}
-Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle
-scores for the three policy interfaces. Across the three target speeds, the
-proposed Residual-Reflex RL controller achieved the highest overall
-reference-based gait similarity. The average overall score over the three
-speeds was 89.9\% for Residual-Reflex RL, 64.9\% for E2E-RL, and 51.3\% for
-DEP-RL. Fig.~\ref{fig:gait_score_bars} visualizes the main component
-scores and shows that the largest residual-reflex improvements appear in knee
-kinematics, ankle kinematics, and vertical GRF morphology. Compared with both
-direct muscle-control baselines, Residual-Reflex RL more consistently preserved
-reference-like joint coordination and stance-phase loading.
-These results indicate that completing the speed-tracking task does not
-necessarily imply reference-consistent joint and contact dynamics.
+The gait-cycle scores reveal a clearer separation between the three control
+interfaces. Across the tested speeds, Residual-Reflex RL achieved the highest
+overall reference-based gait similarity, with an average score of 89.9\%,
+compared with 64.9\% for E2E-RL and 51.3\% for DEP-RL
+(Table~\ref{tab:gait_similarity}). The main differences appear in the knee,
+ankle, and vertical GRF components, where the residual reflex controller more
+consistently preserved reference-like joint coordination and stance-phase
+loading. This contrast is important because the direct muscle-control baselines
+can complete the speed-tracking task, yet their gait cycles can still deviate
+substantially from reference kinematics and contact dynamics.
 
 \begin{table}[!t]
 \centering
@@ -517,17 +520,17 @@ components.}
 \label{fig:gait_score_bars}
 \end{figure}
 
-Figures~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12} show the
-normalized kinematic gait-cycle profiles used to interpret these scores. They
-show where each controller follows or deviates from the reference envelopes
-across pelvic tilt, hip, knee, and ankle profiles. The residual reflex
-controller produced compact and consistent left--right gait cycles across
-speeds, whereas both direct muscle-control baselines showed larger cycle-to-cycle
-variation or larger deviations from the reference envelopes, especially in the
-knee and ankle profiles. The smoother residual-reflex kinematic profiles are
-consistent with the higher knee and ankle scores in
-Table~\ref{tab:gait_similarity}. The GRF component is analyzed separately in the
-next subsection.
+The normalized kinematic profiles in
+Figs.~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12} explain these
+scores at the waveform level. Residual-Reflex RL produced compact left and
+right gait-cycle trajectories that stayed close to the reference envelopes
+across pelvic tilt, hip, knee, and ankle motion. By contrast, the direct
+muscle-control baselines showed larger cycle-to-cycle spread or systematic
+deviations, especially in the knee and ankle profiles. The visual concentration
+of the residual-reflex waveforms is consistent with the higher knee and ankle
+scores in Table~\ref{tab:gait_similarity}. The GRF component is analyzed
+separately below because contact loading is not always visually apparent from
+joint snapshots alone.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
@@ -557,16 +560,14 @@ cycle average and the gray band is the reference envelope.}
 \end{figure}
 
 \subsection{GRF Morphology}
-Because ground reaction force reflects how the controller loads and unloads the
-body during stance, we further examine the vertical GRF profiles separately in
-Fig.~\ref{fig:grf_morphology}. The Residual-Reflex RL controller produced smoother
-stance-phase force profiles that remained closer to the reference envelope
-across the tested speeds. In contrast, both direct muscle-control baselines generated
-less regular loading patterns, including sharper early-stance peaks, reduced
-late-stance support, or force profiles outside the reference envelope. This
-difference is consistent with the component scores in
-Table~\ref{tab:gait_similarity}, where Residual-Reflex RL achieved
-higher GRF scores than both direct muscle-control baselines at all three speeds.
+Ground reaction force provides a direct view of how each controller loads and
+unloads the body during stance. Residual-Reflex RL produced smoother vertical
+GRF profiles with a more reference-consistent double-support pattern across the
+tested speeds (Fig.~\ref{fig:grf_morphology}). In comparison, the direct
+muscle-control baselines exhibited sharper early-stance peaks, reduced
+late-stance support, or larger stride-to-stride fluctuations. These waveform
+differences are reflected in the GRF component scores, where Residual-Reflex RL
+outperformed both baselines at all three speeds.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{grf_morphology_comparison.png}}
@@ -579,11 +580,13 @@ evaluation, and the panel annotations report the GRF reference-envelope score.}
 \end{figure}
 
 \subsection{Symmetry and Repeatability}
-Table~\ref{tab:symmetry_variability} reports left--right waveform differences
-and stride variability. The residual reflex controller consistently produced
-lower left--right RMSE and lower stride time/length CV than both direct muscle-control
-baselines. This supports the qualitative observation that Residual-Reflex RL generates a more
-regular and bilaterally symmetric gait pattern.
+The residual reflex representation also improved the regularity of the generated
+gait cycles. Residual-Reflex RL consistently produced lower left--right waveform
+differences and lower stride time/length coefficients of variation than both
+direct muscle-control baselines (Table~\ref{tab:symmetry_variability}). These
+metrics support the visual observation that residual reflex modulation yields a
+more bilaterally symmetric and repeatable gait pattern, rather than merely
+producing occasional successful walking cycles.
 
 \begin{table}[!t]
 \centering
@@ -622,17 +625,16 @@ speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
 \end{figure}
 
 \subsection{Qualitative Gait Visualization}
-Fig.~\ref{fig:qualitative_snapshots} provides a final visual comparison of the
-three evaluated controllers at 1.2~m/s. The E2E-RL trajectory can produce
-joint postures that appear broadly plausible in isolated snapshots, which is
-consistent with its relatively high hip and ankle scores in
-Table~\ref{tab:gait_similarity}. However, its low GRF score indicates that the
-contact loading pattern is not reference-consistent, which corresponds to a less
-smooth walking motion in the synchronized video. DEP-RL shows larger deviations
-in both joint coordination and GRF morphology, consistent with its lower
-reference-based gait similarity scores. In contrast, Residual-Reflex RL combines
-high joint-angle scores with high GRF scores, resulting in a more regular
-posture progression over the sampled gait cycle.
+The qualitative snapshots give an intuitive view of the same result at the body
+posture level (Fig.~\ref{fig:qualitative_snapshots}). E2E-RL can produce
+postures that appear broadly plausible in isolated frames, which is consistent
+with its relatively high hip and ankle scores at 1.2~m/s. However, the low GRF
+score indicates that the contact loading pattern is not reference-consistent,
+matching the less smooth motion observed in the synchronized video. DEP-RL
+shows larger deviations in both joint coordination and GRF morphology. In
+contrast, Residual-Reflex RL combines high joint-angle scores with high GRF
+scores, leading to a more regular posture progression over the sampled gait
+cycle.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
