@@ -20,10 +20,10 @@
 \usepackage{booktabs}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-\markboth{\hskip25pc REFLEX-INFORMED DRL FOR MUSCULOSKELETAL GAIT}
-{Author \MakeLowercase{\textit{et al.}}: Reflex-Informed DRL for Musculoskeletal Gait}
+\markboth{\hskip25pc RESIDUAL REFLEX MODULATION FOR MUSCULOSKELETAL GAIT}
+{Author \MakeLowercase{\textit{et al.}}: Residual Reflex Modulation for Musculoskeletal Gait}
 \begin{document}
-\title{Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation}
+\title{Low-Dimensional Residual Reflex Modulation for Musculoskeletal Gait Generation}
 \author{First A. Author, \IEEEmembership{Fellow, IEEE}, Second B. Author, and Third C. Author Jr., \IEEEmembership{Member, IEEE}
 \thanks{This paragraph of the first footnote will contain the date on 
 which you submitted your paper for review. It will also contain support 
@@ -48,7 +48,7 @@ Tsukuba, Japan (e-mail: author@nrim.go.jp).}}
 Deep reinforcement learning (DRL) has shown promise for controlling
 musculoskeletal locomotion, but direct muscle-level control requires
 exploration in a high-dimensional and highly redundant action space. This
-paper investigates a residual-reflex DRL pipeline for musculoskeletal
+letter investigates a residual-reflex DRL pipeline for musculoskeletal
 gait generation. Instead of directly commanding all muscle
 excitations, the proposed residual reflex pipeline uses an existing
 reflex-based controller as a structured neuromechanical prior and trains a
@@ -107,7 +107,7 @@ raises a related question: rather than improving exploration in the full muscle
 excitation space, can the effective action space itself be reduced by learning
 at the level of structured reflex modulation?
 
-This paper investigates that question through a residual reflex DRL pipeline
+This letter investigates that question through a residual reflex DRL pipeline
 for musculoskeletal walking. Instead of replacing the reflex
 controller with an end-to-end policy, the proposed method keeps the reflex
 controller as a low-level biomechanical prior and trains a policy to output
@@ -117,7 +117,7 @@ an interpretable neuromechanical controller. This idea is related in spirit to
 residual reinforcement learning \cite{residualrl2019}, but is applied here to
 reflex-parameter modulation in a muscle-driven gait environment.
 
-The main contributions of this paper are as follows:
+The main contributions of this letter are as follows:
 \begin{enumerate}
     \item A residual reflex action representation is formulated for
     musculoskeletal gait generation. The learned policy modulates four selected
@@ -134,284 +134,146 @@ The main contributions of this paper are as follows:
     musculoskeletal gait, motivating gait-quality evaluation beyond reward.
 \end{enumerate}
 
-The remainder of this paper is organized as follows: Section II presents the
+The remainder of this letter is organized as follows: Section II presents the
 residual reflex control formulation and learning pipeline; Section III
 describes the controlled walking validation setup and evaluation metrics; Section IV reports
 and analyzes the results; and Section V concludes the paper and outlines
 future work.
 
-\section{Methodology}
-\subsection{Overview of the Reflex-Informed DRL Framework}\label{formats}
-Inspired by the hierarchical neurophysiological mechanisms of human locomotion, the proposed framework integrates a biologically grounded reflex controller with a DRL agent to achieve stable and physiologically plausible gait generation within a musculoskeletal simulation environment. As in Fig.~\ref{framwork}, the overall framework consists of three modules.
-\textbf{(a)} The \textit{Actor--Critic Learning Module} optimizes the target policy via the MPO algorithm, where the critic network estimates the action-value function $Q(s,a)$, which is approximated by the neural network $q(s,a;\boldsymbol{\omega})$, and the actor network updates its policy parameters $\boldsymbol{\theta}_{\text{new}}$ to maximize the expected return. 
-\textbf{(b)} The \textit{Agent--Environment Rollout Module} enables the behavior policy to interact with the environment, collecting experience tuples $(s_t, a_t, r_t, s_{t+1})$ that are stored in a replay buffer for off-policy sampling. 
-\textbf{(c)} The \textit{Physiological Environment Module} integrates the RIC and the MSK model. 
-The controller transforms the high-level policy outputs into physiologically meaningful muscle activations, while the MSK model simulates the resulting neuromuscular and skeletal dynamics.
 
-This hierarchical integration bridges reflex-based control and DRL, combining the fast feedback regulation of biological reflexes with the high-level adaptability of policy learning, thereby enabling robust and physiologically grounded motion generation across different gait conditions. In the following sections, the proposed framework is detailed layer by layer,
-including the physiological reflex–musculoskeletal model, the learning-based modulation mechanism,
-and the policy optimization strategy.
+\section{Methodology}
+\subsection{Residual-Reflex Control Architecture}
+The proposed method treats the reflex controller as a structured low-level
+motor prior and learns only a compact residual modulation on top of it. As
+shown in Fig.~\ref{framwork}, the musculoskeletal model returns proprioceptive
+and kinematic states to a high-level DRL policy. The policy outputs a
+low-dimensional residual action, which modifies selected reflex parameters
+before the reflex controller generates muscle excitations. The resulting muscle
+excitations are then transformed into skeletal motion and ground reaction forces
+by the musculoskeletal simulator. This hierarchy changes the role of DRL from
+direct muscle excitation control to reflex-parameter modulation.
+
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{framwork.png}}
-\caption{Overview of the Reflex-Informed DRL Framework.}
+\caption{Residual-reflex DRL pipeline. The learned policy does not directly
+command all muscle excitations. Instead, it modulates selected parameters of a
+reflex controller, which then produces muscle-level stimulation for the
+musculoskeletal model.}
 \label{framwork}
 \end{figure}
 
-
-\subsection{Reflex-Informed Physiological Environment}\label{formats}
-A physiologically consistent environment is essential for enabling the learning agent to acquire motor behaviors that align with human biomechanics. Therefore, the proposed framework introduces a reflex-informed physiological environment that bridges neural feedback regulation and musculoskeletal dynamics. This design provides a neurophysiologically grounded foundation for deep reinforcement learning, allowing policy optimization to proceed in a biologically interpretable and physiologically plausible manner.
-
-\subsubsection{Neurophysiological Basis of Reflex Mechanisms}\label{formats}
-In human locomotion, sensory feedback plays a crucial role in regulating muscle activation and joint stability.
-The proprioceptive system relies primarily on two sensors: the muscle spindle, which detects changes in muscle length and velocity, and the Golgi tendon organ, which monitors muscle tension, as illustrated in Fig.~\ref{ muscle spindle}.
-These feedback signals are transmitted through spinal pathways to modulate motor neuron excitability, forming the physiological basis of reflex control that maintains balance and smooth gait transitions.
-
-\begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{reflex.png}}
-\caption{Physiological basis of reflex feedback: muscle spindle and Golgi tendon organ providing proprioceptive length–velocity and force feedback.}
-\label{ muscle spindle}
-\end{figure}
-\subsubsection{Reflex-Informed Controller}\label{sec:reflex} The Reflex-Informed Controller (RIC) is designed to emulate spinal-level reflex mechanisms, providing intrinsic stability and rapid local feedback. This controller is phase-dependent, operating based on a division of the gait cycle into five distinct subphases: Early Stance (ES), Late Stance (LS), Liftoff (LF), Swing (SW), and Landing(LA). The controller receives proprioceptive sensory inputs including normalized muscle length $\tilde{l}$, velocity $\tilde{v}$, force $\tilde{f}$, and global DOF, and computes the total reflex contribution to muscle stimulation $u_{\text{reflex}}$.
-% This signal is structured as a composite of Feedforward $u_{C}$, Reflex Feedback $u_{X}$, and Reflex-like Postural Control $u_{PD}$.
-\begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{RIC.png}}
-\caption{Overview of the Reflex-Informed Controller.}
-\label{Reflex-Informed Controller}
-\end{figure}
-
-\textbf{Reflex Control Topology:} The control topology of the RIC is defined by explicit Source-Target relationships, allowing for complex, multi-synaptic pathways beyond simple self-feedback. The muscle reflexes utilize sensors from a specific source muscle to modulate the activation of a target muscle. This architecture allows us to implement three critical feedback modes:
-
-\paragraph{Self-Reflexes and Inter-Muscle Reflexes}
-The muscle-level feedback terms ($u_L, u_V, u_F$)  utilize sensors from a source muscle $j$ to modulate a target muscle $i$, implementing self-reflexes ($i=j$) and inter-muscle reflexes. The former forms the basis for monosynaptic stretch reflexes. The Later connections model essential multi-synaptic coordination pathways like reciprocal inhibition, which is critical for alternating limb movement during gait. To model this, we use the notation $u_{X, i \leftarrow j}$ to indicate the contribution of feedback type $X$ from source muscle $j$'s sensor to the target muscle $i$'s stimulation.
-
-\paragraph{Global Reflex-like Postural Control}
-In addition to the spinal proprioceptive reflexes, the RIC also integrates a Proportional-Derivative (PD) balance controller $u_{\text{PD}}$. This controller is driven by kinematic inputs (position $\theta$ and velocity $\dot{\theta}$) sourced from a global DOF (e.g., pelvis pitch) and applies its output to a set of target muscles: (e.g., hip flexors/extensors) that collectively control posture. This mechanism ensures that the fast feedback corrections account for whole-body stability by linking global errors to local muscle modulation.
-
-
-\noindent
-\textbf{ Control Laws and Formulation:} While the mathematical forms of the control laws (Equations 1–5) are universal and potentially applicable to all muscles, their actual engagement is sparse and targeted to adhere to physiological realism. This phase-dependent activation defines a structured action space that is grounded in neurophysiological evidence. We selectively activate these pathways for nine major lower-limb muscle groups crucial for gait: Tibialis Anterior (TA), Soleus (SOL), Gastrocnemius (GAS), Vastus (VAS), Biceps Femoris (BIF), Iliopsoas (ILI), Hamstrings (HAM), Gluteus Maximus (GLU), and Rectus Femoris (FEM). Furthermore, the application is gait-phase-dependent: all gains ($k_{C, i}$ and $k_{X, i \leftarrow j}$) and offsets ($\tilde{l}_{0, i \leftarrow j}$, $\tilde{v}_{0, i \leftarrow j}$ and $\tilde{f}_{0, i \leftarrow j}$) are phase-dependent parameters whose non-zero values are defined specifically for each combination of muscle pair, reflex type, and active gait subphase (while the current residual policy modulates a selected subset of four reflex parameters. The stimulation terms are formulated as follows:
-
-Feedforward Stimulation: Provides a baseline, phase-dependent muscle drive.
-\begin{equation}u_{C, i} = k_{C, i} \label{eq:feedforward} \end{equation}
-
-
-Length Feedback (Muscle Spindles): Responds to the deviation between muscle length  $\tilde{l}_j$  and a length offset $\tilde{l}_{0, i \leftarrow j}$, implementing the stretch reflex.
-\begin{equation}
-    u_{L, i \leftarrow j} = k_{L, i \leftarrow j} \cdot \max(0, \tilde{l}_j(t - t_{D}) - \tilde{l}_{0, i \leftarrow j}) \label{eq:length_feedback} 
-\end{equation}
-
-
-Velocity Feedback (Muscle Spindles): Responds to the rate of length change $\tilde{v}$, implementing the dynamic stretch reflex component.
-\begin{equation}
-    u_{V, i \leftarrow j} = k_{V, i \leftarrow j} \cdot \max(0, \tilde{v}_j(t - t_{D}) - \tilde{v}_{0, i \leftarrow j}) \label{eq:velocity_feedback} 
-\end{equation}
-
-Force Feedback (Golgi Tendon Organs): Provides inhibitory feedback in response to muscle force $\tilde{f}$.
-\begin{equation}
-    u_{F, i \leftarrow j} = k_{F, i \leftarrow j} \cdot (\tilde{f}_j(t - t_{D}) - \tilde{f}_{0, i \leftarrow j})  \label{eq:force_feedback} 
-\end{equation}
-
- Proportional-Derivative (PD) Balance Controller: This component provides reflex-like postural control to stabilize the trunk's forward lean angle $\theta$. It is driven by the position and velocity of a global DOF ($\theta$) and applies its output to the target muscle $i$:
-\begin{equation}
-   u_{\text{PD}, i} = k_{P, i} (\theta(t - t_{D}) - \theta_{0, i}) + k_{D, i}\dot{\theta}(t - t_{D}) \label{eq:pd_controller}
-\end{equation}
-
-where $k_{X}$ are the reflex gains, $\tilde{l}_{0}$ is the normalized length offset, $\theta$ is the trunk lean angle, $\dot{\theta}$ is angular velocity and $t_{D}$ is the time delay.
-
-Total Reflex Contribution: The final muscle stimulation input $u_{\text{reflex}, i}$ for target muscle $i$ is the summation of all individual terms. The PD contribution $u_{\text{PD}, i}$ is applied locally to the muscle $i$, and the muscle feedback terms are aggregated over all source muscles $j$:
-
-\begin{equation}
-   \begin{aligned}
-u_{\text{reflex}, i} = \quad & u_{C, i} + u_{\text{PD}, i} \\
-& + \sum_{j \in \mathcal{M}} \left( u_{L, i \leftarrow j} + u_{V, i \leftarrow j} + u_{F, i \leftarrow j} \right)
-\end{aligned} 
-\label{eq:pd_controller}
-\end{equation}
-
-Where: $u_{C, i}$ is the constant feedforward term; $u_{\text{PD}, i}$ is the postural control contribution; $\mathcal{M}$ is the set of all muscles in the model. The term $u_{X, i \leftarrow j}$ indicates the contribution of feedback type $X$ from source muscle $j$'s sensor to the target muscle $i$'s stimulation, where $k_{X, i \leftarrow j}=0$ if the connection is not active (sparse topology). 
-
-
-% 写 reflex 控制器原理（神经层反馈方程等）
-\subsubsection{Musculoskeletal Dynamics Model}\label{sec:msk}
-The Musculoskeletal Dynamics Model transforms the muscle activations $a$ into joint torques and resultant limb motion, serving as the execution layer of the physiological environment. The final control signal $u_{\text{reflex}, i}$ from the RIC is first filtered through the muscle activation dynamics to account for the intrinsic neural delay and time constant $\tau$ inherent in muscle excitation, yielding the actual muscle activation $\alpha_i$:
-\begin{equation}
-    \frac{d\alpha_i}{dt} = \frac{u_{\text{reflex}, i} - \alpha_i}{\tau} \quad 
-\end{equation}
-
-The activation $\alpha_i$ drives the complex \textbf{muscle-tendon dynamics}. The total force $F_{\text{total}, i}$ is calculated using a Hill-type model, which combines the active force $F_{\text{active}, i}$ driven by neural input, and the passive force $F_{\text{passive}, i}$ arising from elastic tissues. The total force is defined as:
-\begin{equation}
-F_{\text{total}, i} = F_{\text{active}, i} + F_{\text{passive}, i}
-\end{equation}
-The active force component, which is directly proportional to activation $\alpha_i$, is modeled as:
-\begin{equation}
-    F_{\text{active}, i} = \alpha_i \cdot F_{\text{max}, i} \cdot f_{L}(\tilde{L}_i) \cdot f_{V}(\tilde{V}_i) \quad 
-\end{equation}
-where $F_{\text{max}, i}$ is the maximum isometric force, and $f_{L}(\tilde{L}_i)$ and $f_{V}(\tilde{V}_i)$ are the non-linear force-length and force-velocity relationships, respectively. The passive force component, which models the resistance of elastic elements, is a function of the normalized muscle length $\tilde{L}_i$:
-\begin{equation}
-    F_{\text{passive}, i} = F_{\text{max}, i} \cdot f_{\text{PL}}(\tilde{L}_i) \quad 
-\end{equation}
-where $f_{\text{PL}}(\tilde{L}_i)$ is the normalized passive force-length curve. 
-
-The resulting muscle forces $F_{\text{total}, i}$ are mapped to the joints via the moment arm $r_{i, k}(\mathbf{q})$. The net muscle torque $\tau_{\text{musc}, k}$ at joint $k$ is the summation of contributions from all muscles $\mathcal{M}_{k}$ spanning that joint:
-\begin{equation}
-    \tau_{\text{musc}, k} = \sum_{i \in \mathcal{M}_{k}} F_{\text{total}, i} \cdot r_{i, k}(\mathbf{q}) \quad 
-\end{equation}
-The MSK dynamic process ensures that the DRL policy's output is translated into physically plausible muscle actions before influencing the skeleton's motion.
-
-
-
-
-% 写 MSK 模型与动力学方程
-\subsection{Deep Reinforcement Learning–Driven Reflex Modulation}\label{formats}
-
-\subsubsection{Agent-Environment Rollout and Data Flow}
-The gait generation problem is formalized as a continuous Markov Decision Process (MDP) defined by the tuple $\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{R}, \mathcal{P}, \gamma)$. At each time step $t$, the DRL agent observes a physiological state $\boldsymbol{s_t} \in \mathcal{S}$, outputs an action $\boldsymbol{a_t} \in \mathcal{A}$ that modulates the reflex controller parameters, and receives a reward $r_t = \mathcal{R}(\boldsymbol{s_t}, \boldsymbol{a_t})$ from the environment.
-
-
-\textbf{State:} The state vector $\boldsymbol{s_t}$ consists of muscle-level variables, whole-body kinematics,
-and joint-space information:
+Let $\mathbf{s}_t$ denote the state observed by the policy at time $t$. The
+state contains muscle-level signals, foot states, whole-body kinematics, and
+joint-space variables:
 \begin{equation}
 \begin{aligned}
-\boldsymbol{s_t} = \big[
-& \boldsymbol{l(t)},\;\boldsymbol{\dot{l}(t)},\; \boldsymbol{f(t)},\; \boldsymbol{e(t)},\; \boldsymbol{\alpha(t)}, \\
-& \boldsymbol{p_{feet}(t)},\; \boldsymbol{q(t)},\; \boldsymbol{\dot{q}(t)},\; \theta(t),\;\dot{\theta}(t)\;
-\big]
+\mathbf{s}_t = [
+&\mathbf{l}_t,\dot{\mathbf{l}}_t,\mathbf{f}_t,\mathbf{e}_t,
+\boldsymbol{\alpha}_t,\mathbf{p}_{feet,t},\\
+&\mathbf{q}_t,\dot{\mathbf{q}}_t,\theta_t,\dot{\theta}_t],
 \end{aligned}
 \end{equation}
-Here,  $\boldsymbol{l}$ and $\boldsymbol{\dot{{l}}}$ are the fiber lengths and velocities of all 9 muscles; $\boldsymbol{f}$ is the vector of muscle forces; $\boldsymbol{e}$ and $\boldsymbol{\alpha}$ denote muscle excitations and activations; $\boldsymbol{p_{feet}}$ represents foot relative positions; $\boldsymbol{q}$ and $\boldsymbol{\dot{q}}$ are joint angles and joint angular velocities; $\theta$ and $\dot{\theta}$ are trunk lean angle and angular velocity. This state construction matches the observation vector used in the simulation environment
-and provides the DRL agent with a complete description of the system dynamics.
+where $\mathbf{l}$, $\dot{\mathbf{l}}$, and $\mathbf{f}$ are muscle fiber
+lengths, velocities, and forces; $\mathbf{e}$ and $\boldsymbol{\alpha}$ are
+muscle excitations and activations; $\mathbf{p}_{feet}$ represents foot
+positions; $\mathbf{q}$ and $\dot{\mathbf{q}}$ are joint angles and angular
+velocities; and $\theta$ is the trunk pitch angle.
 
-\textbf{Action:} The action $\boldsymbol{a_t}$ corresponds to the modulation of the reflex controller parameters:
+\subsection{Reflex Controller}
+The low-level controller is a phase-dependent reflex controller inspired by
+neuromuscular feedback pathways. The gait cycle is divided into stance,
+liftoff, swing, and landing-related subphases. In each subphase, sparse
+reflex pathways map sensory feedback to target muscle stimulation. For a target
+muscle $i$ and a source muscle $j$, the controller includes length, velocity,
+and force feedback terms:
+\begin{align}
+u_{L,i\leftarrow j} &= k_{L,i\leftarrow j}
+\max(0,\tilde{l}_j(t-t_D)-\tilde{l}_{0,i\leftarrow j}),\\
+u_{V,i\leftarrow j} &= k_{V,i\leftarrow j}
+\max(0,\tilde{v}_j(t-t_D)-\tilde{v}_{0,i\leftarrow j}),\\
+u_{F,i\leftarrow j} &= k_{F,i\leftarrow j}
+(\tilde{f}_j(t-t_D)-\tilde{f}_{0,i\leftarrow j}),
+\end{align}
+where $\tilde{l}$, $\tilde{v}$, and $\tilde{f}$ are normalized muscle length,
+velocity, and force; $k_L$, $k_V$, and $k_F$ are reflex gains; and $t_D$ is a
+sensorimotor delay. A reflex-like postural feedback term is also used to
+couple trunk pitch errors to selected lower-limb muscles:
 \begin{equation}
-\boldsymbol{a_t} = u(\boldsymbol{s_t};\theta_{now}) \in \mathbb{R}^{n},
+u_{\text{PD},i}=k_{P,i}(\theta(t-t_D)-\theta_{0,i})+
+k_{D,i}\dot{\theta}(t-t_D).
 \end{equation}
-where $u(\cdot)$ is the current actor network parameterized by $\theta_{now}$. Each element of $\boldsymbol{a_t}$ adjusts a gain or offset inside a specific reflex pathway. The modulated parameters include:
-reflex gains ($k_{L}, k_{V}, k_{F}$) and Offsets ($\tilde{l}_{0}, \tilde{v}_{0}, \tilde{f}_{0}$) for the $9$ lower-limb muscle groups, feedforward Gain ($k_{C}$) and PD balance Gains ($k_{P}, k_{D}$) and target Angle ($\theta_0$).
-
-
-
-\textbf{Reward:} The reward consists of multiple physiological and kinematic indicators, designed to simultaneously optimize gait speed, stability, energy efficiency, and physiological rationality. The components are defined as follows:
-
-\paragraph{Velocity tracking} Rewards the agent for maintaining a steady forward velocity that matches a predefined target velocity $v^*$.
+The total stimulation of muscle $i$ is the sum of feedforward, local feedback,
+and postural feedback components:
 \begin{equation}
-r_{\text{vel}} =
-\exp \left[- (v(t) - v^*)^2 \right].
+u_i = u_{C,i}+u_{\text{PD},i}
++\sum_{j\in\mathcal{M}}(u_{L,i\leftarrow j}
++u_{V,i\leftarrow j}+u_{F,i\leftarrow j}).
 \end{equation}
+This reflex structure provides immediate sensory feedback and a biomechanical
+inductive bias before policy learning is applied.
 
-\paragraph{Ground reaction force penalty} Penalizes excessive ground contact load (GRF). The cost is calculated only when the contact load exceeds a certain threshold $\text{GRF}_{\text{ref}}$, promoting controlled and stable foot-ground interaction without undue impact.
+\subsection{Residual Action Space}
+Instead of allowing the policy to directly command all muscle excitations, the
+proposed controller uses a four-dimensional residual action
+$\mathbf{a}_t\in\mathbb{R}^{4}$. Each action component modulates one selected
+reflex parameter around its nominal value:
 \begin{equation}
-r_{\text{grf}} = \max(0, \text{GRF}(t) - \text{GRF}_{\text{ref}}) \quad \text{}
+p_i(t)=p_{i,0}(1+\lambda a_i(t)),
 \end{equation}
+where $p_{i,0}$ is the nominal reflex parameter and $\lambda$ is the action
+scale. In the present implementation, $\lambda=0.5$. Thus $a_i(t)=0$ recovers
+the underlying reflex controller, while nonzero actions produce state-dependent
+residual modulation.
 
-\paragraph{Excitation smoothness} Penalizes large temporal changes in muscle excitation, ensuring that the control signal from the DRL agent is biologically smooth and avoids rapid, jerky movements. The cost is calculated by taking the mean square of the difference between current and previous muscle excitations
-\begin{equation}
-r_{\text{smooth}} = 
-- \frac{1}{N} \sum_{i=1}^{N}
-\left(e_i(t) - e_i(t-1)\right)^2.
-\end{equation}
+\begin{table}[!t]
+\caption{Selected Residual Reflex Actions}
+\label{tab:residual_actions}
+\centering
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{lll}
+\toprule
+Action & Modulated reflex parameter & Functional role \\
+\midrule
+$a_1$ & Hamstrings length gain & Hip extension and late-swing braking \\
+$a_2$ & Iliopsoas length offset & Hip flexion and swing initiation \\
+$a_3$ & Soleus force gain & Ankle support and propulsion \\
+$a_4$ & Vasti force gain & Knee extension and stance support \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
-\paragraph{Muscle usage cost} Encourages energetic efficiency by penalizing the number of muscles whose activation $\alpha$ exceeds a low threshold $\alpha_{ref}$. This promotes sparse muscle recruitment patterns:
-\begin{equation}
-r_{\text{nmusc}} = 
-\frac{1}{N}
-\sum_{i=1}^{N}
-\mathbf{\text{C}}(\alpha_i(t) > \alpha_{ref})
-\end{equation}
-where $\mathbf{C}(\cdot)$ is a custom condition function which evaluates the activation condition ($\alpha_i(t)>\alpha_{\text{ref}}$) at each step $i$. It returns $1$ if the condition is met (the muscle is active) and $0$ otherwise. $N$ is the total number of muscles in the model..
+These four parameters were selected because they act on gait-critical pathways:
+hip flexion/extension for leg swing and placement, knee extension for stance
+support, and ankle plantarflexion for support and propulsion. The purpose of
+this selection is not to claim global optimality of the four parameters, but to
+test whether a small and interpretable reflex-parameter action space can guide
+DRL toward more natural gait than direct muscle-level control.
 
+\subsection{Policy Learning}
+The policy is trained with Maximum a Posteriori Policy Optimization (MPO), an
+off-policy actor--critic algorithm for continuous control. The same optimizer
+is used for both the proposed residual-reflex controller and the end-to-end
+baseline. Therefore, the main experimental comparison isolates the control
+representation: low-dimensional reflex-parameter modulation versus direct
+muscle-level action.
 
-\paragraph{Joint limit torques} Penalizes the absolute magnitude of torques $\tau_j^{\text{limit}}$ generated when joints reach their physical limits. This encourages the agent to operate within the natural range of motion of the skeleton. The cost is calculated by taking the mean absolute value of the limit torques across all $J$ joints:
-\begin{equation}
-r_{\text{constr}} = 
-- \frac{1}{J} \sum_{j=1}^{J}
-\left| \tau_j^{\text{limit}}(t) \right|.
-\end{equation}
-
-\paragraph{Self-contact penalty} Penalizes unwanted or non-foot contact between different body segments. The penalty ensures gait coordination by inhibiting inappropriate contact (e.g., shin dragging or knee bumping). The function computes the sum of contact forces ($F_{\text{self}}(t)$) on all non-foot segments (excluding expected contacts like the heels, e.g., 'calcn\_r', 'calcn\_l'). This force is then clipped and normalized to produce the penalt: 
-
-\begin{equation}
-r_{\text{self}} = 
-- \frac{\mathrm{clip}(F_{\text{self}}(t), -100, 100)}{100}.
-\end{equation}
-
-The reward at each time step is defined as a weighted sum of task-performance and
-physiological regularization terms:
+At each time step, the policy samples an action from a Gaussian action
+distribution conditioned on $\mathbf{s}_t$. The action is applied to the
+controller, the simulator advances one step, and the transition
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored for off-policy
+updates. The reward combines target-speed tracking with regularization terms
+for excessive contact load, abrupt excitation changes, joint-limit torques, and
+unwanted self-contact:
 \begin{equation}
 \begin{aligned}
-r_t =\, 
-& w_{vel} \, r_{\text{vel}}
-+ w_{grf} \, r_{\text{grf}}
-+ w_{smooth} \, r_{\text{smooth}}\\
-& + w_{nmusc} \, r_{\text{nmusc}}
-+ w_{constr} \, r_{\text{constr}}
-+ w_{self} \, r_{\text{self}}
+r_t =\,
+&w_{vel}r_{vel}+w_{grf}r_{grf}+w_{smooth}r_{smooth}\\
+&+w_{constr}r_{constr}+w_{self}r_{self}.
 \end{aligned}
 \end{equation}
-
-
-
-
-
-
-
-The interaction between the DRL agent and the physiological environment is governed by the Behavior Policy $u(\boldsymbol{s}; \theta_{\text{now}})$, which is typically the current version of the Actor network. The interaction flow realizes the core off-policy data collection mechanism.
-
-
-The DRL objective is to learn the optimal policy $\pi^*$ that maximizes the expected cumulative discounted return $R_t = \sum_{k=0}^{\infty} \gamma^k r_{t+k}$. At each time step $t$, the Behavior Policy generates the continuous action vector $\boldsymbol{a_t}$. This action is executed by the RIC to modulate its internal parameters. The Physiological Environment (RIC and MSK Model) returns the reward $r_t$ and the next state $\boldsymbol{s_{t+1}}$. The complete experience tuple $(\boldsymbol{s_t}, \boldsymbol{a_t}, \boldsymbol{r_t}, \boldsymbol{s_{t+1}})$ is then stored in a Replay Buffer.
-
-The use of this Replay Buffer is essential for the off-policy nature of the MPO algorithm. It allows the DRL agent to sample and reuse experiences for training, which significantly improves sample efficiency by breaking the correlation between sequential training updates.
-
-\subsubsection{Actor–Critic Framework for Reflex Modulation}
-% 写 AC 架构在 reflex 调节中的作用
-The Reflex-Informed DRL Framework employs a hierarchical control strategy, where a high-level DRL policy (Actor) acts as a meta-controller to dynamically modulate the parameters of the low-level RIC. This architecture is based on the off-policy Actor-Critic method, separating policy generation from value estimation (Critic).
-
-\textbf{The Actor Network} is the high-level policy, representing the Target Policy $\pi(\boldsymbol{s};\boldsymbol{\theta_{new}})$ being optimized, responsible for learning the adaptive modulation of the physiological reflexes
-
-Input: The Actor receives the full state vector $\boldsymbol{s_t}$ from the environment. The state vector is designed to provide sufficient context as Equation (12).
-
-Output: The Actor outputs a continuous action vector of modulation factors $\boldsymbol{a_t}$. These factors dynamically scale the set of active reflex parameters defined in the low-level controller.
-
-
-\textbf{The Critic Network $q(\boldsymbol{s}, \boldsymbol{a}; \boldsymbol{\omega})$} is essential for evaluating the performance of the Actor policy and stabilizing the learning process. It serves to estimate the action-value function $Q(\boldsymbol{s}, \boldsymbol{a})$, predicting the expected cumulative discounted return that will be achieved by executing action $\boldsymbol{a}$ in state $\boldsymbol{s}$.
-The Critic network $q(\boldsymbol{s},\boldsymbol{a};\boldsymbol{\omega})$ is essential for evaluating the performance of the Actor policy and stabilizing the learning process. It serves to estimate the action-value function $Q(\boldsymbol{s},\boldsymbol{a})$, predicting the expected cumulative discounted return that will be achieved by executing action $\boldsymbol{a}$ in state $\boldsymbol{s}$[cite: 238].
-
-Input: The Critic receives a concatenated vector of dimension $D_s + D_a$. This vector comprises the full environmental state vector $\boldsymbol{s_t}$, which is identical to the input of the Actor network, and the continuous action vector $\boldsymbol{a_t}$ output by the Actor. The state $\boldsymbol{s_t}$ includes kinematic and proprioceptive signals. The action $\boldsymbol{a_t}$ consists of the dynamic modulation factors.
-
-Output: The Critic produces a single scalar value, $Q(\boldsymbol{s}, \boldsymbol{a}) \in \mathbb{R}$, which represents the predicted long-term return for the given state-action pair.
-
-The Critic network is updated by minimizing the temporal difference (TD) error. This TD error then functions as the critical learning signal for the Actor, guiding the Target Policy ($\pi$) via gradient ascent towards actions that maximize the predicted action-value, thereby facilitating efficient policy improvement.
-
-
-
-\subsubsection{MPO-Based Off-Policy Optimization}\label{formats} The DRL agent utilizes the Maximum a Posteriori Policy Optimization (MPO) algorithm, a powerful off-policy method well-suited for high-dimensional continuous control problems. The MPO algorithm views reinforcement learning as a probabilistic inference problem. This approach significantly differs from standard policy gradient methods because it decouples the learning process into two distinct, stable phases: first, identifying the ideal action distribution from experience, and second, updating the Target Policy network to accurately match that distribution. The core advantage of MPO lies in its off-policy nature, which ensures stability and high sample efficiency by allowing the Target Policy $\pi(\boldsymbol{s};\boldsymbol{\theta_{new}})$ to be updated using data generated by a separate Behavior Policy $u(\boldsymbol{s};\boldsymbol{\theta_{now}})$.
-
-\textbf{Behavior and Target Policies:} The Behavior Policy $u(\boldsymbol{s}; \boldsymbol{\theta_{\text{now}}})$ is the policy used for environmental rollout and data collection, generating the experience tuples $(\boldsymbol{s_t}, \boldsymbol{a_t}, \boldsymbol{r_t}, \boldsymbol{s_{t+1}})$ stored in the Replay Buffer. The Target Policy $\pi(\boldsymbol{s};\boldsymbol{\theta_{new}})$ is optimized by maximizing the expected action-value under KL-divergence constraints that restrict policy updates from deviating excessively from the Behavior Policy, ensuring the updates are stable while maximizing utility.
-
-\textbf{Policy Optimization via EM Procedure} The core idea of the learning process is to maximize the expected action-value while ensuring the new policy does not deviate excessively from the old policy (trust region). This is achieved via an Expectation-Maximization (EM) procedure:
-
-
-\begin{enumerate}
-    \item \textbf{E-Step :}
-    Instead of directly updating the network parameters, we first construct a non-parametric \textbf{"ideal"} action distribution $q(\boldsymbol{a}|\boldsymbol{s})$. This distribution is derived by re-weighting the samples from the Behavior Policy $u(\boldsymbol{s};\boldsymbol{\theta_{now}})$ based on their action-values $Q(\boldsymbol{s}, \boldsymbol{a})$ estimated by the Critic network. The ideal distribution assigns higher probability to actions with higher Q-values:
-    \begin{equation}
-        q(\boldsymbol{a}|\boldsymbol{s}) \propto  u(\boldsymbol{a}|\boldsymbol{s}) \exp\left(\frac{Q(\boldsymbol{s}, \boldsymbol{a})}{\eta}\right)
-    \end{equation}
-    where $ u(\boldsymbol{a}|\boldsymbol{s}) $ represents the probability density of taking action $\boldsymbol{a}$ under the current Behavior Policy $u$ based on the sampled history. The term $\eta$ is a temperature parameter (Lagrange multiplier) that controls the "softness" of the distribution, automatically balancing exploration and exploitation.
-
-    \item \textbf{M-Step:}
-    The parametric Target Policy $\pi(\boldsymbol{s};\boldsymbol{\theta_{new}})$ is then updated to approximate this ideal distribution $q(\boldsymbol{a}|\boldsymbol{s})$. This is equivalent to minimizing the KL-divergence between the ideal distribution and the current policy. The update maximizes the expected log-probability of actions sampled from the ideal distribution, effectively adjusting the Actor network parameters $\boldsymbol{\theta}$ to increase the likelihood of generating actions that have high Q-values:
-    \begin{equation}
-        \theta_{\text{new}} = \arg\max_{\theta} \mathbb{E}_{\boldsymbol{s} \sim \mathcal{D}, \boldsymbol{a} \sim q(\cdot|\boldsymbol{s})} [\log \pi(\boldsymbol{a}|\boldsymbol{s}; \theta)]
-    \end{equation}
-    Here, the expectation is taken over states $\boldsymbol{s}$ sampled from the Replay Buffer $\mathcal{D}$, and over actions $\boldsymbol{a}$ drawn from the ideal distribution $q(\cdot|\boldsymbol{s})$. In practice, this means we update the Actor network to increase the likelihood of actions that have high Q-values from the E-step. This EM-based approach provides two critical benefits for our reflex modulation
-task:
-
-\end{enumerate}
-
-In summary, MPO provides a practical off-policy optimization framework for residual reflex modulation. The KL-divergence constraint limits the magnitude of each policy update, while the replay buffer enables reuse of previously collected simulation data. In this work, MPO is used as the policy optimizer for both the residual reflex controller and the end-to-end baseline; the main comparison therefore focuses on the control representation rather than on the optimizer itself.
-
-
-
+The reward is used for policy learning only. Final gait quality is assessed
+using gait-cycle kinematics, GRF morphology, left--right symmetry, and
+cycle-to-cycle repeatability rather than episodic reward alone.
 
 \section{Experiments}
 \subsection{Environments and Tasks}\label{sec:experiments}
@@ -429,40 +291,14 @@ resulting vertical ground reaction forces are recorded for gait analysis.
 \end{figure}
 
 \subsubsection{Compared Control Interfaces}
-Two policy interfaces were compared. The proposed \emph{Residual Reflex}
-controller uses a reflex-based controller as the low-level control structure.
-The DRL policy outputs four normalized residual actions, each modulating one
-selected reflex parameter around its nominal value:
-\begin{equation}
-    K_i(t)=K_{i,0}\left(1 + \alpha a_i(t)\right), \quad \alpha=0.5,
-\end{equation}
-where $K_{i,0}$ is the nominal reflex parameter and $a_i(t)$ is the policy
-output. In the current implementation, the four modulated parameters are the
-hamstrings length gain, iliopsoas reference length, soleus force gain, and
-vasti force gain.
-
-These four parameters were selected because they affect distinct and
-biomechanically important parts of the gait cycle while keeping the learned
-action space low-dimensional. The hamstrings length feedback is related to hip
-extension control and swing-to-stance transition, and therefore influences leg
-deceleration and preparation for foot contact. The iliopsoas reference length
-affects hip flexor recruitment and contributes to swing initiation and foot
-clearance. The soleus force feedback is associated with ankle plantarflexor
-support and forward propulsion during stance, which strongly influences the
-vertical GRF profile. The vasti force feedback contributes to knee extension
-and load-bearing during early stance, directly affecting knee stability and the
-shape of the stance-phase knee trajectory. Together, these parameters cover
-hip, knee, and ankle contributions to both limb advancement and stance support.
-They were therefore chosen as a representative residual action set for testing
-whether DRL can improve gait quality by modulating a small number of
-interpretable reflex pathways, rather than as a claim that this set is globally
-optimal.
-
-The baseline controller is an \emph{End-to-End} muscle-control policy without
-the reflex modulation structure. It directly outputs muscle-level control
-actions for the same musculoskeletal model. Both controllers were trained with
-MPO-based off-policy reinforcement learning. The current experiments do not use
-DEP; DEP-RL is discussed as related work because it motivates the difficulty of
+Two DRL policy interfaces were compared. The proposed \emph{Residual Reflex}
+controller uses the four-dimensional reflex-parameter action space described in
+Table~\ref{tab:residual_actions}. The baseline controller is an
+\emph{End-to-End} muscle-control policy without the reflex modulation
+structure. It directly outputs muscle-level control actions for the same
+musculoskeletal model. Both controllers were trained with MPO-based off-policy
+reinforcement learning. The current experiments do not use DEP; DEP-RL is
+discussed as related work because it motivates the difficulty of
 high-dimensional musculoskeletal action spaces.
 
 \begin{table}[!t]
@@ -720,7 +556,7 @@ relative to direct muscle-level control within the present validation setting.
 
 
 \section{Conclusion}
-This paper presented a residual reflex DRL pipeline for musculoskeletal gait
+This letter presented a residual reflex DRL pipeline for musculoskeletal gait
 generation. Rather than directly commanding all muscle
 excitations, the learned policy modulates four selected reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
