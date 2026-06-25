@@ -48,15 +48,15 @@ Tsukuba, Japan (e-mail: author@nrim.go.jp).}}
 Deep reinforcement learning (DRL) has shown promise for controlling
 musculoskeletal locomotion, but direct muscle-level control requires
 exploration in a high-dimensional and highly redundant action space. This
-paper investigates an alternative action representation for fixed-speed
-musculoskeletal gait generation. Instead of directly commanding all muscle
-excitations, the proposed residual reflex framework uses an existing
+paper investigates a residual-reflex DRL pipeline for musculoskeletal
+gait generation. Instead of directly commanding all muscle
+excitations, the proposed residual reflex pipeline uses an existing
 reflex-based controller as a structured neuromechanical prior and trains a
 DRL policy to modulate four selected reflex parameters through residual
 actions. The policy therefore operates in a compact reflex-parameter space
 while preserving the biomechanical feedback structure embedded in the
-reflex controller. Experiments are conducted in a Hyfydy-based planar
-musculoskeletal model at target walking speeds of 0.8, 1.0, and
+reflex controller. The pipeline is validated in a Hyfydy-based planar
+musculoskeletal model using fixed-speed walking tasks at 0.8, 1.0, and
 1.2~m/s. The proposed controller is compared with an end-to-end baseline
 that directly controls muscle-level actions. Although the end-to-end
 baseline can generate walking motions, its normalized gait-cycle profiles
@@ -107,8 +107,8 @@ raises a related question: rather than improving exploration in the full muscle
 excitation space, can the effective action space itself be reduced by learning
 at the level of structured reflex modulation?
 
-This paper investigates that question through a residual reflex DRL framework
-for fixed-speed musculoskeletal walking. Instead of replacing the reflex
+This paper investigates that question through a residual reflex DRL pipeline
+for musculoskeletal walking. Instead of replacing the reflex
 controller with an end-to-end policy, the proposed method keeps the reflex
 controller as a low-level biomechanical prior and trains a policy to output
 residual adjustments to a small set of selected reflex parameters. The role of
@@ -122,9 +122,9 @@ The main contributions of this paper are as follows:
     \item A residual reflex action representation is formulated for
     musculoskeletal gait generation. The learned policy modulates four selected
     reflex parameters instead of directly commanding all muscle excitations.
-    \item The proposed controller is implemented in a Hyfydy-based planar
-    musculoskeletal environment and compared with an end-to-end muscle-level
-    DRL baseline at three fixed walking speeds.
+    \item The proposed pipeline is implemented in a Hyfydy-based planar
+    musculoskeletal environment. As an initial validation, it is compared with
+    an end-to-end muscle-level DRL baseline on three fixed-speed walking tasks.
     \item The learned gaits are evaluated using normalized gait-cycle
     kinematics and vertical ground reaction force (GRF) profiles. The results
     show that residual reflex modulation improves reference gait-cycle similarity,
@@ -135,8 +135,8 @@ The main contributions of this paper are as follows:
 \end{enumerate}
 
 The remainder of this paper is organized as follows: Section II presents the
-residual reflex control formulation and learning framework; Section III
-describes the experimental setup and evaluation metrics; Section IV reports
+residual reflex control formulation and learning pipeline; Section III
+describes the controlled walking validation setup and evaluation metrics; Section IV reports
 and analyzes the results; and Section V concludes the paper and outlines
 future work.
 
@@ -424,7 +424,7 @@ resulting vertical ground reaction forces are recorded for gait analysis.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{body.png}}
-\caption{Planar musculoskeletal model used for fixed-speed walking experiments.}
+\caption{Planar musculoskeletal model used for pipeline validation.}
 \label{fig:body_model}
 \end{figure}
 
@@ -467,7 +467,7 @@ high-dimensional musculoskeletal action spaces.
 
 \begin{table}[!t]
 \centering
-\caption{Policy interfaces compared in the fixed-speed experiments.}
+\caption{Policy interfaces compared in the validation experiments.}
 \label{tab:policy_interface}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -484,8 +484,11 @@ End-to-End & 18 & Direct muscle-level control actions. \\
 
 \subsection{Evaluation Protocol}
 Policies were evaluated at three fixed target speeds: 0.8, 1.0, and
-1.2~m/s. For each trained policy, a representative walking trajectory was
-exported as an STO file and analyzed using the reference-envelope gait-cycle analysis procedure.
+1.2~m/s. These fixed-speed tasks are used as controlled validation cases for
+the residual reflex pipeline, rather than as the intended limit of the method.
+For each trained policy, a representative walking trajectory was exported as
+an STO file and analyzed using the reference-envelope gait-cycle analysis
+procedure.
 The gait cycle was normalized to 0--100\%, and the following profiles were
 computed for both legs: pelvic tilt, hip angle, knee angle, ankle angle, and
 vertical GRF. The gait-cycle score measures whether the mean simulated profile
@@ -503,7 +506,7 @@ symmetry rather than fall robustness.
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
 
-\subsection{Gait Similarity Across Fixed Speeds}
+\subsection{Gait Similarity in Controlled Walking Validation}
 Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle scores for
 Residual Reflex and End-to-End controllers. Across the three matched target
 speeds, the proposed residual reflex controller achieved higher overall gait
@@ -515,7 +518,7 @@ motions that completed the task but deviated strongly from reference gait.
 
 \begin{table}[!t]
 \centering
-\caption{reference-envelope gait-cycle scores for fixed-speed walking. Scores are
+\caption{Reference-envelope gait-cycle scores in controlled walking validation. Scores are
 computed from normalized gait-cycle kinematics and vertical GRF.}
 \label{tab:gait_similarity}
 \small
@@ -634,25 +637,26 @@ repeatability.
 The current study has several limitations. First, all reported experiments use
 a single training seed for each configuration, so the results should be
 interpreted as trajectory-level evidence rather than training-seed statistics.
-Second, the comparison focuses on fixed-speed walking and does not yet include
-external perturbation recovery or true metabolic cost estimation. Third, the
-model is planar, and extension to three-dimensional locomotion remains future
-work. These limitations define the next experimental steps, but they do not
-affect the central finding that a low-dimensional residual reflex action space
-can improve gait plausibility relative to direct muscle-level control in the
-current fixed-speed setting.
+Second, the current validation focuses on fixed-speed walking and does not yet
+include online speed transitions, external perturbation recovery, or true
+metabolic cost estimation. Third, the model is planar, and extension to
+three-dimensional locomotion remains future work. These limitations define the
+next experimental steps, but they do not affect the central finding that a
+low-dimensional residual reflex action space can improve gait plausibility
+relative to direct muscle-level control within the present validation setting.
 
 
 \section{Conclusion}
-This paper presented a residual reflex DRL framework for fixed-speed
-musculoskeletal gait generation. Rather than directly commanding all muscle
+This paper presented a residual reflex DRL pipeline for musculoskeletal gait
+generation. Rather than directly commanding all muscle
 excitations, the learned policy modulates four selected reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
 space and preserves a structured neuromechanical prior within the control loop.
 
-Experiments in a Hyfydy-based planar musculoskeletal model showed that the
-residual reflex controller produced gait cycles with higher reference-envelope gait-cycle
-scores than an end-to-end muscle-control baseline at 0.8, 1.0, and 1.2~m/s.
+As an initial validation, experiments in a Hyfydy-based planar musculoskeletal
+model showed that the residual reflex controller produced gait cycles with
+higher reference-envelope gait-cycle scores than an end-to-end muscle-control
+baseline at 0.8, 1.0, and 1.2~m/s.
 The improvement was most evident in knee kinematics, ankle kinematics, and
 vertical GRF morphology. Additional cycle-level analysis showed lower
 left--right waveform differences and lower stride variability, indicating more
