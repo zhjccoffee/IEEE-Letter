@@ -271,16 +271,29 @@ At each time step, the policy samples an action from a Gaussian action
 distribution conditioned on $\mathbf{s}_t$. The action is applied to the
 controller, the simulator advances one step, and the transition
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored for off-policy
-updates. The reward combines target-speed tracking with regularization terms
-for excessive contact load, abrupt excitation changes, joint-limit torques, and
-unwanted self-contact:
+updates. The base reward combines target-speed tracking with regularization
+terms for excessive contact load, abrupt excitation changes, muscle usage,
+joint-limit torques, and unwanted self-contact:
 \begin{equation}
 \begin{aligned}
-r_t =\,
+r_t^{base} =\,
 &w_{vel}r_{vel}+w_{grf}r_{grf}+w_{smooth}r_{smooth}\\
-&+w_{constr}r_{constr}+w_{self}r_{self}.
+&+w_{musc}r_{musc}+w_{constr}r_{constr}+w_{self}r_{self}.
 \end{aligned}
 \end{equation}
+For the residual-reflex controller, additional posture and residual-action
+regularization terms are included:
+\begin{equation}
+r_t = r_t^{base} + w_{\theta}r_{\theta}
++w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
+\end{equation}
+Here, $r_{\theta}$ and $r_{\dot{\theta}}$ penalize deviations of pelvis pitch
+and pitch rate, $r_{com}$ penalizes vertical center-of-mass velocity, and
+$r_{\Delta a}$ penalizes rapid changes in the residual reflex action. Some
+terms may have zero weight in a given experiment; the fixed-speed experiments
+reported here used the same base reward structure for the residual-reflex and
+end-to-end policies, with the additional posture and residual-action
+regularization applied to the residual-reflex controller.
 The reward is used for policy learning only. Final gait quality is assessed
 using gait-cycle kinematics, GRF morphology, left--right symmetry, and
 cycle-to-cycle repeatability rather than episodic reward alone.
@@ -296,7 +309,9 @@ resulting vertical ground reaction forces are recorded for gait analysis.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{body.png}}
-\caption{Planar musculoskeletal model used for pipeline validation.}
+\caption{Schematic of the Hyfydy-based planar musculoskeletal model used for
+pipeline validation. The model contains nine lower-limb muscle groups per leg,
+including TA, SOL, GAS, VAS, BIF, ILI, HAM, GLU, and FEM.}
 \label{fig:body_model}
 \end{figure}
 
