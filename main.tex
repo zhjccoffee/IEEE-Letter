@@ -20,10 +20,10 @@
 \usepackage{booktabs}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-\markboth{\hskip25pc RESIDUAL REFLEX MODULATION FOR MUSCULOSKELETAL GAIT}
-{Author \MakeLowercase{\textit{et al.}}: Residual Reflex Modulation for Musculoskeletal Gait}
+\markboth{\hskip25pc LOW-DIMENSIONAL REFLEX-INFORMED DRL FOR GAIT}
+{Author \MakeLowercase{\textit{et al.}}: Low-Dimensional Reflex-Informed DRL for Musculoskeletal Gait}
 \begin{document}
-\title{Low-Dimensional Residual Reflex Modulation for Musculoskeletal Gait Generation}
+\title{Low-Dimensional Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation}
 \author{First A. Author, \IEEEmembership{Fellow, IEEE}, Second B. Author, and Third C. Author Jr., \IEEEmembership{Member, IEEE}
 \thanks{This paragraph of the first footnote will contain the date on 
 which you submitted your paper for review. It will also contain support 
@@ -48,10 +48,11 @@ Tsukuba, Japan (e-mail: author@nrim.go.jp).}}
 Deep reinforcement learning (DRL) has shown promise for controlling
 musculoskeletal locomotion, but direct muscle-level control requires
 exploration in a high-dimensional and highly redundant action space. This
-letter investigates a residual-reflex DRL pipeline for musculoskeletal
+letter investigates a low-dimensional reflex-informed DRL pipeline for musculoskeletal
 gait generation. Instead of directly commanding all muscle
 excitations, the proposed residual reflex pipeline uses an existing
-reflex-based controller as a structured neuromechanical prior and trains a
+reflex-based controller as a structured neuromechanical prior inspired by
+spinal sensory feedback pathways, and trains a
 DRL policy to modulate four selected reflex parameters through residual
 actions. The policy therefore operates in a compact reflex-parameter space
 while preserving the biomechanical feedback structure embedded in the
@@ -107,10 +108,11 @@ raises a related question: rather than improving exploration in the full muscle
 excitation space, can the effective action space itself be reduced by learning
 at the level of structured reflex modulation?
 
-This letter investigates that question through a residual reflex DRL pipeline
+This letter investigates that question through a low-dimensional
+reflex-informed DRL pipeline
 for musculoskeletal walking. Instead of replacing the reflex
 controller with an end-to-end policy, the proposed method keeps the reflex
-controller as a low-level biomechanical prior and trains a policy to output
+controller as a low-level neuromuscular feedback prior and trains a policy to output
 residual adjustments to a small set of selected reflex parameters. The role of
 DRL is therefore changed from direct muscle excitation control to modulation of
 an interpretable neuromechanical controller. This idea is related in spirit to
@@ -144,7 +146,8 @@ future work.
 \section{Methodology}
 \subsection{Residual-Reflex Control Architecture}
 The proposed method treats the reflex controller as a structured low-level
-motor prior and learns only a compact residual modulation on top of it. As
+motor prior inspired by spinal sensory feedback circuits and learns only a
+compact residual modulation on top of it. As
 shown in Fig.~\ref{framwork}, the musculoskeletal model returns proprioceptive
 and kinematic states to a high-level DRL policy. The policy outputs a
 low-dimensional residual action, which modifies selected reflex parameters
@@ -155,9 +158,10 @@ direct muscle excitation control to reflex-parameter modulation.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{framwork.png}}
-\caption{Residual-reflex DRL pipeline. The learned policy does not directly
-command all muscle excitations. Instead, it modulates selected parameters of a
-reflex controller, which then produces muscle-level stimulation for the
+\caption{Low-dimensional reflex-informed DRL pipeline. The learned policy does
+not directly command all muscle excitations. Instead, it modulates selected
+parameters of a neural-feedback-inspired reflex controller, which then produces
+muscle-level stimulation for the
 musculoskeletal model.}
 \label{framwork}
 \end{figure}
@@ -181,7 +185,8 @@ velocities; and $\theta$ is the trunk pitch angle.
 
 \subsection{Reflex Controller}
 The low-level controller is a phase-dependent reflex controller inspired by
-neuromuscular feedback pathways. The gait cycle is divided into stance,
+neuromuscular feedback pathways, including muscle-spindle-like length and
+velocity feedback and Golgi-tendon-organ-like force feedback. The gait cycle is divided into stance,
 liftoff, swing, and landing-related subphases. In each subphase, sparse
 reflex pathways map sensory feedback to target muscle stimulation. For a target
 muscle $i$ and a source muscle $j$, the controller includes length, velocity,
@@ -230,17 +235,22 @@ residual modulation.
 \label{tab:residual_actions}
 \centering
 \resizebox{\columnwidth}{!}{
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-Action & Modulated reflex parameter & Functional role \\
+Action & Parameter & Pathway & Functional role \\
 \midrule
-$a_1$ & Hamstrings length gain & Hip extension and late-swing braking \\
-$a_2$ & Iliopsoas length offset & Hip flexion and swing initiation \\
-$a_3$ & Soleus force gain & Ankle support and propulsion \\
-$a_4$ & Vasti force gain & Knee extension and stance support \\
+$a_1$ & $k_{L,\mathrm{HAM}}$ & S11100.hamstrings.KL & Hip extension / late-swing braking \\
+$a_2$ & $\tilde{l}_{0,\mathrm{ILI}}$ & S00011.iliopsoas.L0 & Hip flexion / swing initiation \\
+$a_3$ & $k_{F,\mathrm{SOL}}$ & S11111.soleus.KF & Ankle support / propulsion \\
+$a_4$ & $k_{F,\mathrm{VAS}}$ & S00011.vasti.KF & Knee extension / stance support \\
 \bottomrule
 \end{tabular}}
 \end{table}
+
+The pathway labels in Table~\ref{tab:residual_actions} follow the controller
+implementation notation: the binary code after ``S'' denotes the gait subphases
+in which the corresponding reflex pathway is active, and the suffix specifies
+the muscle and reflex parameter being modulated.
 
 These four parameters were selected because they act on gait-critical pathways:
 hip flexion/extension for leg swing and placement, knee extension for stance
