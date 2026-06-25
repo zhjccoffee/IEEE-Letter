@@ -453,17 +453,6 @@ speed.}
 }
 \end{table}
 
-\begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
-\caption{Qualitative gait snapshots over one detected gait cycle at
-1.2~m/s. Frames were sampled at 0\%, 25\%, 50\%, 75\%, and 100\% of the gait
-cycle detected from the corresponding STO trajectory and synchronized video.
-The visualization provides a qualitative view of posture progression for the
-two direct muscle-control baselines and the proposed Residual-Reflex RL
-controller.}
-\label{fig:qualitative_snapshots}
-\end{figure}
-
 \subsection{Reference-Based Gait Similarity}
 Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle
 scores for the three policy interfaces. Across the three target speeds, the
@@ -619,6 +608,27 @@ Lower values indicate more symmetric or more repeatable gait.}
 \caption{Left--right waveform differences and stride variability across target
 speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
 \label{fig:symmetry_variability_bars}
+\end{figure}
+
+\subsection{Qualitative Gait Visualization}
+Fig.~\ref{fig:qualitative_snapshots} provides a final visual comparison of the
+three evaluated controllers at 1.2~m/s. The E2E-RL trajectory can produce
+joint postures that appear broadly plausible in isolated snapshots, which is
+consistent with its relatively high hip and ankle scores in
+Table~\ref{tab:gait_similarity}. However, its low GRF score indicates that the
+contact loading pattern is not reference-consistent, which corresponds to a less
+smooth walking motion in the synchronized video. DEP-RL shows larger deviations
+in both joint coordination and GRF morphology, consistent with its lower
+reference-based gait similarity scores. In contrast, Residual-Reflex RL combines
+high joint-angle scores with high GRF scores, resulting in a more regular
+posture progression over the sampled gait cycle.
+
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
+\caption{Qualitative gait snapshots over one detected gait cycle at
+1.2~m/s. Frames were sampled at 0\%, 25\%, 50\%, 75\%, and 100\% of the gait
+cycle detected from the corresponding STO trajectory and synchronized video.}
+\label{fig:qualitative_snapshots}
 \end{figure}
 
 \subsection{Discussion}
