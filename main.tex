@@ -503,6 +503,12 @@ quantified using the coefficient of variation (CV) of stride time and stride
 length. These measures are used to describe gait regularity and bilateral
 symmetry rather than fall robustness.
 
+We also report spatiotemporal gait measures, including realized walking speed,
+absolute speed tracking error, stride length, and stride time. These metrics
+indicate whether the generated trajectories satisfy the commanded locomotion
+task, while the reference-envelope and symmetry metrics assess the quality of
+the resulting gait pattern.
+
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
 
@@ -546,6 +552,49 @@ computed from normalized gait-cycle kinematics and vertical GRF.}
 residual reflex controller improves overall gait similarity and especially
 knee, ankle, and GRF components.}
 \label{fig:gait_score_bars}
+\end{figure}
+
+\subsection{Spatiotemporal Tracking and Stride Measures}
+Table~\ref{tab:spatiotemporal_metrics} reports realized speed, absolute speed
+error, stride length, stride time, and the number of analyzed gait cycles. Both
+controllers generated forward walking near the commanded speeds, but they used
+different spatiotemporal strategies. The end-to-end baseline tended to produce
+shorter stride times and, at lower speeds, shorter stride lengths, whereas the
+residual reflex controller generated longer and more regular strides. These
+task-level metrics complement the gait-cycle shape analysis: a controller may
+track speed reasonably well while still producing less physiological joint and
+GRF profiles.
+
+\begin{table}[!t]
+\centering
+\caption{Spatiotemporal metrics from the analyzed walking trajectories. Speed
+error is the absolute difference between realized and target speed.}
+\label{tab:spatiotemporal_metrics}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.12}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l l r r r r r}
+\toprule
+\textbf{Target} & \textbf{Method} & \textbf{Real. speed} & \textbf{Error} & \textbf{Stride len.} & \textbf{Stride time} & \textbf{Cycles} \\
+\midrule
+0.8 & Residual Reflex & 0.79 & 0.01 & 0.99 & 1.26 & 35 \\
+0.8 & End-to-End & 0.87 & 0.07 & 0.78 & 0.89 & 50 \\
+1.0 & Residual Reflex & 1.05 & 0.05 & 1.23 & 1.17 & 37 \\
+1.0 & End-to-End & 1.01 & 0.01 & 0.87 & 0.87 & 53 \\
+1.2 & Residual Reflex & 1.21 & 0.01 & 1.34 & 1.11 & 40 \\
+1.2 & End-to-End & 1.26 & 0.06 & 1.23 & 0.97 & 46 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{spatiotemporal_metrics_bars.png}}
+\caption{Spatiotemporal tracking and stride measures across target speeds. The
+speed error evaluates task tracking, while stride length and stride time
+summarize the gait pattern used to achieve the target speed.}
+\label{fig:spatiotemporal_metrics}
 \end{figure}
 
 \subsection{Gait-Cycle Profiles Across Walking Speeds}
