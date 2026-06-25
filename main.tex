@@ -120,18 +120,16 @@ improving exploration in the original muscle excitation space, can the effective
 action space itself be reduced by learning at the level of structured reflex
 modulation?
 
-This letter investigates that question through a low-dimensional
+In this study, we investigate that question through a low-dimensional
 reflex-informed DRL pipeline for musculoskeletal walking. Instead of replacing
 the reflex controller with an end-to-end policy, the proposed method keeps the
 reflex controller as a low-level neuromuscular feedback prior and trains a
 policy to output residual adjustments to a small set of selected reflex
-parameters. The role of DRL is therefore changed from direct muscle excitation
-control to modulation of an interpretable neuromechanical controller. This idea
-is related in spirit to residual reinforcement learning \cite{residualrl2019},
-but is applied here to reflex-parameter modulation in a muscle-driven gait
-environment.
+parameters. Inspired by residual reinforcement learning
+\cite{residualrl2019}, DRL is used here to modulate an interpretable
+neuromechanical controller rather than to directly command muscle excitations.
 
-The main contributions of this letter are as follows:
+The main contributions are as follows:
 \begin{enumerate}
     \item A residual reflex action representation is formulated for
     musculoskeletal gait generation. The learned policy modulates four selected
@@ -148,7 +146,7 @@ The main contributions of this letter are as follows:
     motivating gait-quality evaluation using waveform and stride-level metrics.
 \end{enumerate}
 
-The remainder of this letter is organized as follows: Section II presents the residual reflex control formulation and learning pipeline; Section III describes the controlled walking validation setup and evaluation metrics; Section IV reports and analyzes the results; and Section V concludes the paper and outlines
+The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning pipeline; Section III describes the controlled walking validation setup and evaluation metrics; Section IV reports and analyzes the results; and Section V concludes the paper and outlines
 future work.
 
 
@@ -666,7 +664,7 @@ relative to direct muscle-level control within the present validation setting.
 
 
 \section{Conclusion}
-This letter presented a residual reflex DRL pipeline for musculoskeletal gait
+We presented a residual reflex DRL pipeline for musculoskeletal gait
 generation. Rather than directly commanding all muscle
 excitations, the learned policy modulates four selected reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
