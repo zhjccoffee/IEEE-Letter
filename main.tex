@@ -417,7 +417,7 @@ In summary, MPO provides a practical off-policy optimization framework for resid
 \subsection{Environments and Tasks}\label{sec:experiments}
 \subsubsection{Simulation Environment}
 The experiments were conducted in a two-dimensional planar musculoskeletal
-model implemented in a Hyfydy-based musculoskeletal simulator. The model contains the pelvis, trunk, and
+model implemented with the Hyfydy physics engine \cite{hyfydy}. The model contains the pelvis, trunk, and
 bilateral lower-limb segments, with sagittal-plane hip, knee, and ankle motion.
 Actuation is provided by 18 Hill-type muscles, with nine muscles per leg. Foot--ground interaction is modeled through discrete contact elements, and the
 resulting vertical ground reaction forces are recorded for gait analysis.
@@ -669,6 +669,10 @@ The authors would like to thank the developers of musculoskeletal simulation
 tools used in this work.
 
 \begin{thebibliography}{00}
+\bibitem{hyfydy}
+Hyfydy, ``Hyfydy: A physics engine for biomechanical simulation.'' [Online].
+Available: https://hyfydy.com
+
 \bibitem{geyer2010}
 H. Geyer and H. Herr, ``A muscle-reflex model that encodes principles of
 legged mechanics produces human walking dynamics and muscle activities,''
