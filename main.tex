@@ -55,14 +55,14 @@ reflex-based controller as a structured neuromechanical prior and trains a
 DRL policy to modulate four selected reflex parameters through residual
 actions. The policy therefore operates in a compact reflex-parameter space
 while preserving the biomechanical feedback structure embedded in the
-reflex controller. Experiments are conducted in a SCONE/Hyfydy planar
+reflex controller. Experiments are conducted in a Hyfydy-based planar
 musculoskeletal model at target walking speeds of 0.8, 1.0, and
 1.2~m/s. The proposed controller is compared with an end-to-end baseline
 that directly controls muscle-level actions. Although the end-to-end
 baseline can generate walking motions, its normalized gait-cycle profiles
 show substantial deviations from reference gait, especially in knee
 kinematics and vertical ground reaction force. In contrast, the residual
-reflex controller achieves higher SCONE gait analysis scores across the
+reflex controller achieves higher reference-envelope gait-cycle scores across the
 tested speeds and produces more symmetric and repeatable gait cycles. These
 results suggest that reducing the effective action space through residual
 reflex modulation can improve the physiological plausibility of learned
@@ -91,9 +91,8 @@ physiologically implausible.
 Biologically inspired reflex controllers provide one way to address this
 problem. Muscle reflex models encode local sensory--motor feedback pathways
 inspired by spinal reflex mechanisms and have been shown to generate
-human-like walking dynamics \cite{geyer2010}. Tools such as SCONE further make
-it possible to optimize and evaluate such controllers in predictive
-simulations of biological motion \cite{scone2019}. Nevertheless, reflex-based
+human-like walking dynamics \cite{geyer2010}. Predictive simulation tools further make it possible to optimize and
+evaluate such controllers in simulations of biological motion. Nevertheless, reflex-based
 controllers typically depend on carefully selected gains, thresholds, and
 offsets. These parameters are often tuned manually or optimized offline, and
 their effects can be sensitive to the musculoskeletal model and task condition.
@@ -123,12 +122,12 @@ The main contributions of this paper are as follows:
     \item A residual reflex action representation is formulated for
     musculoskeletal gait generation. The learned policy modulates four selected
     reflex parameters instead of directly commanding all muscle excitations.
-    \item The proposed controller is implemented in a SCONE/Hyfydy-based planar
+    \item The proposed controller is implemented in a Hyfydy-based planar
     musculoskeletal environment and compared with an end-to-end muscle-level
     DRL baseline at three fixed walking speeds.
     \item The learned gaits are evaluated using normalized gait-cycle
     kinematics and vertical ground reaction force (GRF) profiles. The results
-    show that residual reflex modulation improves SCONE gait similarity,
+    show that residual reflex modulation improves reference gait-cycle similarity,
     especially for knee kinematics, ankle kinematics, and GRF morphology.
     \item The comparison demonstrates that high task reward or successful
     walking alone is not sufficient evidence of physiologically plausible
@@ -418,7 +417,7 @@ In summary, MPO provides a practical off-policy optimization framework for resid
 \subsection{Environments and Tasks}\label{sec:experiments}
 \subsubsection{Simulation Environment}
 The experiments were conducted in a two-dimensional planar musculoskeletal
-model implemented in SCONE/Hyfydy. The model contains the pelvis, trunk, and
+model implemented in a Hyfydy-based musculoskeletal simulator. The model contains the pelvis, trunk, and
 bilateral lower-limb segments, with sagittal-plane hip, knee, and ankle motion.
 Actuation is provided by 18 Hill-type muscles, with nine muscles per leg. Foot--ground interaction is modeled through discrete contact elements, and the
 resulting vertical ground reaction forces are recorded for gait analysis.
@@ -469,14 +468,14 @@ End-to-End & 18 & Direct muscle-level control actions. \\
 \subsection{Evaluation Protocol}
 Policies were evaluated at three fixed target speeds: 0.8, 1.0, and
 1.2~m/s. For each trained policy, a representative walking trajectory was
-exported as an STO file and analyzed using the SCONE gait analysis procedure.
+exported as an STO file and analyzed using the reference-envelope gait-cycle analysis procedure.
 The gait cycle was normalized to 0--100\%, and the following profiles were
 computed for both legs: pelvic tilt, hip angle, knee angle, ankle angle, and
-vertical GRF. The SCONE gait score measures whether the mean simulated profile
+vertical GRF. The gait-cycle score measures whether the mean simulated profile
 lies within the reference gait envelope; higher values indicate closer
 agreement with reference gait.
 
-In addition to the SCONE component scores, we computed two descriptive gait
+In addition to the gait-cycle component scores, we computed two descriptive gait
 quality measures from the detected gait cycles. First, left--right waveform
 symmetry was quantified as the root-mean-square difference between the average
 left and right normalized profiles. Second, stride-to-stride repeatability was
@@ -488,7 +487,7 @@ symmetry rather than fall robustness.
 \label{sec:results-and-analysis}
 
 \subsection{Gait Similarity Across Fixed Speeds}
-Table~\ref{tab:gait_similarity} summarizes the SCONE gait analysis scores for
+Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle scores for
 Residual Reflex and End-to-End controllers. Across the three matched target
 speeds, the proposed residual reflex controller achieved higher overall gait
 similarity than the end-to-end baseline. The average overall score over the
@@ -499,12 +498,13 @@ motions that completed the task but deviated strongly from reference gait.
 
 \begin{table}[!t]
 \centering
-\caption{SCONE gait analysis scores for fixed-speed walking. Scores are
+\caption{reference-envelope gait-cycle scores for fixed-speed walking. Scores are
 computed from normalized gait-cycle kinematics and vertical GRF.}
 \label{tab:gait_similarity}
 \small
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.12}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{l l r r r r r r}
 \toprule
 \textbf{Target} & \textbf{Method} & \textbf{Real.} & \textbf{Overall} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} \\
@@ -516,19 +516,20 @@ computed from normalized gait-cycle kinematics and vertical GRF.}
 1.2 & Residual Reflex & 1.21 & 93.2 & 99.6 & 88.7 & 88.6 & 89.1 \\
 1.2 & End-to-End & 1.26 & 69.6 & 88.4 & 52.4 & 85.9 & 21.5 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
-\caption{Comparison of SCONE gait analysis scores across target speeds. The
+\caption{Comparison of reference-envelope gait-cycle scores across target speeds. The
 residual reflex controller improves overall gait similarity and especially
 knee, ankle, and GRF components.}
 \label{fig:gait_score_bars}
 \end{figure}
 
 \subsection{Gait-Cycle Profiles at 1.2 m/s}
-Figure~\ref{fig:gait_profiles_12} shows the SCONE-style gait-cycle profiles at
+Figure~\ref{fig:gait_profiles_12} shows the reference-envelope gait-cycle profiles at
 the 1.2~m/s target speed. The residual reflex controller produced compact and
 consistent left--right gait cycles, with hip, knee, ankle, and GRF curves that
 closely followed the reference envelopes. By contrast, the end-to-end baseline
@@ -539,7 +540,7 @@ in the knee and GRF profiles.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.98\textwidth]{gait_analysis_residual_vs_e2e_1p2.png}}
-\caption{SCONE-style gait analysis at target speed 1.2~m/s. Blue and red
+\caption{Reference-envelope gait-cycle analysis at target speed 1.2~m/s. Blue and red
 curves denote left and right gait cycles, respectively; the black curve is the
 cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_12}
@@ -563,6 +564,7 @@ Lower values indicate more symmetric or more repeatable gait.}
 \small
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.12}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{l l r r r r r r}
 \toprule
 \textbf{Target} & \textbf{Method} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} & \textbf{Time CV} & \textbf{Length CV} \\
@@ -574,8 +576,15 @@ Lower values indicate more symmetric or more repeatable gait.}
 1.2 & Residual Reflex & 0.87 & 0.87 & 0.46 & 0.02 & 0.70 & 0.74 \\
 1.2 & End-to-End & 3.43 & 3.00 & 9.84 & 0.04 & 3.87 & 5.83 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
+
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{gait_symmetry_variability_bars.png}}
+\caption{Left--right waveform differences and stride variability across target speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
+\label{fig:symmetry_variability_bars}
+\end{figure}
 
 \subsection{Discussion}
 The results indicate that the main benefit of residual reflex learning is not
@@ -607,8 +616,8 @@ excitations, the learned policy modulates four selected reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
 space and preserves a structured neuromechanical prior within the control loop.
 
-Experiments in a SCONE/Hyfydy planar musculoskeletal model showed that the
-residual reflex controller produced gait cycles with higher SCONE gait analysis
+Experiments in a Hyfydy-based planar musculoskeletal model showed that the
+residual reflex controller produced gait cycles with higher reference-envelope gait-cycle
 scores than an end-to-end muscle-control baseline at 0.8, 1.0, and 1.2~m/s.
 The improvement was most evident in knee kinematics, ankle kinematics, and
 vertical GRF morphology. Additional cycle-level analysis showed lower
@@ -622,8 +631,8 @@ tests, and effort or metabolic-cost analysis using validated biomechanical
 energy models.
 
 \section*{Acknowledgment}
-The authors would like to thank the developers of SCONE and Hyfydy for making
-musculoskeletal simulation tools available for locomotion research.
+The authors would like to thank the developers of musculoskeletal simulation
+tools used in this work.
 
 \begin{thebibliography}{00}
 \bibitem{geyer2010}
@@ -632,10 +641,6 @@ legged mechanics produces human walking dynamics and muscle activities,''
 \textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
 vol. 18, no. 3, pp. 263--273, 2010.
 
-\bibitem{scone2019}
-T. Geijtenbeek, ``SCONE: Open source software for predictive simulation of
-biological motion,'' \textit{Journal of Open Source Software}, vol. 4, no. 38,
-Art. no. 1421, 2019.
 
 \bibitem{deprl2023}
 F. Paulus, L. N. Haab, T. Geng, C. Pinneri, N. Reimers, S. Schmitt, and
