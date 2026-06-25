@@ -58,13 +58,14 @@ actions. The policy therefore operates in a compact reflex-parameter space
 while preserving the biomechanical feedback structure embedded in the
 reflex controller. The pipeline is validated in a Hyfydy-based planar
 musculoskeletal model using target-speed walking tasks at 0.8, 1.0, and
-1.2~m/s. The proposed controller is compared with an end-to-end baseline
-that directly controls muscle-level actions. Although the end-to-end
-baseline can generate walking motions, its normalized gait-cycle profiles
-show substantial deviations from reference gait, especially in knee
-kinematics and vertical ground reaction force. In contrast, the residual
-reflex controller achieves higher reference-envelope gait-cycle scores across the
-tested speeds and produces more symmetric and repeatable gait cycles. These
+1.2~m/s. The proposed controller is compared with two direct-control baselines:
+an end-to-end muscle-control policy and an end-to-end policy augmented with
+DEP-style exploratory feedback. Although the direct-control baselines can
+generate walking motions, their normalized gait-cycle profiles show substantial
+deviations from reference gait, especially in knee kinematics and vertical
+ground reaction force. In contrast, the residual reflex controller achieves
+higher reference-envelope gait-cycle scores across the tested speeds and
+produces more symmetric and repeatable gait cycles. These
 results suggest that reducing the effective action space through residual
 reflex modulation can improve the physiological plausibility of learned
 musculoskeletal walking.
@@ -125,8 +126,8 @@ The main contributions of this letter are as follows:
     musculoskeletal gait generation. The learned policy modulates four selected
     reflex parameters instead of directly commanding all muscle excitations.
     \item The proposed pipeline is implemented in a Hyfydy-based planar
-    musculoskeletal environment and compared with an end-to-end muscle-level
-    DRL baseline on controlled walking tasks.
+    musculoskeletal environment and compared with end-to-end muscle-level
+    direct-control baselines on controlled walking tasks.
     \item The learned gaits are evaluated using normalized gait-cycle
     kinematics and vertical ground reaction force (GRF) profiles. The results
     show that residual reflex modulation improves reference gait-cycle similarity,
@@ -259,10 +260,10 @@ DRL toward more natural gait than direct muscle-level control.
 \subsection{Policy Learning}
 The policy is trained with Maximum a Posteriori Policy Optimization (MPO), an
 off-policy actor--critic algorithm for continuous control. The same optimizer
-is used for both the proposed residual-reflex controller and the end-to-end
-baseline. Therefore, the main experimental comparison isolates the control
-representation: low-dimensional reflex-parameter modulation versus direct
-muscle-level action.
+is used across the compared policies. Therefore, the main experimental
+comparison isolates the control representation: low-dimensional
+reflex-parameter modulation versus direct muscle-level action, with and without
+DEP-style exploratory feedback.
 
 At each time step, the policy samples an action from a Gaussian action
 distribution conditioned on $\mathbf{s}_t$. The action is applied to the
@@ -301,15 +302,13 @@ rectus femoris (FEM). Foot--ground contact elements are used to compute
 vertical ground reaction forces for gait analysis.
 
 \subsubsection{Compared Control Interfaces}
-Two DRL policy interfaces were compared. The proposed \emph{Residual Reflex}
+Three DRL policy interfaces were compared. The proposed \emph{Residual Reflex}
 controller uses the four-dimensional reflex-parameter action space described in
-Table~\ref{tab:residual_actions}. The baseline controller is an
-\emph{End-to-End} muscle-control policy without the reflex modulation
-structure. It directly outputs muscle-level control actions for the same
-musculoskeletal model. Both controllers were trained with MPO-based off-policy
-reinforcement learning. The current experiments do not use DEP; DEP-RL is
-discussed as related work because it motivates the difficulty of
-high-dimensional musculoskeletal action spaces.
+Table~\ref{tab:residual_actions}. The \emph{End-to-End} baseline directly
+outputs muscle-level control actions without reflex modulation. A second
+\emph{End-to-End + DEP} baseline uses the same direct muscle-level action space
+with DEP-style exploratory feedback. All policies were trained with MPO-based
+off-policy reinforcement learning on the same musculoskeletal model.
 
 \begin{table}[!t]
 \centering
@@ -324,6 +323,7 @@ high-dimensional musculoskeletal action spaces.
 \midrule
 Residual Reflex & 4 & Residual modulation of selected reflex parameters. \\
 End-to-End & 18 & Direct muscle-level control actions. \\
+End-to-End + DEP & 18 & Direct muscle-level control with DEP-style exploratory feedback. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -415,7 +415,13 @@ morphology, symmetry/repeatability, and complete gait-cycle visualization.
 
 \subsection{Speed Tracking and Stride Measures}
 Table~\ref{tab:spatiotemporal_metrics} reports realized speed, absolute speed
-error, stride length, stride time, and the number of analyzed gait cycles. Both controllers generated forward walking near the commanded speeds, showing that the comparison is made between policies that can complete the target-speed walking task. The end-to-end baseline tended to produce shorter stride times and, at lower speeds, shorter stride lengths, whereas the residual reflex controller generated longer and more regular strides. These task-level metrics establish task completion before gait naturalness is evaluated.
+error, stride length, stride time, and the number of analyzed gait cycles. All
+three policies generated forward walking near the commanded speeds, showing
+that the comparison is made between policies that can complete the target-speed
+walking task. The direct-control baselines generally produced less consistent
+stride measures, whereas the residual reflex controller generated longer and
+more regular strides. These task-level metrics establish task completion before
+gait naturalness is evaluated.
 
 \begin{table}[!t]
 \centering
@@ -433,10 +439,13 @@ speed.}
 \midrule
 0.8 & Residual Reflex & 0.79 & \textbf{0.01} & 0.99 & 1.26 & 35 \\
 0.8 & End-to-End & 0.87 & 0.07 & 0.78 & 0.89 & 50 \\
+0.8 & End-to-End + DEP & 0.83 & 0.03 & 1.09 & 1.31 & 33 \\
 1.0 & Residual Reflex & 1.05 & 0.05 & 1.23 & 1.17 & 37 \\
 1.0 & End-to-End & 1.01 & \textbf{0.01} & 0.87 & 0.87 & 53 \\
+1.0 & End-to-End + DEP & 1.14 & 0.14 & 1.29 & 1.13 & 39 \\
 1.2 & Residual Reflex & 1.21 & \textbf{0.01} & 1.34 & 1.11 & 40 \\
 1.2 & End-to-End & 1.26 & 0.06 & 1.23 & 0.97 & 46 \\
+1.2 & End-to-End + DEP & 1.30 & 0.10 & 1.37 & 1.06 & 42 \\
 \bottomrule
 \end{tabular}%
 }
@@ -452,17 +461,17 @@ the gait pattern used to achieve the target speed.}
 
 \subsection{Reference-Based Gait Naturalness}
 Table~\ref{tab:gait_similarity} summarizes the reference-envelope gait-cycle
-scores for Residual Reflex and End-to-End controllers. Across the three matched
-target speeds, the proposed residual reflex controller achieved higher
-reference-based gait naturalness than the end-to-end baseline. The average
-overall score over the three speeds was 89.9\% for Residual Reflex and 63.7\%
-for End-to-End. Fig.~\ref{fig:gait_score_bars} visualizes the main component
-scores and shows that the largest improvements appear in knee kinematics and
-vertical GRF morphology. At 0.8~m/s, the end-to-end ankle score drops to zero
-because the averaged ankle trajectory lies outside the reference envelope for a
-large portion of the gait cycle. These results indicate that completing the
-speed-tracking task does not necessarily imply reference-consistent joint and
-contact dynamics.
+scores for the three policy interfaces. Across the three target speeds, the
+proposed residual reflex controller achieved the highest overall
+reference-based gait naturalness. The average overall score over the three
+speeds was 89.9\% for Residual Reflex, 63.7\% for End-to-End, and 51.3\% for
+End-to-End + DEP. Fig.~\ref{fig:gait_score_bars} visualizes the main component
+scores and shows that the largest residual-reflex improvements appear in knee
+kinematics, ankle kinematics, and vertical GRF morphology. DEP improved the
+0.8~m/s end-to-end knee score, but it did not consistently improve overall gait
+naturalness, especially at higher speeds where the GRF score collapsed.
+These results indicate that completing the speed-tracking task does not
+necessarily imply reference-consistent joint and contact dynamics.
 
 \begin{table}[!t]
 \centering
@@ -480,10 +489,13 @@ vertical GRF.}
 \midrule
 0.8 & Residual Reflex & 0.79 & \textbf{84.2} & 96.6 & \textbf{68.9} & \textbf{78.5} & \textbf{76.7} \\
 0.8 & End-to-End & 0.87 & 50.5 & \textbf{98.3} & 18.6 & 0.0 & 35.9 \\
+0.8 & End-to-End + DEP & 0.83 & 54.4 & 72.7 & 50.8 & 8.7 & 39.8 \\
 1.0 & Residual Reflex & 1.05 & \textbf{92.3} & \textbf{100.0} & \textbf{82.6} & \textbf{88.9} & \textbf{89.8} \\
 1.0 & End-to-End & 1.01 & 70.9 & 99.9 & 45.4 & 61.5 & 48.0 \\
+1.0 & End-to-End + DEP & 1.14 & 55.1 & 62.5 & 64.2 & 48.7 & 0.0 \\
 1.2 & Residual Reflex & 1.21 & \textbf{93.2} & \textbf{99.6} & \textbf{88.7} & \textbf{88.6} & \textbf{89.1} \\
 1.2 & End-to-End & 1.26 & 69.6 & 88.4 & 52.4 & 85.9 & 21.5 \\
+1.2 & End-to-End + DEP & 1.30 & 44.5 & 44.5 & 33.4 & 44.5 & 0.0 \\
 \bottomrule
 \end{tabular}%
 }
@@ -492,43 +504,48 @@ vertical GRF.}
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
 \caption{Reference-based gait naturalness scores across target speeds. Numeric
-labels indicate the score of each bar. The residual reflex controller improves
-the overall score and especially knee, ankle, and GRF components.}
+labels indicate the score of each bar. The residual reflex controller achieves
+the highest overall score and especially improves knee, ankle, and GRF
+components.}
 \label{fig:gait_score_bars}
 \end{figure}
 
 Figures~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12} show the
 normalized kinematic gait-cycle profiles used to interpret these scores. They
 show where each controller follows or deviates from the reference envelopes
-across hip, knee, and ankle profiles. The residual reflex
+across pelvic tilt, hip, knee, and ankle profiles. The residual reflex
 controller produced compact and consistent left--right gait cycles across
-speeds, whereas the end-to-end baseline showed larger cycle-to-cycle variation,
-especially in the knee and ankle profiles. The smoother residual-reflex
-kinematic profiles are consistent with the higher knee and ankle scores in
-Table~\ref{tab:gait_similarity}. The GRF component is analyzed separately in
-the next subsection.
+speeds, whereas both direct-control baselines showed larger cycle-to-cycle
+variation or larger deviations from the reference envelopes, especially in the
+knee and ankle profiles. The smoother residual-reflex kinematic profiles are
+consistent with the higher knee and ankle scores in
+Table~\ref{tab:gait_similarity}. The GRF component is analyzed separately in the
+next subsection.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
-\caption{Reference-envelope kinematic gait-cycle visualization at target speed 0.8~m/s.
-Blue and red curves denote left and right gait cycles, respectively; the black
-curve is the cycle average and the gray band is the reference envelope.}
+\caption{Reference-envelope kinematic gait-cycle visualization at target speed
+0.8~m/s for Residual Reflex, End-to-End, and End-to-End + DEP. Blue and red
+curves denote left and right gait cycles, respectively; the black curve is the
+cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_08}
 \end{figure}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_1p0.png}}
-\caption{Reference-envelope kinematic gait-cycle visualization at target speed 1.0~m/s.
-Blue and red curves denote left and right gait cycles, respectively; the black
-curve is the cycle average and the gray band is the reference envelope.}
+\caption{Reference-envelope kinematic gait-cycle visualization at target speed
+1.0~m/s for Residual Reflex, End-to-End, and End-to-End + DEP. Blue and red
+curves denote left and right gait cycles, respectively; the black curve is the
+cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_10}
 \end{figure}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_1p2.png}}
-\caption{Reference-envelope kinematic gait-cycle visualization at target speed 1.2~m/s.
-Blue and red curves denote left and right gait cycles, respectively; the black
-curve is the cycle average and the gray band is the reference envelope.}
+\caption{Reference-envelope kinematic gait-cycle visualization at target speed
+1.2~m/s for Residual Reflex, End-to-End, and End-to-End + DEP. Blue and red
+curves denote left and right gait cycles, respectively; the black curve is the
+cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_12}
 \end{figure}
 
@@ -537,31 +554,31 @@ Because ground reaction force reflects how the controller loads and unloads the
 body during stance, we further examine the vertical GRF profiles separately in
 Fig.~\ref{fig:grf_morphology}. The residual reflex controller produced smoother
 stance-phase force profiles that remained closer to the reference envelope
-across the tested speeds. In contrast, the end-to-end baseline often generated
-less regular loading patterns, including sharper early-stance peaks or reduced
-late-stance support. This difference is consistent with the component scores in
+across the tested speeds. In contrast, both direct-control baselines generated
+less regular loading patterns, including sharper early-stance peaks, reduced
+late-stance support, or force profiles outside the reference envelope. This
+difference is consistent with the component scores in
 Table~\ref{tab:gait_similarity}, where the residual reflex controller achieved
-higher GRF scores at all three speeds.
+higher GRF scores than both direct-control baselines at all three speeds.
 
-\begin{figure*}[!t]
-\centerline{\includegraphics[width=0.95\textwidth]{grf_morphology_comparison.png}}
-\caption{Vertical GRF morphology across target speeds. Blue and red thin
-curves show individual left and right normalized gait cycles, respectively;
-the black curve denotes the cycle mean, the gray band denotes the reference
-envelope used for post-hoc evaluation, and the panel annotations report the
-GRF reference-envelope score.}
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{grf_morphology_comparison.png}}
+\caption{Vertical GRF morphology across target speeds for Residual Reflex,
+End-to-End, and End-to-End + DEP. Blue and red thin curves show individual left
+and right normalized gait cycles, respectively; the black curve denotes the
+cycle mean, the gray band denotes the reference envelope used for post-hoc
+evaluation, and the panel annotations report the GRF reference-envelope score.}
 \label{fig:grf_morphology}
-\end{figure*}
+\end{figure}
 
 \subsection{Symmetry and Repeatability}
 Table~\ref{tab:symmetry_variability} reports left--right waveform differences
 and stride variability. The residual reflex controller consistently produced
-lower left--right RMSE and lower stride time/length CV than the end-to-end
-baseline. This supports the qualitative observation that the residual reflex
-policy generates a more regular and bilaterally symmetric gait pattern. We
-therefore use the term gait regularity or gait symmetry rather than perturbation
-robustness, since no external perturbation experiments are included in the
-current evaluation.
+lower left--right RMSE and lower stride time/length CV than both direct-control
+baselines. DEP reduced stride variability relative to the end-to-end baseline in
+some cases, but it did not improve bilateral waveform symmetry. This supports
+the qualitative observation that the residual reflex policy generates a more
+regular and bilaterally symmetric gait pattern.
 
 \begin{table}[!t]
 \centering
@@ -578,10 +595,13 @@ Lower values indicate more symmetric or more repeatable gait.}
 \midrule
 0.8 & Residual Reflex & \textbf{0.80} & \textbf{1.03} & \textbf{0.89} & \textbf{0.04} & \textbf{1.98} & \textbf{5.66} \\
 0.8 & End-to-End & 2.92 & 5.75 & 6.36 & 0.10 & 9.05 & 14.88 \\
+0.8 & End-to-End + DEP & 11.20 & 11.73 & 11.59 & 0.12 & 7.96 & 11.04 \\
 1.0 & Residual Reflex & \textbf{1.78} & \textbf{1.85} & \textbf{0.97} & \textbf{0.03} & \textbf{1.51} & \textbf{1.86} \\
 1.0 & End-to-End & 2.97 & 4.08 & 2.18 & 0.08 & 6.05 & 8.27 \\
+1.0 & End-to-End + DEP & 4.54 & 10.12 & 16.27 & 0.28 & 2.62 & 5.27 \\
 1.2 & Residual Reflex & \textbf{0.87} & \textbf{0.87} & \textbf{0.46} & \textbf{0.02} & \textbf{0.70} & \textbf{0.74} \\
 1.2 & End-to-End & 3.43 & 3.00 & 9.84 & 0.04 & 3.87 & 5.83 \\
+1.2 & End-to-End + DEP & 8.33 & 5.83 & 6.31 & 0.34 & 2.29 & 4.78 \\
 \bottomrule
 \end{tabular}%
 }
