@@ -491,9 +491,33 @@ an STO file and analyzed using the reference-envelope gait-cycle analysis
 procedure.
 The gait cycle was normalized to 0--100\%, and the following profiles were
 computed for both legs: pelvic tilt, hip angle, knee angle, ankle angle, and
-vertical GRF. The gait-cycle score measures whether the mean simulated profile
-lies within the reference gait envelope; higher values indicate closer
-agreement with reference gait.
+vertical GRF. The reference envelopes were obtained from a gait-analysis
+template containing normative lower and upper bounds for each normalized
+gait-cycle profile. For each quantity, all detected left and right gait cycles
+were first time-normalized and averaged to obtain a mean simulated profile
+$\bar{y}(x)$, where $x$ denotes gait-cycle percentage. Let
+$y_{\min}(x_k)$ and $y_{\max}(x_k)$ denote the lower and upper reference
+envelope values at the template sample points $x_k$. The normalized envelope
+violation is computed as
+\begin{equation}
+e = \frac{1}{N}\sum_{k=1}^{N}
+\frac{
+\left[y_{\min}(x_k)-\bar{y}(x_k)\right]_+
++ \left[\bar{y}(x_k)-y_{\max}(x_k)\right]_+
+}{
+\max\left(0.01, y_{\max}(x_k)-y_{\min}(x_k)\right)
+}.
+\end{equation}
+where $[z]_+=\max(z,0)$.
+The corresponding gait-cycle score is then defined as
+\begin{equation}
+S = 100 \cdot \mathrm{clip}(1-e,0,1).
+\end{equation}
+Thus, a score of 100 indicates that the averaged trajectory stays entirely
+within the reference envelope, whereas lower scores indicate larger normalized
+deviations from the reference gait pattern. The overall score is the average
+of the component scores for pelvic tilt, hip angle, knee angle, ankle angle,
+and vertical GRF.
 
 In addition to the gait-cycle component scores, we computed two descriptive gait
 quality measures from the detected gait cycles. First, left--right waveform
