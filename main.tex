@@ -482,6 +482,9 @@ loading. E2E-RL retained relatively high hip scores, and in some cases high
 ankle scores, but its knee and GRF scores were much less consistent. DEP-RL did
 not improve this pattern in the present validation data; its overall score was
 lower than E2E-RL at 1.0 and 1.2~m/s, mainly because of poor GRF agreement.
+Scores close to zero indicate that the averaged profile lies outside the
+reference envelope over most of the normalized gait cycle, rather than a small
+localized deviation.
 This contrast is important because E2E-RL and DEP-RL can complete the
 speed-tracking task, yet their gait cycles can still deviate substantially from
 reference kinematics and contact dynamics.
@@ -575,8 +578,11 @@ abnormal or inconsistent loading despite visually plausible joint postures in
 some snapshots; this explains why its GRF scores were much lower than its hip
 or ankle scores. DEP-RL produced even larger early-stance peaks and
 stride-to-stride fluctuations at 1.0 and 1.2~m/s, leading to near-zero GRF
-agreement in those cases. Residual-Reflex RL avoided these sharp loading
-transients and achieved the highest GRF scores at all three speeds.
+agreement in those cases. In the GRF metric, a score of 0.0 means that the mean
+force profile stays outside the reference envelope after normalization, which
+matches the large impact-like peaks and irregular unloading visible in the DEP-RL
+panels. Residual-Reflex RL avoided these sharp loading transients and achieved
+the highest GRF scores at all three speeds.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{grf_morphology_comparison.png}}
@@ -637,15 +643,25 @@ speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
 
 \subsection{Qualitative Gait Visualization}
 The qualitative snapshots in Fig.~\ref{fig:qualitative_snapshots} give an
-intuitive view of the same result at the body posture level. E2E-RL can produce
-postures that appear broadly plausible in isolated frames, which is consistent
-with its relatively high hip and ankle scores at 1.2~m/s. However, the low GRF
-score indicates that the contact loading pattern is not reference-consistent,
-matching the less smooth motion observed in the synchronized video. DEP-RL
-shows larger deviations in both joint coordination and GRF morphology. In
-contrast, Residual-Reflex RL combines high joint-angle scores with high GRF
-scores, leading to a more regular posture progression over the sampled gait
-cycle.
+intuitive view of the same result at the body posture level. E2E-RL appears
+reasonable at first glance: the trunk remains upright, and the 0--100\% sequence
+contains recognizable stance and swing postures. This visual plausibility is
+consistent with its relatively high hip and ankle scores at 1.2~m/s. However,
+the motion is less convincing when interpreted together with the GRF result.
+The limb postures do not necessarily imply a smooth transfer of body weight, and
+the low GRF score indicates that the contact loading pattern is not
+reference-consistent.
+
+DEP-RL shows the clearest qualitative deviations. Around 25\% of the sampled
+cycle, the body posture appears pitched forward and the swing leg is lifted with
+a less natural knee--ankle configuration. Around 75\%, the limb configuration is
+again less coordinated, with the leg appearing to advance without a smooth
+stance-to-swing transition. These snapshots are consistent with the lower knee,
+ankle, and GRF scores of DEP-RL, and with the irregular force profiles observed
+in Fig.~\ref{fig:grf_morphology}. In contrast, Residual-Reflex RL maintains a
+more upright trunk and a more gradual progression from stance to swing across
+the sampled cycle. Its posture sequence is not only visually smoother, but also
+supported quantitatively by high joint-angle scores and high GRF agreement.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
