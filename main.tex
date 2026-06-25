@@ -391,17 +391,24 @@ D_y =
 \sqrt{\frac{1}{N}\sum_{k=1}^{N}
 \left(\bar{y}_{L}(x_k)-\bar{y}_{R}(x_k)\right)^2},
 \end{equation}
-where $\bar{y}_{L}$ and $\bar{y}_{R}$ are the average left- and right-side
-profiles. Stride-to-stride repeatability was quantified using the coefficient
-of variation (CV) of stride time and stride length:
+where $y$ denotes a normalized gait-cycle waveform, $x_k$ is the $k$th
+gait-cycle sample, $N$ is the number of samples in the normalized gait cycle,
+and $\bar{y}_{L}$ and $\bar{y}_{R}$ are the average left- and right-side
+profiles computed over the analyzed cycles. Stride-to-stride repeatability was
+quantified using the coefficient of variation (CV) of stride time and stride
+length:
 \begin{equation}
 \mathrm{CV}_{z}=100\frac{\sigma_z}{\mu_z},
 \end{equation}
-where $z$ denotes either stride time or stride length, and $\mu_z$ and
-$\sigma_z$ are its mean and standard deviation over the analyzed gait cycles.
-Lower waveform differences and lower CV values indicate more symmetric and
-more repeatable gait. These measures describe gait regularity rather than
-external perturbation robustness.
+where $z$ denotes either stride time or stride length, $\mu_z$ is the mean
+value of $z$, and $\sigma_z$ is its standard deviation over the analyzed gait
+cycles. The factor 100 expresses CV as a percentage. In the results,
+$D_y$ is used to compare left--right waveform symmetry for each gait-cycle
+quantity, whereas $\mathrm{CV}_z$ is used to compare stride-to-stride
+repeatability of timing and step length. Lower $D_y$ indicates more symmetric
+left--right motion, and lower $\mathrm{CV}_z$ indicates more repeatable gait
+cycles. These measures describe gait regularity rather than external
+perturbation robustness.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
@@ -458,10 +465,13 @@ scores for Residual Reflex and End-to-End controllers. Across the three matched
 target speeds, the proposed residual reflex controller achieved higher
 reference-based gait naturalness than the end-to-end baseline. The average
 overall score over the three speeds was 89.9\% for Residual Reflex and 63.7\%
-for End-to-End. The largest improvements appeared in knee kinematics and
-vertical GRF morphology, which are two components where the end-to-end baseline
-often produced walking motions that completed the task but deviated strongly
-from reference gait.
+for End-to-End. Fig.~\ref{fig:gait_score_bars} visualizes the main component
+scores and shows that the largest improvements appear in knee kinematics and
+vertical GRF morphology. At 0.8~m/s, the end-to-end ankle score drops to zero
+because the averaged ankle trajectory lies outside the reference envelope for a
+large portion of the gait cycle. These results indicate that completing the
+speed-tracking task does not necessarily imply reference-consistent joint and
+contact dynamics.
 
 \begin{table}[!t]
 \centering
@@ -490,9 +500,9 @@ vertical GRF.}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
-\caption{Reference-based gait naturalness scores across target speeds. The
-residual reflex controller improves the overall score and especially knee,
-ankle, and GRF components.}
+\caption{Reference-based gait naturalness scores across target speeds. Numeric
+labels indicate the score of each bar. The residual reflex controller improves
+the overall score and especially knee, ankle, and GRF components.}
 \label{fig:gait_score_bars}
 \end{figure}
 
@@ -502,8 +512,10 @@ show where each controller follows or deviates from the reference envelopes
 across hip, knee, and ankle profiles. The residual reflex
 controller produced compact and consistent left--right gait cycles across
 speeds, whereas the end-to-end baseline showed larger cycle-to-cycle variation,
-especially in the knee profile. The GRF component is analyzed separately in the
-next subsection.
+especially in the knee and ankle profiles. The smoother residual-reflex
+kinematic profiles are consistent with the higher knee and ankle scores in
+Table~\ref{tab:gait_similarity}. The GRF component is analyzed separately in
+the next subsection.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.98\textwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
