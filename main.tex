@@ -269,7 +269,11 @@ controller, the simulator advances one step, and the transition
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored for off-policy
 updates. The base reward combines target-speed tracking with regularization
 terms for excessive contact load, abrupt excitation changes, muscle usage,
-joint-limit torques, and unwanted self-contact:
+joint-limit torques, and unwanted self-contact. Specifically, $r_{vel}$ rewards
+target-speed tracking, $r_{grf}$ penalizes excessive ground reaction force,
+$r_{smooth}$ penalizes abrupt changes in muscle excitation, $r_{musc}$
+penalizes excessive muscle recruitment, $r_{constr}$ penalizes joint-limit
+torques, and $r_{self}$ penalizes non-foot self-contact:
 \begin{equation}
 \begin{aligned}
 r_t^{base} =\,
@@ -283,9 +287,10 @@ regularization terms are included:
 r_t = r_t^{base} + w_{\theta}r_{\theta}
 +w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
 \end{equation}
-Here, $r_{\theta}$ and $r_{\dot{\theta}}$ penalize deviations of pelvis pitch
-and pitch rate, $r_{com}$ penalizes vertical center-of-mass velocity, and
-$r_{\Delta a}$ penalizes rapid changes in the residual reflex action. Some
+Here, $r_{\theta}$ penalizes deviation from the target pelvis pitch,
+$r_{\dot{\theta}}$ penalizes pelvis pitch rate, $r_{com}$ penalizes excessive
+vertical or non-forward center-of-mass velocity, and $r_{\Delta a}$ penalizes
+rapid changes in the residual reflex action. Some
 terms may have zero weight in a given experiment; the fixed-speed experiments
 reported here used the same base reward structure for the residual-reflex and
 end-to-end policies, with the additional posture and residual-action
