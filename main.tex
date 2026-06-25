@@ -340,9 +340,10 @@ an STO file and analyzed using the reference-envelope gait-cycle analysis
 procedure.
 The gait cycle was normalized to 0--100\%, and the following profiles were
 computed for both legs: pelvic tilt, hip angle, knee angle, ankle angle, and
-vertical GRF. The reference envelopes were obtained from a gait-analysis
-template containing normative lower and upper bounds for each normalized
-gait-cycle profile. For each quantity, all detected left and right gait cycles
+vertical GRF. The reference envelopes were obtained from the gait-analysis
+template used for post-hoc evaluation, which provides normative lower and upper
+bounds for each normalized gait-cycle profile. These envelopes were not used
+during policy training. For each quantity, all detected left and right gait cycles
 were first time-normalized and averaged to obtain a mean simulated profile
 $\bar{y}(x)$, where $x$ denotes gait-cycle percentage. Let
 $y_{\min}(x_k)$ and $y_{\max}(x_k)$ denote the lower and upper reference
