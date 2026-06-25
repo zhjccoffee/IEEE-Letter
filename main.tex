@@ -394,21 +394,18 @@ D_y =
 where $y$ denotes a normalized gait-cycle waveform, $x_k$ is the $k$th
 gait-cycle sample, $N$ is the number of samples in the normalized gait cycle,
 and $\bar{y}_{L}$ and $\bar{y}_{R}$ are the average left- and right-side
-profiles computed over the analyzed cycles. Stride-to-stride repeatability was
-quantified using the coefficient of variation (CV) of stride time and stride
-length:
+profiles computed over the analyzed cycles. In the results, lower $D_y$
+indicates more symmetric left--right motion.
+
+Stride-to-stride repeatability was quantified using the coefficient of
+variation (CV) of stride time and stride length:
 \begin{equation}
 \mathrm{CV}_{z}=100\frac{\sigma_z}{\mu_z},
 \end{equation}
 where $z$ denotes either stride time or stride length, $\mu_z$ is the mean
 value of $z$, and $\sigma_z$ is its standard deviation over the analyzed gait
-cycles. The factor 100 expresses CV as a percentage. In the results,
-$D_y$ is used to compare left--right waveform symmetry for each gait-cycle
-quantity, whereas $\mathrm{CV}_z$ is used to compare stride-to-stride
-repeatability of timing and step length. Lower $D_y$ indicates more symmetric
-left--right motion, and lower $\mathrm{CV}_z$ indicates more repeatable gait
-cycles. These measures describe gait regularity rather than external
-perturbation robustness.
+cycles. The factor 100 expresses CV as a percentage. In the results, lower
+$\mathrm{CV}_z$ indicates more repeatable gait cycles.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
@@ -517,29 +514,29 @@ kinematic profiles are consistent with the higher knee and ankle scores in
 Table~\ref{tab:gait_similarity}. The GRF component is analyzed separately in
 the next subsection.
 
-\begin{figure*}[!t]
-\centerline{\includegraphics[width=0.98\textwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
 \caption{Reference-envelope kinematic gait-cycle visualization at target speed 0.8~m/s.
 Blue and red curves denote left and right gait cycles, respectively; the black
 curve is the cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_08}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}[!t]
-\centerline{\includegraphics[width=0.98\textwidth]{gait_analysis_residual_vs_e2e_1p0.png}}
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_1p0.png}}
 \caption{Reference-envelope kinematic gait-cycle visualization at target speed 1.0~m/s.
 Blue and red curves denote left and right gait cycles, respectively; the black
 curve is the cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_10}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}[!t]
-\centerline{\includegraphics[width=0.98\textwidth]{gait_analysis_residual_vs_e2e_1p2.png}}
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_1p2.png}}
 \caption{Reference-envelope kinematic gait-cycle visualization at target speed 1.2~m/s.
 Blue and red curves denote left and right gait cycles, respectively; the black
 curve is the cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_12}
-\end{figure*}
+\end{figure}
 
 \subsection{GRF Morphology}
 Because ground reaction force reflects how the controller loads and unloads the
