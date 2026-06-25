@@ -441,6 +441,23 @@ output. In the current implementation, the four modulated parameters are the
 hamstrings length gain, iliopsoas reference length, soleus force gain, and
 vasti force gain.
 
+These four parameters were selected because they affect distinct and
+biomechanically important parts of the gait cycle while keeping the learned
+action space low-dimensional. The hamstrings length feedback is related to hip
+extension control and swing-to-stance transition, and therefore influences leg
+deceleration and preparation for foot contact. The iliopsoas reference length
+affects hip flexor recruitment and contributes to swing initiation and foot
+clearance. The soleus force feedback is associated with ankle plantarflexor
+support and forward propulsion during stance, which strongly influences the
+vertical GRF profile. The vasti force feedback contributes to knee extension
+and load-bearing during early stance, directly affecting knee stability and the
+shape of the stance-phase knee trajectory. Together, these parameters cover
+hip, knee, and ankle contributions to both limb advancement and stance support.
+They were therefore chosen as a representative residual action set for testing
+whether DRL can improve gait quality by modulating a small number of
+interpretable reflex pathways, rather than as a claim that this set is globally
+optimal.
+
 The baseline controller is an \emph{End-to-End} muscle-control policy without
 the reflex modulation structure. It directly outputs muscle-level control
 actions for the same musculoskeletal model. Both controllers were trained with
