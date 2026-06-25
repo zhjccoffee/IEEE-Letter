@@ -1,48 +1,33 @@
-\documentclass[journal,twoside,web]{ieeecolor}
-\usepackage{generic}
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \usepackage{hyperref}
 \hypersetup{hidelinks=true}
 \usepackage{textcomp}
 \usepackage{array}
+\usepackage{tabularx} 
+\usepackage{multirow}
+\usepackage{booktabs}
 
 
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-  % 左对齐+自动伸缩
 
-\usepackage{tabularx} 
-\usepackage{multirow}
-\usepackage{booktabs}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-\markboth{\hskip25pc LOW-DIMENSIONAL REFLEX-INFORMED DRL FOR GAIT}
-{Author \MakeLowercase{\textit{et al.}}: Low-Dimensional Reflex-Informed DRL for Musculoskeletal Gait}
 \begin{document}
-\title{Low-Dimensional Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation}
-\author{First A. Author, \IEEEmembership{Fellow, IEEE}, Second B. Author, and Third C. Author Jr., \IEEEmembership{Member, IEEE}
-\thanks{This paragraph of the first footnote will contain the date on 
-which you submitted your paper for review. It will also contain support 
-information, including sponsor and financial support acknowledgment. For 
-example, ``This work was supported in part by the U.S. Department of 
-Commerce under Grant 123456.'' }
-\thanks{The next few paragraphs should contain 
-the authors' current affiliations, including current address and e-mail. For 
-example, First A. Author is with the National Institute of Standards and 
-Technology, Boulder, CO 80305 USA (e-mail: author@boulder.nist.gov). }
-\thanks{Second B. Author Jr. was with Rice University, Houston, TX 77005 USA. He is 
-now with the Department of Physics, Colorado State University, Fort Collins, 
-CO 80523 USA (e-mail: author@lamar.colostate.edu).}
-\thanks{Third C. Author is with 
-the Electrical Engineering Department, University of Colorado, Boulder, CO 
-80309 USA, on leave from the National Research Institute for Metals, 
-Tsukuba, Japan (e-mail: author@nrim.go.jp).}}
+\title{\LARGE \bf
+Low-Dimensional Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation
+}
+\author{Anonymous Authors}
 
 \maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
 
 \begin{abstract}
 Deep reinforcement learning (DRL) has shown promise for controlling
@@ -71,16 +56,14 @@ reflex modulation can improve the physiological plausibility of learned
 musculoskeletal walking.
 \end{abstract}
 
-\begin{IEEEkeywords}
-Deep reinforcement learning, gait generation, musculoskeletal simulation,
-reflex control, residual reinforcement learning.
-\end{IEEEkeywords}
+\textbf{Keywords---}Deep reinforcement learning, gait generation,
+musculoskeletal simulation, reflex control, residual reinforcement learning.
 
 \section{Introduction}
 \label{sec:introduction}
 
-\IEEEPARstart{H}{uman} walking emerges from the interaction of neural
-feedback, muscle--tendon dynamics, skeletal mechanics, and foot--ground
+Human walking emerges from the interaction of neural feedback, muscle--tendon
+dynamics, skeletal mechanics, and foot--ground
 contact. Physics-based musculoskeletal models are therefore attractive for
 studying and synthesizing gait because they explicitly connect muscle
 activation to joint motion, contact loading, and whole-body movement
@@ -709,7 +692,7 @@ tools used in this work.
 
 \begin{thebibliography}{99}
 \bibitem{hyfydy}
-Hyfydy, ``Hyfydy: A physics engine for biomechanical simulation.'' [Online].
+T. Geijtenbeek, ``The Hyfydy simulation software,'' Nov. 2021. [Online].
 Available: https://hyfydy.com
 
 \bibitem{anderson2001}
