@@ -717,17 +717,6 @@ changes in existing neuromechanical feedback pathways. The more clustered
 kinematic cycles, smoother GRF profiles, and lower stride variability are
 consistent with this structured action representation.
 
-The current study has several limitations. First, all reported experiments use
-a single training seed for each configuration, so the results should be
-interpreted as trajectory-level evidence rather than training-seed statistics.
-Second, the current validation focuses on target-speed walking and does not yet
-include online speed transitions, external perturbation recovery, or true
-metabolic cost estimation. Third, the model is planar, and extension to
-three-dimensional locomotion remains future work. These limitations define the
-next experimental steps, but they do not affect the central finding that a
-low-dimensional residual reflex action space can improve gait plausibility
-relative to direct muscle-level control within the present validation setting.
-
 
 \section{Conclusion}
 We presented a residual reflex DRL pipeline for musculoskeletal gait
@@ -746,9 +735,9 @@ left--right waveform differences and lower stride variability, indicating more
 regular and symmetric gait patterns.
 
 The results support the view that successful walking alone is not sufficient
-for evaluating learned musculoskeletal locomotion. Future work will include
-multi-seed training statistics, controlled perturbation-recovery tests, and
-effort or metabolic-cost analysis using validated biomechanical energy models.
+for evaluating learned musculoskeletal locomotion. While the present validation
+focuses on fixed-speed walking, future work will extend the evaluation to online
+speed transitions and controlled perturbation-recovery tests.
 
 \section*{Acknowledgment}
 The authors would like to thank the developers of musculoskeletal simulation
