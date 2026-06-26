@@ -33,12 +33,13 @@ Low-Dimensional Reflex-Informed Deep Reinforcement Learning for Musculoskeletal 
 Deep reinforcement learning (DRL) has shown promise for controlling
 musculoskeletal locomotion, but direct muscle-level control requires
 exploration in a high-dimensional and highly redundant action space. This study
-investigates a low-dimensional reflex-informed DRL pipeline for musculoskeletal
-gait generation. Instead of directly commanding all muscle
-excitations, the proposed residual reflex pipeline uses an existing
+investigates Residual-Reflex RL, a low-dimensional reflex-informed DRL pipeline
+for musculoskeletal gait generation. Instead of directly commanding all muscle
+excitations, the proposed pipeline uses an existing
 reflex-based controller as a structured neuromechanical prior inspired by
-spinal sensory feedback pathways and trains a DRL policy to modulate four
-selected reflex parameters through residual actions. The policy therefore operates in a compact reflex-parameter space
+spinal sensory feedback pathways. A DRL policy then modulates four selected
+reflex parameters through residual actions and operates in a compact
+reflex-parameter space
 while preserving the biomechanical feedback structure embedded in the
 reflex controller. The pipeline is validated in a Hyfydy-based planar
 musculoskeletal model using target-speed walking tasks at 0.8, 1.0, and
@@ -48,8 +49,8 @@ exploration and DEP-RL with DEP-style embodied exploration. Although E2E-RL
 and DEP-RL can
 generate walking motions, their normalized gait-cycle profiles show substantial
 deviations from reference gait, especially in knee kinematics and vertical
-ground reaction force. In contrast, the residual reflex controller achieves
-higher reference-based gait-cycle similarity scores across the tested speeds and
+ground reaction force. In contrast, the Residual-Reflex RL controller achieves
+higher reference-envelope scores across the tested speeds and
 produces more symmetric and repeatable gait cycles. These
 results suggest that reducing the effective action space through residual
 reflex modulation can improve the physiological plausibility of learned
@@ -239,7 +240,7 @@ the underlying reflex controller, while nonzero actions produce state-dependent
 residual modulation.
 
 \begin{table}[!t]
-\caption{Selected Residual Reflex Actions}
+\caption{Selected Residual-Reflex Actions}
 \label{tab:residual_actions}
 \centering
 \resizebox{\columnwidth}{!}{
@@ -290,7 +291,7 @@ r_t^{base} =\,
 &+w_{musc}r_{musc}+w_{constr}r_{constr}+w_{self}r_{self}.
 \end{aligned}
 \end{equation}
-For the residual-reflex controller, additional terms regularize pelvis pitch
+For the Residual-Reflex RL controller, additional terms regularize pelvis pitch
 ($r_{\theta}$), pelvis pitch rate ($r_{\dot{\theta}}$), vertical
 center-of-mass velocity ($r_{com}$), and residual-action changes
 ($r_{\Delta a}$):
@@ -318,7 +319,7 @@ control actions, following the direct muscle-control setting
 commonly used in musculoskeletal DRL studies
 \cite{weng2021,devree2021,ogum2024}. \emph{DEP-RL}
 uses the same direct muscle-level action space, but adds DEP-style embodied
-exploration \cite{deprl2023}. The proposed \emph{Residual-Reflex RL} controller instead learns
+exploration \cite{deprl2023}. The proposed \emph{Residual-Reflex RL} controller learns
 four-dimensional residual actions that modulate the selected reflex parameters
 in Table~\ref{tab:residual_actions}. All policies were trained with MPO-based
 off-policy reinforcement learning on the same musculoskeletal model.
@@ -356,7 +357,7 @@ stride length and stride time describe the gait strategy used to achieve the
 target speed. The stride measures were computed from the detected gait cycles
 in each evaluated trajectory.
 
-\subsubsection{Reference-based gait similarity}
+\subsubsection{Reference-envelope gait analysis}
 To quantify whether the generated motion follows reference gait-cycle shapes,
 we computed reference-envelope scores for pelvic tilt, hip angle, knee angle,
 ankle angle, and vertical GRF. The gray reference envelopes in the profile
@@ -374,7 +375,7 @@ e = \frac{1}{N}\sum_{k=1}^{N}
 + \left[\bar{y}(x_k)-y_{\max}(x_k)\right]_+
 }{
 \max\left(0.01, y_{\max}(x_k)-y_{\min}(x_k)\right)
-}.
+},
 \end{equation}
 where $[z]_+=\max(z,0)$.
 The corresponding score is
@@ -473,12 +474,12 @@ speed.}
 }
 \end{table}
 
-\subsection{Reference-Based Gait Similarity}
+\subsection{Reference-Envelope Gait Analysis}
 The gait-cycle scores reveal a clearer separation between the three methods.
 As listed in Table~\ref{tab:gait_similarity}, Residual-Reflex RL achieved the highest
-overall reference-based gait similarity, with an average score of 89.9\%,
+overall reference-envelope score, with an average score of 89.9\%,
 compared with 64.9\% for E2E-RL and 51.3\% for DEP-RL. The main differences appear in the knee,
-ankle, and vertical GRF components, where the residual reflex controller more
+ankle, and vertical GRF components, where the Residual-Reflex RL controller more
 consistently preserved reference-like joint coordination and stance-phase
 loading. E2E-RL retained relatively high hip scores, and in some cases high
 ankle scores, but its knee and GRF scores were much less consistent. DEP-RL did
@@ -499,7 +500,7 @@ the full gait pattern is not reference-consistent.
 
 \begin{table}[!t]
 \centering
-\caption{Reference-based gait similarity scores in controlled walking
+\caption{Reference-envelope scores in controlled walking
 validation. Scores are computed from normalized gait-cycle kinematics and
 vertical GRF.}
 \label{tab:gait_similarity}
@@ -529,8 +530,8 @@ vertical GRF.}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
-\caption{Reference-based gait similarity scores across target speeds. Numeric
-labels indicate the score of each bar. The residual reflex controller achieves
+\caption{Reference-envelope scores across target speeds. Numeric
+labels indicate the score of each bar. The Residual-Reflex RL controller achieves
 the highest overall score and especially improves knee, ankle, and GRF
 components.}
 \label{fig:gait_score_bars}
@@ -550,7 +551,7 @@ trajectories clustered around the reference envelopes, while E2E-RL and DEP-RL
 showed larger deviations or more scattered cycles. These speed-dependent
 waveform observations are consistent with the knee and ankle scores in
 Table~\ref{tab:gait_similarity}.
-They also explain why the residual reflex controller looks more repeatable in
+They also explain why the Residual-Reflex RL controller looks more repeatable in
 animation: the blue and red gait cycles occupy a narrower region, meaning that
 successive steps and the two legs follow more similar trajectories. For the
 direct muscle-control methods, the larger spread indicates that different steps
@@ -719,15 +720,15 @@ consistent with this structured action representation.
 
 
 \section{Conclusion}
-We presented a residual reflex DRL pipeline for musculoskeletal gait
+We presented a Residual-Reflex RL pipeline for musculoskeletal gait
 generation. Rather than directly commanding all muscle
 excitations, the learned policy modulates four selected reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
 space and preserves a structured neuromechanical prior within the control loop.
 
 As an initial validation, experiments in a Hyfydy-based planar musculoskeletal
-model showed that the residual reflex controller produced gait cycles with
-higher reference-based gait-cycle similarity scores than E2E-RL and DEP-RL at
+model showed that the Residual-Reflex RL controller produced gait cycles with
+higher reference-envelope scores than E2E-RL and DEP-RL at
 0.8, 1.0, and 1.2~m/s.
 The improvement was most evident in knee kinematics, ankle kinematics, and
 vertical GRF morphology. Additional cycle-level analysis showed lower
@@ -738,10 +739,6 @@ The results support the view that successful walking alone is not sufficient
 for evaluating learned musculoskeletal locomotion. While the present validation
 focuses on fixed-speed walking, future work will extend the evaluation to online
 speed transitions and controlled perturbation-recovery tests.
-
-\section*{Acknowledgment}
-The authors would like to thank the developers of musculoskeletal simulation
-tools used in this work.
 
 \begin{thebibliography}{99}
 \bibitem{hyfydy}
