@@ -37,11 +37,10 @@ investigates Residual-Reflex RL, a low-dimensional reflex-informed DRL pipeline
 for musculoskeletal gait generation. Instead of directly commanding all muscle
 excitations, the proposed pipeline uses an existing
 reflex-based controller as a structured neuromechanical prior inspired by
-spinal sensory feedback pathways. A DRL policy then modulates four selected
-reflex parameters through residual actions and operates in a compact
-reflex-parameter space
-while preserving the biomechanical feedback structure embedded in the
-reflex controller. The pipeline is validated in a Hyfydy-based planar
+spinal sensory feedback pathways. A DRL policy then acts in a compact
+reflex-parameter space, applying residual modulation to a small set of
+gait-relevant feedback pathways while preserving the biomechanical structure
+embedded in the reflex controller. The pipeline is validated in a Hyfydy-based planar
 musculoskeletal model using target-speed walking tasks at 0.8, 1.0, and
 1.2~m/s. The proposed controller is compared with two direct muscle-control
 baselines: end-to-end reinforcement learning (E2E-RL) with standard policy
