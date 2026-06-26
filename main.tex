@@ -32,14 +32,13 @@ Low-Dimensional Reflex-Informed Deep Reinforcement Learning for Musculoskeletal 
 \begin{abstract}
 Deep reinforcement learning (DRL) has shown promise for controlling
 musculoskeletal locomotion, but direct muscle-level control requires
-exploration in a high-dimensional and highly redundant action space. This
-letter investigates a low-dimensional reflex-informed DRL pipeline for musculoskeletal
+exploration in a high-dimensional and highly redundant action space. This study
+investigates a low-dimensional reflex-informed DRL pipeline for musculoskeletal
 gait generation. Instead of directly commanding all muscle
 excitations, the proposed residual reflex pipeline uses an existing
 reflex-based controller as a structured neuromechanical prior inspired by
-spinal sensory feedback pathways, and trains a
-DRL policy to modulate four selected reflex parameters through residual
-actions. The policy therefore operates in a compact reflex-parameter space
+spinal sensory feedback pathways and trains a DRL policy to modulate four
+selected reflex parameters through residual actions. The policy therefore operates in a compact reflex-parameter space
 while preserving the biomechanical feedback structure embedded in the
 reflex controller. The pipeline is validated in a Hyfydy-based planar
 musculoskeletal model using target-speed walking tasks at 0.8, 1.0, and
@@ -121,34 +120,34 @@ improving exploration in the original muscle excitation space, can the effective
 action space itself be reduced by learning at the level of structured reflex
 modulation?
 
-In this study, we investigate that question through a low-dimensional
-reflex-informed DRL pipeline for musculoskeletal walking. Instead of replacing
-the reflex controller with an end-to-end policy, the proposed method keeps the
-reflex controller as a low-level neuromuscular feedback prior and trains a
-policy to output residual adjustments to a small set of selected reflex
-parameters. Inspired by residual reinforcement learning
-\cite{residualrl2019}, DRL is used here to modulate an interpretable
-neuromechanical controller rather than to directly command muscle excitations.
+In this study, we address this gap by combining the structure of reflex control
+with the adaptability of DRL. The goal is to avoid two extremes: hand-tuning a
+fixed reflex controller, or learning all muscle excitations directly in a
+high-dimensional action space. Inspired by residual reinforcement learning
+\cite{residualrl2019}, the proposed method keeps the reflex controller as a
+low-level neuromuscular feedback prior and trains a policy to output residual
+adjustments to a small set of selected reflex parameters. DRL is therefore used
+to modulate an interpretable neuromechanical controller rather than to directly
+command muscle excitations.
 
 The main contributions are as follows:
 \begin{enumerate}
-    \item We propose a neuro-inspired hierarchical control framework for
-    musculoskeletal gait generation. The framework embeds a reflex-based
-    low-level controller inside a DRL loop, so that learning acts as
-    high-level modulation of physiologically motivated feedback pathways rather
-    than as direct muscle excitation control.
-    \item We introduce a low-dimensional and structured residual policy
-    formulation for reflex modulation. By constraining the learned action to
-    four interpretable reflex parameters, the policy searches over coordinated
-    changes in the reflex controller instead of the full muscle-control space.
-    \item We validate the framework in a Hyfydy-based planar musculoskeletal
-    walking environment against E2E-RL and DEP-RL, and evaluate gait quality
-    using gait-cycle kinematics, vertical GRF morphology, bilateral symmetry,
-    and stride repeatability. The results show more reference-consistent knee,
-    ankle, and contact-loading patterns under residual reflex modulation.
+    \item To reduce the burden of direct muscle-level learning, we propose a
+    neuro-inspired hierarchical control framework in which DRL modulates a
+    reflex-based low-level controller instead of directly commanding all muscle
+    excitations.
+    \item To make reflex adaptation learnable and interpretable, we introduce a
+    low-dimensional residual policy formulation that adjusts four gait-critical
+    reflex parameters, allowing coordinated modulation of hip, knee, and ankle
+    feedback pathways.
+    \item To test whether task success translates into gait plausibility, we
+    validate the framework against E2E-RL and DEP-RL using gait-cycle
+    kinematics, vertical GRF morphology, bilateral symmetry, and stride
+    repeatability. The results show more reference-consistent knee, ankle, and
+    contact-loading patterns under residual reflex modulation.
 \end{enumerate}
 
-The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning pipeline; Section III describes the controlled walking validation setup and evaluation metrics; Section IV reports and analyzes the results; and Section V concludes the paper and outlines
+The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning pipeline; Section III describes the controlled walking validation setup and evaluation metrics; Section IV presents and analyzes the results; and Section V concludes the paper and outlines
 future work.
 
 
@@ -361,7 +360,7 @@ in each evaluated trajectory.
 To quantify whether the generated motion follows reference gait-cycle shapes,
 we computed reference-envelope scores for pelvic tilt, hip angle, knee angle,
 ankle angle, and vertical GRF. The gray reference envelopes in the profile
-figures denote lower and upper bounds from the post-hoc gait-analysis template.
+figures denote lower and upper bounds from the post-hoc reference-envelope data.
 They were used only for evaluation and were not included in the policy reward.
 For each quantity, left and right gait cycles were time-normalized
 and averaged to obtain a mean simulated profile $\bar{y}(x)$, where $x$
