@@ -65,7 +65,10 @@ dynamics, skeletal mechanics, and foot--ground
 contact. Physics-based musculoskeletal models are therefore attractive for
 studying and synthesizing gait because they explicitly connect muscle
 activation to joint motion, contact loading, and whole-body movement
-\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. However, controlling
+\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. Such models are also
+relevant to simulation-based studies of human locomotion, rehabilitation
+controller design, and assistive-device control, where both movement outcomes
+and neuromuscular mechanisms matter. However, controlling
 such models remains difficult. The system is highly overactuated, muscle
 dynamics are nonlinear and strongly coupled, and many different excitation
 patterns can produce similar task-level motion. Consequently, a controller that
@@ -145,7 +148,7 @@ The main contributions are as follows:
     contact-loading patterns under residual reflex modulation.
 \end{enumerate}
 
-The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning pipeline; Section III describes the controlled walking validation setup and evaluation metrics; Section IV presents and analyzes the results; and Section V concludes the paper and outlines
+The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning framework; Section III describes the controlled walking validation setup and evaluation metrics; Section IV presents and analyzes the results; and Section V concludes the paper and outlines
 future work.
 
 
@@ -164,7 +167,7 @@ direct muscle excitation control to reflex-parameter modulation.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{framwork.png}}
-\caption{Low-dimensional reflex-informed DRL pipeline. The learned policy does
+\caption{Low-dimensional reflex-informed DRL framework. The learned policy does
 not directly command all muscle excitations. Instead, it modulates selected
 parameters of a neural-feedback-inspired reflex controller, which then produces
 muscle-level stimulation for the
@@ -260,10 +263,10 @@ the muscle and reflex parameter being modulated.
 
 These four parameters were selected because they act on gait-critical pathways:
 hip flexion/extension for leg swing and placement, knee extension for stance
-support, and ankle plantarflexion for support and propulsion. The purpose of
-this selection is not to claim global optimality of the four parameters, but to
-test whether a small and interpretable reflex-parameter action space can guide
-DRL toward more natural gait than direct muscle-level control.
+support, and ankle plantarflexion for support and propulsion. This four-dimensional
+residual action space concentrates policy exploration on biomechanically
+meaningful feedback pathways while retaining an interpretable link between
+learned actions and neuromuscular function.
 
 \subsection{Policy Learning}
 The policy is trained with Maximum a Posteriori Policy Optimization (MPO)
@@ -717,9 +720,9 @@ consistent with this structured action representation.
 
 
 \section{Conclusion}
-We presented a Residual-Reflex RL pipeline for musculoskeletal gait
+We presented a Residual-Reflex RL framework for musculoskeletal gait
 generation. Rather than directly commanding all muscle
-excitations, the learned policy modulates four selected reflex parameters
+excitations, the learned policy modulates four gait-relevant reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
 space and preserves a structured neuromechanical prior within the control loop.
 
@@ -732,10 +735,15 @@ vertical GRF morphology. Additional cycle-level analysis showed lower
 left--right waveform differences and lower stride variability, indicating more
 regular and symmetric gait patterns.
 
-The results support the view that successful walking alone is not sufficient
-for evaluating learned musculoskeletal locomotion. While the present validation
-focuses on fixed-speed walking, future work will extend the evaluation to online
-speed transitions and controlled perturbation-recovery tests.
+These findings suggest that reflex-parameter modulation can provide a compact
+and interpretable learning interface for musculoskeletal gait synthesis, where
+task success must be accompanied by physiologically plausible joint motion and
+contact loading. Such a framework may be useful for simulation-based studies of
+human locomotion, rehabilitation-oriented controller design, and assistive
+device control where both adaptability and neuromuscular interpretability are
+important. While the present validation focuses on fixed-speed walking, future
+work will extend the evaluation to online speed transitions and controlled
+perturbation-recovery tests.
 
 \begin{thebibliography}{99}
 \bibitem{anderson2001}
