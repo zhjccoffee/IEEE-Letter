@@ -132,19 +132,20 @@ neuromechanical controller rather than to directly command muscle excitations.
 
 The main contributions are as follows:
 \begin{enumerate}
-    \item A residual reflex action representation is formulated for
-    musculoskeletal gait generation. The learned policy modulates four selected
-    reflex parameters instead of directly commanding all muscle excitations.
-    \item The proposed pipeline is implemented in a Hyfydy-based planar
-    musculoskeletal environment and compared with E2E-RL and DEP-RL on
-    controlled walking tasks.
-    \item The learned gaits are evaluated using normalized gait-cycle
-    kinematics and vertical ground reaction force (GRF) profiles. The results
-    show that residual reflex modulation improves reference-based gait similarity,
-    especially for knee kinematics, ankle kinematics, and GRF morphology.
-    \item The comparison demonstrates that successful walking alone is not
-    sufficient evidence of physiologically plausible musculoskeletal gait,
-    motivating gait-quality evaluation using waveform and stride-level metrics.
+    \item We propose a neuro-inspired hierarchical control framework for
+    musculoskeletal gait generation. The framework embeds a reflex-based
+    low-level controller inside a DRL loop, so that learning acts as
+    high-level modulation of physiologically motivated feedback pathways rather
+    than as direct muscle excitation control.
+    \item We introduce a low-dimensional and structured residual policy
+    formulation for reflex modulation. By constraining the learned action to
+    four interpretable reflex parameters, the policy searches over coordinated
+    changes in the reflex controller instead of the full muscle-control space.
+    \item We validate the framework in a Hyfydy-based planar musculoskeletal
+    walking environment against E2E-RL and DEP-RL, and evaluate gait quality
+    using gait-cycle kinematics, vertical GRF morphology, bilateral symmetry,
+    and stride repeatability. The results show more reference-consistent knee,
+    ankle, and contact-loading patterns under residual reflex modulation.
 \end{enumerate}
 
 The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning pipeline; Section III describes the controlled walking validation setup and evaluation metrics; Section IV reports and analyzes the results; and Section V concludes the paper and outlines
