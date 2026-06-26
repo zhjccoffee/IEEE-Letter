@@ -299,11 +299,11 @@ r_t = r_t^{base} + w_{\theta}r_{\theta}
 \section{Experiments}
 \subsection{Environments and Tasks}\label{sec:experiments}
 \subsubsection{Simulation Environment}
-The experiments were conducted in a two-dimensional planar musculoskeletal
-model implemented with the Hyfydy physics engine \cite{hyfydy}. The model
-contains the pelvis, trunk, and bilateral lower-limb segments, with
-sagittal-plane hip, knee, and ankle motion. Actuation is provided by 18
-Hill-type muscles, corresponding to nine muscle groups per leg: tibialis
+The experiments were conducted in a Hyfydy-based musculoskeletal simulation
+\cite{hyfydy}. The model contains the pelvis, trunk, and bilateral lower-limb
+segments, with nine generalized coordinates comprising pelvis translation and
+orientation together with bilateral hip, knee, and ankle joint rotations.
+Actuation is provided by 18 Hill-type muscles, corresponding to nine muscle groups per leg: tibialis
 anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS), biceps femoris
 short head (BIF), iliopsoas (ILI), hamstrings (HAM), gluteus maximus (GLU), and
 rectus femoris (FEM). Foot--ground contact elements are used to compute
@@ -723,8 +723,8 @@ excitations, the learned policy modulates four selected reflex parameters
 around a reflex-based controller. This formulation reduces the effective action
 space and preserves a structured neuromechanical prior within the control loop.
 
-As an initial validation, experiments in a Hyfydy-based planar musculoskeletal
-model showed that the Residual-Reflex RL controller produced gait cycles with
+As an initial validation, experiments in a Hyfydy-based musculoskeletal
+simulation showed that the Residual-Reflex RL controller produced gait cycles with
 higher reference-envelope scores than E2E-RL and DEP-RL at
 0.8, 1.0, and 1.2~m/s.
 The improvement was most evident in knee kinematics, ankle kinematics, and
@@ -738,10 +738,6 @@ focuses on fixed-speed walking, future work will extend the evaluation to online
 speed transitions and controlled perturbation-recovery tests.
 
 \begin{thebibliography}{99}
-\bibitem{hyfydy}
-T. Geijtenbeek, ``The Hyfydy simulation software,'' Nov. 2021. [Online].
-Available: https://hyfydy.com
-
 \bibitem{anderson2001}
 F. C. Anderson and M. G. Pandy, ``Dynamic optimization of human walking,''
 \textit{Journal of Biomechanical Engineering}, vol. 123, no. 5, pp. 381--390,
@@ -757,6 +753,11 @@ S. Lee, M. Park, K. Lee, and J. Lee, ``Scalable muscle-actuated human
 simulation and control,'' \textit{ACM Transactions on Graphics}, vol. 38,
 no. 4, Art. no. 73, 2019.
 
+\bibitem{degroote2021}
+F. De Groote and A. Falisse, ``Perspective on musculoskeletal modelling and
+predictive simulations of human movement to assess the neuromechanics of
+gait,'' \textit{Proceedings of the Royal Society B}, vol. 288, no. 1946, 2021.
+
 \bibitem{falisse2019}
 A. Falisse, G. Serrancol{\'i}, C. L. Dembia, J. Gillis, I. Jonkers, and
 F. De Groote, ``Rapid predictive simulations with complex musculoskeletal
@@ -764,10 +765,44 @@ models suggest that diverse healthy and pathological human gaits can emerge
 from similar control strategies,'' \textit{Journal of the Royal Society
 Interface}, vol. 16, no. 157, 2019.
 
-\bibitem{degroote2021}
-F. De Groote and A. Falisse, ``Perspective on musculoskeletal modelling and
-predictive simulations of human movement to assess the neuromechanics of
-gait,'' \textit{Proceedings of the Royal Society B}, vol. 288, no. 1946, 2021.
+\bibitem{peng2017}
+X. B. Peng and M. van de Panne, ``Learning locomotion skills using DeepRL:
+Does the choice of action space matter?'' in \textit{Proc. ACM SIGGRAPH /
+Eurographics Symposium on Computer Animation}, 2017.
+
+\bibitem{weng2021}
+J. Weng, E. Hashemi, and A. Arami, ``Natural walking with musculoskeletal
+models using deep reinforcement learning,'' \textit{IEEE Robotics and
+Automation Letters}, vol. 6, no. 2, pp. 4156--4162, 2021.
+
+\bibitem{devree2021}
+R. de Vree and R. Carloni, ``Deep reinforcement learning for physics-based
+musculoskeletal simulations of healthy subjects and transfemoral prostheses'
+users during normal walking,'' \textit{IEEE Transactions on Neural Systems and
+Rehabilitation Engineering}, 2021.
+
+\bibitem{ogum2024}
+B. N. Ogum, L. R. B. Schomaker, and R. Carloni, ``Learning to walk with deep
+reinforcement learning: Forward dynamic simulation of a physics-based
+musculoskeletal model of an osseointegrated transfemoral amputee,''
+\textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
+2024.
+
+\bibitem{song2021}
+S. Song, {\L}. Kidzi{\'n}ski, X. B. Peng, C. Ong, J. Hicks, S. Levine,
+C. G. Atkeson, and S. L. Delp, ``Deep reinforcement learning for modeling
+human locomotion control in neuromechanical simulation,'' \textit{Journal of
+NeuroEngineering and Rehabilitation}, vol. 18, Art. no. 126, 2021.
+
+\bibitem{nowakowski2021}
+K. Nowakowski \textit{et al.}, ``Human locomotion with reinforcement learning
+using bioinspired reward reshaping strategies,'' \textit{Medical \&
+Biological Engineering \& Computing}, vol. 59, pp. 243--256, 2021.
+
+\bibitem{su2023}
+L. Su and E. M. Gutierrez-Farewik, ``Simulating human walking: A model-based
+reinforcement learning approach with musculoskeletal modeling,'' \textit{Frontiers
+in Neurorobotics}, vol. 17, 2023.
 
 \bibitem{geyer2010}
 H. Geyer and H. Herr, ``A muscle-reflex model that encodes principles of
@@ -790,56 +825,17 @@ F. Dzeladini, J. van den Kieboom, and A. Ijspeert, ``The contribution of a
 central pattern generator in a reflex-based neuromuscular model,''
 \textit{Frontiers in Human Neuroscience}, vol. 8, Art. no. 371, 2014.
 
-\bibitem{koseki2024}
-S. Koseki, M. Hayashibe, and D. Owaki, ``Identifying essential factors for
-energy-efficient walking control across a wide range of velocities in
-reflex-based musculoskeletal systems,'' \textit{PLOS Computational Biology},
-vol. 20, no. 1, 2024.
-
 \bibitem{li2024}
 G. Li, A. Ijspeert, and M. Hayashibe, ``AI-CPG: Adaptive imitated central
 pattern generators for bipedal locomotion learned through reinforced reflex
 neural networks,'' \textit{IEEE Robotics and Automation Letters}, vol. 9,
 no. 6, pp. 5190--5197, 2024.
 
-\bibitem{peng2017}
-X. B. Peng and M. van de Panne, ``Learning locomotion skills using DeepRL:
-Does the choice of action space matter?'' in \textit{Proc. ACM SIGGRAPH /
-Eurographics Symposium on Computer Animation}, 2017.
-
-\bibitem{weng2021}
-J. Weng, E. Hashemi, and A. Arami, ``Natural walking with musculoskeletal
-models using deep reinforcement learning,'' \textit{IEEE Robotics and
-Automation Letters}, vol. 6, no. 2, pp. 4156--4162, 2021.
-
-\bibitem{devree2021}
-R. de Vree and R. Carloni, ``Deep reinforcement learning for physics-based
-musculoskeletal simulations of healthy subjects and transfemoral prostheses'
-users during normal walking,'' \textit{IEEE Transactions on Neural Systems and
-Rehabilitation Engineering}, 2021.
-
-\bibitem{song2021}
-S. Song, {\L}. Kidzi{\'n}ski, X. B. Peng, C. Ong, J. Hicks, S. Levine,
-C. G. Atkeson, and S. L. Delp, ``Deep reinforcement learning for modeling
-human locomotion control in neuromechanical simulation,'' \textit{Journal of
-NeuroEngineering and Rehabilitation}, vol. 18, Art. no. 126, 2021.
-
-\bibitem{nowakowski2021}
-K. Nowakowski \textit{et al.}, ``Human locomotion with reinforcement learning
-using bioinspired reward reshaping strategies,'' \textit{Medical \&
-Biological Engineering \& Computing}, vol. 59, pp. 243--256, 2021.
-
-\bibitem{su2023}
-L. Su and E. M. Gutierrez-Farewik, ``Simulating human walking: A model-based
-reinforcement learning approach with musculoskeletal modeling,'' \textit{Frontiers
-in Neurorobotics}, vol. 17, 2023.
-
-\bibitem{ogum2024}
-B. N. Ogum, L. R. B. Schomaker, and R. Carloni, ``Learning to walk with deep
-reinforcement learning: Forward dynamic simulation of a physics-based
-musculoskeletal model of an osseointegrated transfemoral amputee,''
-\textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
-2024.
+\bibitem{koseki2024}
+S. Koseki, M. Hayashibe, and D. Owaki, ``Identifying essential factors for
+energy-efficient walking control across a wide range of velocities in
+reflex-based musculoskeletal systems,'' \textit{PLOS Computational Biology},
+vol. 20, no. 1, 2024.
 
 \bibitem{deprl2023}
 F. Paulus, L. N. Haab, T. Geng, C. Pinneri, N. Reimers, S. Schmitt, and
@@ -847,16 +843,20 @@ G. Martius, ``DEP-RL: Embodied exploration for reinforcement learning in
 overactuated and musculoskeletal systems,'' in \textit{International
 Conference on Learning Representations}, 2023.
 
-\bibitem{mpo2018}
-A. Abdolmaleki, J. T. Springenberg, Y. Tassa, R. Munos, N. Heess, and
-M. Riedmiller, ``Maximum a posteriori policy optimisation,'' in
-\textit{International Conference on Learning Representations}, 2018.
-
 \bibitem{residualrl2019}
 T. Johannink, S. Bahl, A. Nair, J. Luo, A. Singh, M. Loskyll,
 J. A. Ojea, E. Solowjow, and S. Levine, ``Residual reinforcement learning for
 robot control,'' in \textit{IEEE International Conference on Robotics and
 Automation}, 2019, pp. 6023--6029.
+
+\bibitem{mpo2018}
+A. Abdolmaleki, J. T. Springenberg, Y. Tassa, R. Munos, N. Heess, and
+M. Riedmiller, ``Maximum a posteriori policy optimisation,'' in
+\textit{International Conference on Learning Representations}, 2018.
+
+\bibitem{hyfydy}
+T. Geijtenbeek, ``The Hyfydy simulation software,'' Nov. 2021. [Online].
+Available: https://hyfydy.com
 \end{thebibliography}
 
 \end{document}
