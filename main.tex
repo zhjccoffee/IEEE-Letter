@@ -804,9 +804,11 @@ show that the residual policy did not simply force the weakened model to keep
 the nominal 1.2~m/s speed. Instead, the realized speed decreased as soleus
 strength was reduced, from 1.20~m/s in the nominal model to 0.95~m/s at 83\%
 soleus strength. This behavior is consistent with a conservative adaptation
-strategy: when plantarflexor capacity is reduced, the controller preserves
-stable and natural-looking walking by accepting a slower gait rather than
-maintaining the target speed at the cost of instability.
+strategy and resembles a common compensatory response in human gait: when lower
+limb force capacity is reduced, people often reduce walking speed to maintain
+comfort, stability, and coordinated limb motion. Similarly, the controller
+preserves stable and natural-looking walking by accepting a slower gait rather
+than maintaining the target speed at the cost of instability.
 Importantly, the slower gait was not simply a degraded survival behavior. The
 generated joint trajectories remained close to the human-reference kinematic
 profiles across the tested weakness levels, as shown in
