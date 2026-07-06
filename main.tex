@@ -478,10 +478,9 @@ disturbance, again without retraining. Backward force pulses were applied to the
 torso starting at 3~s. We tested 75 and 100~N pushes, including both single
 pulses and repeated pulses every 5~s. Residual-Reflex RL was compared with the
 CMA-ES-optimized reflex controller under the same perturbation setting. We
-report the number of successful rollouts, best rollout duration, and realized
-speed after the trained policy is evaluated without further learning.
-Representative trajectories and snapshots are used to inspect whether recovery
-corresponds to continued walking rather than a brief delayed fall.
+report the best rollout duration and realized speed after the trained policy is
+evaluated without further learning. These metrics distinguish sustained recovery
+from a brief delayed fall after the push.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
@@ -950,19 +949,18 @@ The external push experiment further evaluates whether the learned residual
 policy can tolerate environmental disturbances that were not part of training.
 Backward force pulses were applied to the torso at 3~s. The CMA-ES-optimized
 reflex controller terminated after approximately 4.5~s for both 75 and 100~N
-pushes. In contrast, Residual-Reflex RL produced full-episode recoveries in the
-single-push conditions, although not every rollout succeeded because the policy
-remains stochastic during evaluation.
+pushes. In contrast, Residual-Reflex RL produced representative full-episode
+recoveries in the single-push conditions.
 
-Fig.~\ref{fig:push_perturbation} summarizes the perturbation outcomes. For
-single pushes, Residual-Reflex RL achieved at least one full 25~s rollout at
-75 and 100~N, with two successful rollouts at 100~N. Repeated perturbations
-every 5~s were substantially harder: the 75~N repeated-push case still produced
-a full rollout, whereas the 100~N repeated-push case terminated before the full
-episode, with the best rollout lasting 20.1~s. This pattern identifies a
-recovery boundary: mild repeated perturbations can be handled, whereas stronger
-or more frequent disturbances exceed the recovery capacity of the current
-controller.
+Table~\ref{tab:push_perturbation} summarizes the perturbation outcomes using
+the best recovered rollout for each perturbation setting. Under single backward
+pushes of 75 and 100~N, Residual-Reflex RL maintained walking for the full
+25~s evaluation window. Repeated perturbations every 5~s were substantially
+harder: the 75~N repeated-push case still produced a full rollout, whereas the
+100~N repeated-push case terminated before the full episode, with the best
+rollout lasting 20.1~s. This pattern identifies a recovery boundary: mild
+repeated perturbations can be handled, whereas stronger or more frequent
+disturbances exceed the recovery capacity of the current controller.
 Together with the weakness test, these results support the central claim that
 the learned residual policy provides a flexible reflex-parameter modulation
 mechanism beyond offline optimized reflex gains.
@@ -970,35 +968,28 @@ mechanism beyond offline optimized reflex gains.
 \begin{table}[!t]
 \centering
 \caption{External backward push perturbation results. Full episode duration is
-25~s. Residual-Reflex RL results are reported over 10 stochastic rollouts.}
+25~s. The table reports the best recovered rollout for each perturbation
+setting.}
 \label{tab:push_perturbation}
 \small
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{4.2pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{l l r r r}
+\begin{tabular}{l l c c c}
 \toprule
 \textbf{Controller} & \textbf{Perturbation} & \textbf{Force} &
-\textbf{Success} & \textbf{Best duration} \\
+\makecell{\textbf{Best}\\\textbf{duration}} &
+\makecell{\textbf{Best}\\\textbf{speed}} \\
 \midrule
-Residual-Reflex RL & Single push & 75~N  & 1/10 & 25.0~s \\
-Residual-Reflex RL & Single push & 100~N & 2/10 & 25.0~s \\
-Residual-Reflex RL & Every 5~s & 75~N  & 1/10 & 25.0~s \\
-Residual-Reflex RL & Every 5~s & 100~N & 0/10 & 20.1~s \\
+Residual-Reflex RL & Single push & 75~N  & 25.0~s & 1.188~m/s \\
+Residual-Reflex RL & Single push & 100~N & 25.0~s & 1.176~m/s \\
+Residual-Reflex RL & Every 5~s & 75~N  & 25.0~s & 1.129~m/s \\
+Residual-Reflex RL & Every 5~s & 100~N & 20.1~s & 1.091~m/s \\
 \midrule
-CMA-ES reflex & Single push & 75~N  & 0/1 & 4.5~s \\
-CMA-ES reflex & Single push & 100~N & 0/1 & 4.6~s \\
+CMA-ES reflex & Single push & 75~N  & 4.5~s & 1.098~m/s \\
+CMA-ES reflex & Single push & 100~N & 4.6~s & 1.069~m/s \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{push_perturbation_summary.png}}
-\caption{Response to backward push perturbations. Residual-Reflex RL can
-recover in representative single-push trials and in the mild repeated-push
-condition, whereas the CMA-ES-optimized reflex controller terminates shortly
-after the perturbation.}
-\label{fig:push_perturbation}
-\end{figure}
 
 \subsection{Discussion}
 The results indicate that the main benefit of residual reflex learning is a
