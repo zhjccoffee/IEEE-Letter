@@ -62,76 +62,70 @@ musculoskeletal simulation, reflex control, residual reinforcement learning.
 \section{Introduction}
 \label{sec:introduction}
 
-Human walking emerges from the interaction of neural feedback, muscle--tendon
-dynamics, skeletal mechanics, and foot--ground
-contact. Physics-based musculoskeletal models are therefore attractive for
-studying and synthesizing gait because they explicitly connect muscle
-activation to joint motion, contact loading, and whole-body movement
-\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. Such models are also
-relevant to simulation-based studies of human locomotion, rehabilitation
-controller design, and assistive-device control, where both movement outcomes
-and neuromuscular mechanisms matter. However, controlling
-such models remains difficult. The system is highly overactuated, muscle
-dynamics are nonlinear and strongly coupled, and many different excitation
-patterns can produce similar task-level motion. Consequently, a controller that
-tracks a speed or completes a walking episode may still generate gait that is
-irregular, asymmetric, or physiologically implausible.
+Generating physically plausible gait is important for simulation-based studies
+of human locomotion, rehabilitation-oriented controller design, and the
+development of assistive devices. In these applications, a controller should not
+only move the body forward, but also produce natural joint coordination, stable
+contact loading, interpretable neuromuscular behavior, and adaptation to changes
+in the body or environment. Physics-based musculoskeletal models provide a
+powerful testbed for this goal because they explicitly connect muscle
+activation, muscle--tendon dynamics, skeletal motion, and foot--ground contact
+\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. At the same time,
+these models are difficult to control: they are overactuated, nonlinear, and
+highly redundant, so many different excitation patterns can satisfy the same
+task-level walking objective while producing very different gait quality.
 
-Classical predictive simulation and trajectory-optimization approaches have
-provided important insight into human gait mechanics and energetic objectives
-\cite{anderson2001,falisse2019,degroote2021}. These methods can produce
-biomechanically meaningful motions, but often require carefully designed cost
-functions, contact handling, and numerical optimization over the full movement
-trajectory. In parallel, muscle-based character simulation has demonstrated
-that anatomically constrained actuation can improve physical realism in
-synthetic locomotion \cite{geijtenbeek2013,lee2019}. These studies highlight a
-central tension in musculoskeletal gait generation: rich muscle-driven models
-offer physiological detail, but their control spaces are difficult to search.
+One classical route is predictive simulation, trajectory optimization, and
+optimal control. These methods can generate dynamically feasible motions and
+handle physical constraints, and they have provided important insight into gait
+mechanics and energetic objectives
+\cite{anderson2001,falisse2019,degroote2021}. However, they are typically
+offline procedures that optimize over complete trajectories, often requiring
+carefully designed cost functions and substantial computation. The resulting
+motion may explain a plausible gait pattern, but it does not necessarily provide
+a feedback policy that can respond naturally to unexpected perturbations, model
+changes, or online adaptation demands.
 
-Deep reinforcement learning (DRL) offers a complementary route by learning
-closed-loop policies through interaction with simulation. DRL has been used to
-generate locomotion in physics-based characters and musculoskeletal models,
-including policies that directly command muscle activations or excitations
-\cite{peng2017,weng2021,devree2021,ogum2024}. Reviews and recent studies have
-also emphasized that neuromechanical simulation is a promising, but still
-challenging, domain for reinforcement learning because exploration, reward
-design, and gait-quality evaluation become more difficult as the muscle action
-space grows \cite{song2021,nowakowski2021,su2023}. In this setting, end-to-end
-muscle-control policies can learn to walk, yet task reward or episode survival
-alone does not guarantee human-like joint coordination, loading patterns, or
-left--right symmetry.
+A second route is to build structure into the controller itself. Biological
+locomotion studies have motivated central-pattern-generator models, muscle
+synergies, and reflex-based neuromuscular controllers
+\cite{ijspeert2008,geyer2010,song2015,dzeladini2014,li2024}. Such controllers
+are attractive because they are compact, biologically interpretable, and
+closed-loop: sensory feedback can immediately influence muscle stimulation.
+Recent reflex-based predictive studies further suggest that a relatively small
+set of physiologically meaningful control factors can explain efficient walking
+across speeds \cite{koseki2024}. Nevertheless, the gains, thresholds, and
+offsets in these controllers are usually selected manually or optimized offline.
+Once fixed, they may lack a policy-level mechanism for changing reflex
+parameters online when muscle capacity is altered or an external disturbance is
+applied.
 
-Several lines of work therefore introduce structure into locomotion control.
-Reflex-based neuromuscular controllers encode local sensory feedback pathways
-and can reproduce human-like walking dynamics and muscle activities
-\cite{geyer2010,song2015}. Central-pattern-generator and reflex-hybrid models
-further suggest that rhythmic neural priors and sensory feedback can provide
-compact mechanisms for speed regulation and gait coordination
-\cite{ijspeert2008,dzeladini2014,li2024}. Recent reflex-based predictive
-studies also show that a relatively small set of physiologically meaningful
-control factors can explain efficient walking across speeds
-\cite{koseki2024}. Nevertheless, such controllers typically depend on
-carefully selected gains, thresholds, and offsets. These parameters are often
-tuned manually or optimized offline, and their effects can be sensitive to the
-musculoskeletal model and task condition.
+Deep reinforcement learning (DRL) offers a complementary strength: it learns a
+state-dependent policy through interaction with the simulated body. DRL has
+generated locomotion in physics-based characters and musculoskeletal models,
+including end-to-end policies that directly output muscle activations or
+excitations \cite{peng2017,weng2021,devree2021,ogum2024}. However, direct
+muscle-level control exposes the learner to a high-dimensional and redundant
+action space. Exploration and reward design become difficult as the number of
+muscles increases, and successful episode completion alone does not guarantee
+human-like joint coordination, contact loading, or left--right symmetry
+\cite{song2021,nowakowski2021,su2023}. Methods such as DEP-RL improve
+exploration in overactuated and musculoskeletal systems, but still preserve the
+direct muscle-level action interface \cite{deprl2023}.
 
-Another strategy is to improve learning in the high-dimensional muscle action
-space. For example, DEP-RL introduces embodied exploratory feedback for
-overactuated and musculoskeletal systems while preserving direct muscle-level
-control \cite{deprl2023}. This raises a related question: rather than only
-improving exploration in the original muscle excitation space, can the effective
-action space itself be reduced by learning at the level of structured reflex
-modulation?
-
-In this study, we address this gap by combining the structure of reflex control
-with the adaptability of DRL. The goal is to avoid two extremes: relying on
-offline optimized reflex parameters, or learning all muscle excitations directly in a
-high-dimensional action space. Inspired by residual reinforcement learning
-\cite{residualrl2019}, the proposed method keeps the reflex controller as a
-low-level neuromuscular feedback prior and trains a policy to output residual
-adjustments to a small set of selected reflex parameters. DRL is therefore used
-to modulate an interpretable neuromechanical controller rather than to directly
-command muscle excitations.
+These observations reveal a gap: musculoskeletal gait generation needs a
+learning interface that combines the closed-loop stability and biological
+structure of reflex control, the state-dependent adaptability of DRL, and a
+low-dimensional action space that remains interpretable. Human motor control
+offers an intuitive analogy. Locomotion is not learned from scratch as an
+arbitrary mapping from state to every muscle excitation. Fast spinal reflex
+pathways provide a low-level feedback substrate, while development and
+interaction with the environment shape how higher-level neural systems regulate
+and adapt these existing circuits. Inspired by this organization, this study
+treats a reflex controller as a low-level neuromechanical prior and trains a DRL
+policy to apply residual modulation to a small number of gait-relevant reflex
+parameters. The policy therefore learns how to adjust reflex pathways online,
+rather than directly commanding all muscles.
 
 The main contributions are as follows:
 \begin{enumerate}
@@ -149,9 +143,9 @@ The main contributions are as follows:
     repeatability. The results show more reference-consistent knee, ankle, and
     contact-loading patterns under residual reflex modulation.
     \item To evaluate whether residual modulation provides adaptability beyond
-    offline optimized reflex parameters, we test the trained controller under plantarflexor
-    weakness and external push perturbations. The results show that
-    state-dependent reflex-parameter modulation can preserve walking in
+    offline optimized reflex parameters, we test the trained controller under
+    plantarflexor weakness and external push perturbations. The results show
+    that state-dependent reflex-parameter modulation can preserve walking in
     conditions where a CMA-ES-optimized reflex controller fails.
 \end{enumerate}
 
