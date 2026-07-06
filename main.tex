@@ -154,31 +154,35 @@ future work.
 
 
 \section{Methodology}
-\subsection{Residual-Reflex Control Architecture}
+\subsection{Framework Overview}
 The proposed method treats the reflex controller as a structured low-level
 motor prior inspired by spinal sensory feedback circuits and learns only a
 compact residual modulation on top of it. As shown in Fig.~\ref{framwork}, the
-framework contains three functional blocks. First, the high-level learning block
-receives the current observation and outputs a compact residual action. Second,
-the low-level reflex-feedback block maps this residual action to selected reflex
-parameters, and then computes muscle stimulation through sensory feedback
-pathways. Third, the physics-simulation block advances the musculoskeletal
-model, returns the next observation and reward, and provides transition data for
-off-policy learning. This hierarchy changes the role of DRL from direct muscle
-excitation control to reflex-parameter modulation.
+framework is organized into three modules. Module (a) performs the
+agent--environment rollout: the policy observes the current state
+$\mathbf{s}_t$, outputs a residual action $\mathbf{a}_t$, and receives the next
+state and reward after the simulation step. Module (b) is the physiological
+environment, where the residual-reflex-informed controller converts the action
+into modulation of selected reflex parameters, the reflex controller generates
+muscle stimulation, and the musculoskeletal model produces motion and contact
+forces. Module (c) is the actor--critic learning module, where transitions from
+the rollout are stored in a replay buffer and used for off-policy MPO updates.
+This hierarchy changes the role of DRL from direct muscle excitation control to
+reflex-parameter modulation.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
-\caption{Low-dimensional residual-reflex-informed DRL framework. The framework
-is organized into high-level residual policy learning, low-level reflex-feedback
-modulation, and physics simulation. The learned policy does not directly command
-all muscle excitations; instead, it modulates selected parameters of a
-neural-feedback-inspired reflex controller, which then produces muscle-level
-stimulation for the musculoskeletal model.}
+\caption{Low-dimensional residual-reflex-informed DRL framework. (a) During
+agent--environment rollout, the policy maps the current state to a compact
+residual action. (b) In the physiological environment, the residual-reflex
+controller modulates selected reflex parameters and produces muscle activation
+for the musculoskeletal model. (c) In the actor--critic learning module,
+rollout transitions are stored in replay and used for MPO updates.}
 \label{framwork}
 \end{figure*}
 
-Let $\mathbf{s}_t$ denote the observation received by the policy at time $t$.
+In module (a), let $\mathbf{s}_t$ denote the observation received by the policy
+at time $t$.
 In the present implementation, $\mathbf{s}_t\in\mathbb{R}^{122}$. It contains
 muscle-level sensory and activation signals from the 18 Hill-type muscles,
 foot-relative positions, body orientation and angular velocity, generalized
@@ -199,8 +203,9 @@ positions relative to the body; $\boldsymbol{\psi}$ and $\boldsymbol{\omega}$
 are body orientation and angular velocity; $\mathbf{q}$ and $\dot{\mathbf{q}}$
 are generalized coordinates and velocities; and $v^\ast$ is the target speed.
 
-\subsection{Reflex Controller}
-The low-level controller is a phase-dependent reflex controller inspired by
+\subsection{Physiological Environment and Reflex Controller}
+Module (b) contains the musculoskeletal model and the residual-reflex-informed
+controller. The low-level controller is a phase-dependent reflex controller inspired by
 neuromuscular feedback pathways, including muscle-spindle-like length and
 velocity feedback and Golgi-tendon-organ-like force feedback. The gait cycle is divided into stance,
 liftoff, swing, and landing-related subphases. In each subphase, sparse
@@ -233,8 +238,8 @@ u_i = u_{C,i}+u_{\text{PD},i}
 This reflex structure provides immediate sensory feedback and a biomechanical
 inductive bias before policy learning is applied.
 
-\subsection{Residual Action Space}
-Instead of allowing the policy to directly command all muscle excitations, the
+\subsection{Residual Reflex-Parameter Action Space}
+Instead of allowing the policy in module (a) to directly command all muscle excitations, the
 proposed controller uses a four-dimensional residual action
 $\mathbf{a}_t\in\mathbb{R}^{4}$. Each action component modulates one selected
 reflex parameter around its nominal value:
@@ -284,8 +289,8 @@ residual action space concentrates policy exploration on biomechanically
 meaningful feedback pathways while retaining an interpretable link between
 learned actions and neuromuscular function.
 
-\subsection{Policy Learning}
-The policy is trained with Maximum a Posteriori Policy Optimization (MPO)
+\subsection{Actor--Critic Policy Learning}
+Module (c) trains the policy with Maximum a Posteriori Policy Optimization (MPO)
 \cite{mpo2018}, an off-policy actor--critic algorithm for continuous control.
 The actor network receives the 122-dimensional observation $\mathbf{s}_t$ and
 parameterizes a Gaussian policy $\pi_{\phi}(\mathbf{a}_t|\mathbf{s}_t)$. For
