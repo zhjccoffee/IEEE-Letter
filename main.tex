@@ -331,14 +331,14 @@ elements are used to compute vertical ground reaction forces (GRFs) for gait
 analysis.
 
 Four controllers were considered across the validation experiments.
-\emph{E2E-RL} denotes an end-to-end reinforcement learning policy that directly
+E2E-RL denotes an end-to-end reinforcement learning policy that directly
 outputs muscle-level control actions, following the direct muscle-control
 setting commonly used in musculoskeletal DRL studies
-\cite{weng2021,devree2021,ogum2024}. \emph{DEP-RL} uses the same direct
+\cite{weng2021,devree2021,ogum2024}. DEP-RL uses the same direct
 muscle-level action space, but adds DEP-style embodied exploration
-\cite{deprl2023}. The proposed \emph{Residual-Reflex RL} controller learns
+\cite{deprl2023}. The proposed Residual-Reflex RL controller learns
 four-dimensional residual actions that modulate the selected reflex parameters
-in Table~\ref{tab:residual_actions}. The \emph{CMA-ES-optimized reflex}
+in Table~\ref{tab:residual_actions}. The CMA-ES-optimized reflex
 controller is the reflex controller obtained by offline parameter optimization;
 its parameters are not updated during evaluation. It is used as a non-learning
 reflex baseline in the weakness and perturbation tests. All DRL policies were
