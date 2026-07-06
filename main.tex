@@ -250,17 +250,19 @@ residual modulation.
 \caption{Selected Residual-Reflex Actions}
 \label{tab:residual_actions}
 \centering
-\resizebox{\columnwidth}{!}{
-\begin{tabular}{llll}
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\columnwidth}{c c c X}
 \toprule
-Action & Parameter & Pathway & Functional role \\
+\textbf{Action} & \textbf{Parameter} & \textbf{Pathway} & \textbf{Functional role} \\
 \midrule
 $a_1$ & $k_{L,\mathrm{HAM}}$ & S11100.hamstrings.KL & Hip extension / late-swing braking \\
 $a_2$ & $\tilde{l}_{0,\mathrm{ILI}}$ & S00011.iliopsoas.L0 & Hip flexion / swing initiation \\
 \textbf{$a_3$} & \textbf{$k_{F,\mathrm{SOL}}$} & \textbf{S11111.soleus.KF} & \textbf{Ankle support / propulsion} \\
 $a_4$ & $k_{F,\mathrm{VAS}}$ & S00011.vasti.KF & Knee extension / stance support \\
 \bottomrule
-\end{tabular}}
+\end{tabularx}
 \end{table}
 
 The pathway labels in Table~\ref{tab:residual_actions} follow the controller
@@ -517,19 +519,19 @@ speed.}
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.12}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{l l r r r r r}
+\begin{tabular}{c l r r r r r}
 \toprule
 \makecell{\textbf{Target}\\\textbf{speed}} & \textbf{Method} & \makecell{\textbf{Realized}\\\textbf{speed}} & \textbf{Error} & \textbf{Stride len.} & \textbf{Stride time} & \textbf{Cycles} \\
 \midrule
-0.8 & E2E-RL & 0.87 & 0.07 & 0.78 & 0.89 & 50 \\
+\multirow[c]{3}{*}{0.8} & E2E-RL & 0.87 & 0.07 & 0.78 & 0.89 & 50 \\
  & DEP-RL & 0.83 & 0.03 & 1.09 & 1.31 & 33 \\
  & Residual-Reflex RL & 0.79 & \textbf{0.01} & 0.99 & 1.26 & 35 \\
 \midrule
-1.0 & E2E-RL & 1.18 & 0.18 & 1.39 & 1.18 & 37 \\
+\multirow[c]{3}{*}{1.0} & E2E-RL & 1.18 & 0.18 & 1.39 & 1.18 & 37 \\
  & DEP-RL & 1.14 & 0.14 & 1.29 & 1.13 & 39 \\
  & Residual-Reflex RL & 1.05 & \textbf{0.05} & 1.23 & 1.17 & 37 \\
 \midrule
-1.2 & E2E-RL & 1.26 & 0.06 & 1.23 & 0.97 & 46 \\
+\multirow[c]{3}{*}{1.2} & E2E-RL & 1.26 & 0.06 & 1.23 & 0.97 & 46 \\
  & DEP-RL & 1.30 & 0.10 & 1.37 & 1.06 & 42 \\
  & Residual-Reflex RL & 1.21 & \textbf{0.01} & 1.34 & 1.11 & 40 \\
 \bottomrule
@@ -569,19 +571,19 @@ The kinematic average is the mean of the hip, knee, and ankle scores.}
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.12}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{l l r r r r r}
+\begin{tabular}{c l r r r r r}
 \toprule
 \makecell{\textbf{Target}\\\textbf{speed}} & \textbf{Method} & \makecell{\textbf{Realized}\\\textbf{speed}} & \makecell{\textbf{Kinematic}\\\textbf{average}} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} \\
 \midrule
-0.8 & E2E-RL & 0.87 & 39.0 & \textbf{98.3} & 18.6 & 0.0 \\
+\multirow[c]{3}{*}{0.8} & E2E-RL & 0.87 & 39.0 & \textbf{98.3} & 18.6 & 0.0 \\
  & DEP-RL & 0.83 & 44.1 & 72.7 & 50.8 & 8.7 \\
  & Residual-Reflex RL & 0.79 & \textbf{81.3} & 96.6 & \textbf{68.9} & \textbf{78.5} \\
 \midrule
-1.0 & E2E-RL & 1.18 & 81.9 & 81.2 & 72.7 & \textbf{91.8} \\
+\multirow[c]{3}{*}{1.0} & E2E-RL & 1.18 & 81.9 & 81.2 & 72.7 & \textbf{91.8} \\
  & DEP-RL & 1.14 & 58.5 & 62.5 & 64.2 & 48.7 \\
  & Residual-Reflex RL & 1.05 & \textbf{90.5} & \textbf{100.0} & \textbf{82.6} & 88.9 \\
 \midrule
-1.2 & E2E-RL & 1.26 & 75.6 & 88.4 & 52.4 & 85.9 \\
+\multirow[c]{3}{*}{1.2} & E2E-RL & 1.26 & 75.6 & 88.4 & 52.4 & 85.9 \\
  & DEP-RL & 1.30 & 40.8 & 44.5 & 33.4 & 44.5 \\
  & Residual-Reflex RL & 1.21 & \textbf{92.3} & \textbf{99.6} & \textbf{88.7} & \textbf{88.6} \\
 \bottomrule
@@ -734,19 +736,19 @@ more symmetric or more repeatable gait.}
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.12}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{l l r r r r r r}
+\begin{tabular}{c l r r r r r r}
 \toprule
 \makecell{\textbf{Target}\\\textbf{speed}} & \textbf{Method} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} & \makecell{\textbf{Time}\\\textbf{CV (\%)}} & \makecell{\textbf{Length}\\\textbf{CV (\%)}} \\
 \midrule
-0.8 & E2E-RL & 2.92 & 5.75 & 6.36 & 0.10 & 9.05 & 14.88 \\
+\multirow[c]{3}{*}{0.8} & E2E-RL & 2.92 & 5.75 & 6.36 & 0.10 & 9.05 & 14.88 \\
  & DEP-RL & 11.20 & 11.73 & 11.59 & 0.12 & 7.96 & 11.04 \\
  & Residual-Reflex RL & \textbf{0.80} & \textbf{1.03} & \textbf{0.89} & \textbf{0.04} & \textbf{1.98} & \textbf{5.66} \\
 \midrule
-1.0 & E2E-RL & 6.12 & 10.61 & 6.69 & 0.07 & 5.03 & 5.63 \\
+\multirow[c]{3}{*}{1.0} & E2E-RL & 6.12 & 10.61 & 6.69 & 0.07 & 5.03 & 5.63 \\
  & DEP-RL & 4.54 & 10.12 & 16.27 & 0.28 & 2.62 & 5.27 \\
  & Residual-Reflex RL & \textbf{1.78} & \textbf{1.85} & \textbf{0.97} & \textbf{0.03} & \textbf{1.51} & \textbf{1.86} \\
 \midrule
-1.2 & E2E-RL & 3.43 & 3.00 & 9.84 & 0.04 & 3.87 & 5.83 \\
+\multirow[c]{3}{*}{1.2} & E2E-RL & 3.43 & 3.00 & 9.84 & 0.04 & 3.87 & 5.83 \\
  & DEP-RL & 8.33 & 5.83 & 6.31 & 0.34 & 2.29 & 4.78 \\
  & Residual-Reflex RL & \textbf{0.87} & \textbf{0.87} & \textbf{0.46} & \textbf{0.02} & \textbf{0.70} & \textbf{0.74} \\
 \bottomrule
@@ -983,24 +985,26 @@ mechanism beyond offline optimized reflex gains.
 25~s. The table reports the best recovered rollout for each perturbation
 setting.}
 \label{tab:push_perturbation}
-\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}l l c c c}
+\small
+\setlength{\tabcolsep}{1.8pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c}
 \toprule
 \textbf{Method} & \textbf{Perturbation} & \textbf{Force} &
 \makecell{\textbf{Best}\\\textbf{duration}} &
 \makecell{\textbf{Best}\\\textbf{speed}} \\
 \midrule
-\multirow{4}{*}{\makecell[l]{Residual-\\Reflex RL}} &
+\multirow[c]{4}{*}{\makecell[c]{Residual-\\Reflex RL}} &
 \multirow{2}{*}{Single push} & 75~N  & 25.0~s & 1.188~m/s \\
 & & 100~N & 25.0~s & 1.176~m/s \\
+\cmidrule(lr){2-5}
 & \multirow{2}{*}{Every 5~s} & 75~N  & 25.0~s & 1.129~m/s \\
 & & 100~N & 20.1~s & 1.091~m/s \\
 \midrule
-\multirow{4}{*}{\makecell[l]{CMA-ES-\\optimized\\Reflex}} &
+\multirow[c]{4}{*}{\makecell[c]{CMA-ES-\\optimized\\Reflex}} &
 \multirow{2}{*}{Single push} & 75~N  & 4.5~s & 1.098~m/s \\
 & & 100~N & 4.6~s & 1.069~m/s \\
+\cmidrule(lr){2-5}
 & \multirow{2}{*}{Every 5~s} & 75~N  & 4.5~s & 1.098~m/s \\
 & & 100~N & 4.6~s & 1.069~m/s \\
 \bottomrule
