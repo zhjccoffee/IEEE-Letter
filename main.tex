@@ -257,7 +257,7 @@ Action & Parameter & Pathway & Functional role \\
 \midrule
 $a_1$ & $k_{L,\mathrm{HAM}}$ & S11100.hamstrings.KL & Hip extension / late-swing braking \\
 $a_2$ & $\tilde{l}_{0,\mathrm{ILI}}$ & S00011.iliopsoas.L0 & Hip flexion / swing initiation \\
-$a_3$ & $k_{F,\mathrm{SOL}}$ & S11111.soleus.KF & Ankle support / propulsion \\
+\textbf{$a_3$} & \textbf{$k_{F,\mathrm{SOL}}$} & \textbf{S11111.soleus.KF} & \textbf{Ankle support / propulsion} \\
 $a_4$ & $k_{F,\mathrm{VAS}}$ & S00011.vasti.KF & Knee extension / stance support \\
 \bottomrule
 \end{tabular}}
@@ -267,6 +267,12 @@ The pathway labels in Table~\ref{tab:residual_actions} follow the controller
 implementation notation: the binary code after ``S'' denotes the gait subphases
 in which the corresponding reflex pathway is active, and the suffix specifies
 the muscle and reflex parameter being modulated.
+Thus, $a_1$ modulates hamstrings length feedback for hip extension and
+late-swing braking, $a_2$ modulates iliopsoas length-offset feedback for hip
+flexion and swing initiation, $a_3$ modulates soleus force feedback for ankle
+support and propulsion, and $a_4$ modulates vasti force feedback for knee
+extension and stance support. The channel $a_3$ is therefore referred to as the
+soleus-related channel in the weakness analysis.
 
 These four parameters were selected because they act on gait-critical pathways:
 hip flexion/extension for leg swing and placement, knee extension for stance
@@ -819,15 +825,25 @@ policy still produced a full rollout with a kinematic-average score of
 retraining while preserving a natural gait pattern.
 
 The residual-action RMS values also show that the policy remains actively
-engaged under the weakened conditions. The soleus-related channel $a_3$ has the
-largest RMS magnitude across the weakness range, reflecting substantial
-modulation of the ankle support/propulsion pathway. The remaining channels also
-change with weakness, indicating that the adaptation is not a single-parameter
-effect: hip, knee, and ankle feedback pathways are jointly adjusted to preserve
-walking. These results indicate that the four-dimensional residual action space
-acts as a compact adaptive interface on top of the reflex controller: the same
-trained policy can be transferred across weakened body models without
-retraining, while still modulating the underlying reflex pathways online.
+engaged under the weakened conditions. Because $a_3$ modulates the soleus force
+feedback pathway, it is directly associated with ankle support and propulsion.
+This channel has the largest RMS magnitude across the weakness range,
+indicating that plantarflexor feedback remains the dominant modulated pathway
+even when the soleus force capacity is altered. However, the policy does not
+simply increase the soleus-related action as the muscle becomes weaker. Instead,
+it accepts a lower walking speed and redistributes modulation across the other
+pathways. In particular, the stance-support channel $a_4$ becomes larger under
+stronger weakness, which is consistent with increased reliance on knee-extension
+support when ankle push-off capacity is reduced. The hip-related channels
+$a_1$ and $a_2$ vary more mildly and act on late-swing braking and swing
+initiation, respectively, helping maintain leg placement and step timing. The
+paired trends between the hip/swing channels ($a_1$, $a_2$) and the
+stance-support channels ($a_3$, $a_4$) suggest a coordinated redistribution of
+reflex modulation rather than a single-parameter compensation. These results
+indicate that the four-dimensional residual action space acts as a compact
+adaptive interface on top of the reflex controller: the same trained policy can
+be transferred across weakened body models without retraining, while still
+modulating the underlying reflex pathways online.
 
 \begin{table}[!t]
 \centering
@@ -840,15 +856,15 @@ retraining, while still modulating the underlying reflex pathways online.
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c c c}
 \toprule
 \textbf{Soleus} & \textbf{Speed} & \textbf{Err.} &
-\textbf{RMS $a_1$} & \textbf{RMS $a_2$} & \textbf{RMS $a_3$} & \textbf{RMS $a_4$} \\
+\textbf{RMS $a_1$} & \textbf{RMS $a_2$} & \textbf{RMS $\boldsymbol{a_3}$} & \textbf{RMS $a_4$} \\
 \midrule
-83\%  & 0.949 & 0.251 & 0.584 & 0.635 & 0.846 & 0.797 \\
-87\%  & 1.002 & 0.198 & 0.579 & 0.627 & 0.851 & 0.761 \\
-90\%  & 1.063 & 0.137 & 0.594 & 0.620 & 0.878 & 0.741 \\
-93\%  & 1.112 & 0.088 & 0.601 & 0.641 & 0.885 & 0.735 \\
-95\%  & 1.137 & 0.063 & 0.596 & 0.657 & 0.889 & 0.731 \\
-97\%  & 1.167 & 0.033 & 0.588 & 0.678 & 0.895 & 0.736 \\
-100\% & 1.201 & 0.001 & 0.580 & 0.681 & 0.898 & 0.753 \\
+83\%  & 0.949 & 0.251 & 0.584 & 0.635 & \textbf{0.846} & 0.797 \\
+87\%  & 1.002 & 0.198 & 0.579 & 0.627 & \textbf{0.851} & 0.761 \\
+90\%  & 1.063 & 0.137 & 0.594 & 0.620 & \textbf{0.878} & 0.741 \\
+93\%  & 1.112 & 0.088 & 0.601 & 0.641 & \textbf{0.885} & 0.735 \\
+95\%  & 1.137 & 0.063 & 0.596 & 0.657 & \textbf{0.889} & 0.731 \\
+97\%  & 1.167 & 0.033 & 0.588 & 0.678 & \textbf{0.895} & 0.736 \\
+100\% & 1.201 & 0.001 & 0.580 & 0.681 & \textbf{0.898} & 0.753 \\
 \bottomrule
 \end{tabular*}
 \end{table}
@@ -913,7 +929,9 @@ adopts a slower realized speed as force capacity is reduced.}
 \centerline{\includegraphics[width=0.92\columnwidth]{weakness_residual_action_rms.png}}
 \caption{Residual-action modulation under plantarflexor weakness. RMS values
 show that the trained policy continues to adjust all four selected reflex
-channels, with the soleus-related channel $a_3$ showing the largest magnitude.}
+channels. Channel $a_3$ modulates soleus force feedback for ankle
+support/propulsion, whereas $a_4$ modulates vasti force feedback for knee
+extension and stance support.}
 \label{fig:weakness_residual_action_rms}
 \end{figure}
 
