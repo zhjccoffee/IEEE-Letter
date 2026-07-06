@@ -173,15 +173,15 @@ excitations are then transformed into skeletal motion and ground reaction forces
 by the musculoskeletal simulator. This hierarchy changes the role of DRL from
 direct muscle excitation control to reflex-parameter modulation.
 
-\begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{framwork.png}}
+\begin{figure*}[!t]
+\centerline{\includegraphics[width=0.95\textwidth]{framwork.png}}
 \caption{Low-dimensional residual-reflex-informed DRL framework. The learned policy does
 not directly command all muscle excitations. Instead, it modulates selected
 parameters of a neural-feedback-inspired reflex controller, which then produces
 muscle-level stimulation for the
 musculoskeletal model.}
 \label{framwork}
-\end{figure}
+\end{figure*}
 
 Let $\mathbf{s}_t$ denote the state observed by the policy at time $t$. The
 state contains muscle-level signals, foot states, whole-body kinematics, and
