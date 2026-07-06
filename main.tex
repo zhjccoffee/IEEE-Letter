@@ -452,7 +452,9 @@ force of the soleus muscles while keeping the trained 1.2~m/s policy fixed. The
 evaluated soleus strength levels were 83--100\% of the nominal value.
 Residual-Reflex RL was compared with the CMA-ES-optimized reflex controller
 under the same weakened models. We report survival length, realized speed, gait
-quality, and the root-mean-square magnitude of the four residual actions:
+quality, and the root-mean-square magnitude of the four residual actions; for
+the CMA-ES-optimized reflex controller, we report rollout duration as the
+failure/survival measure:
 \begin{equation}
 A_i^{\mathrm{RMS}} =
 \sqrt{\frac{1}{T}\sum_{t=1}^{T}a_i(t)^2},
@@ -792,8 +794,9 @@ training. The soleus maximum isometric force was reduced while the trained
 1.2~m/s Residual-Reflex RL policy was kept unchanged, so the controller was
 evaluated on weakened models without additional training or parameter
 optimization. Under the same model changes, the CMA-ES-optimized reflex
-controller failed in the tested weakened models, whereas Residual-Reflex RL
-produced full 1000-step rollouts for soleus strength levels from 83\% to 100\%.
+controller terminated early for all tested weakened models, as summarized in
+Table~\ref{tab:weakness_optimized_reflex}, whereas Residual-Reflex RL produced
+full 1000-step rollouts for soleus strength levels from 83\% to 100\%.
 
 Table~\ref{tab:weakness_adaptation} and
 Fig.~\ref{fig:weakness_speed_adaptation}
@@ -832,7 +835,7 @@ retraining, while still modulating the underlying reflex pathways online.
 \scriptsize
 \setlength{\tabcolsep}{2.0pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{c c c c c c c}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c c c}
 \toprule
 \textbf{Soleus} & \textbf{Speed} & \textbf{Err.} &
 \textbf{RMS $a_1$} & \textbf{RMS $a_2$} & \textbf{RMS $a_3$} & \textbf{RMS $a_4$} \\
@@ -845,7 +848,31 @@ retraining, while still modulating the underlying reflex pathways online.
 97\%  & 1.167 & 0.033 & 0.588 & 0.678 & 0.895 & 0.736 \\
 100\% & 1.201 & 0.001 & 0.580 & 0.681 & 0.898 & 0.753 \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{CMA-ES-optimized reflex controller under soleus weakness. The full
+episode duration is 25~s; durations below 25~s indicate early termination.}
+\label{tab:weakness_optimized_reflex}
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c}
+\toprule
+\textbf{Soleus} & \makecell{\textbf{Duration}\\\textbf{(s)}} &
+\makecell{\textbf{Full}\\\textbf{episode}} \\
+\midrule
+83\%  & 1.27 & No \\
+87\%  & 1.28 & No \\
+90\%  & 1.28 & No \\
+93\%  & 1.29 & No \\
+95\%  & 1.48 & No \\
+97\%  & 1.47 & No \\
+100\% & 25.00 & Yes \\
+\bottomrule
+\end{tabular*}
 \end{table}
 
 \begin{table}[!t]
@@ -856,7 +883,7 @@ computed from normalized hip, knee, and ankle gait-cycle profiles.}
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{c c c c c}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c}
 \toprule
 \textbf{Soleus} & \makecell{\textbf{Kinematic}\\\textbf{average}} &
 \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} \\
@@ -869,7 +896,7 @@ computed from normalized hip, knee, and ankle gait-cycle profiles.}
 97\%  & 92.5 & 99.9 & 87.4 & 90.2 \\
 100\% & 92.4 & 99.6 & 89.0 & 88.7 \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
 \begin{figure}[!t]
