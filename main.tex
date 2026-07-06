@@ -642,7 +642,8 @@ cycle average and the gray band is the human-reference range.}
 Ground reaction force provides a direct view of how each controller loads and
 unloads the body during stance. Residual-Reflex RL produced smoother vertical
 GRF profiles with a more reference-consistent double-support pattern across the
-tested speeds, as illustrated in Fig.~\ref{fig:grf_morphology}. E2E-RL showed
+tested speeds, as summarized in Table~\ref{tab:grf_scores} and illustrated in
+Fig.~\ref{fig:grf_morphology}. E2E-RL showed
 abnormal or inconsistent loading despite visually plausible joint postures in
 some snapshots; this explains why its GRF scores were much lower than its hip
 or ankle scores. DEP-RL produced even larger early-stance peaks and
@@ -657,6 +658,26 @@ appear visually plausible in some frames, but still interact with the ground
 through abrupt or poorly timed contact forces. The smoother GRF curves of
 Residual-Reflex RL suggest that the reflex prior helps organize the stance
 phase, not only the joint-angle trajectories.
+
+\begin{table}[!t]
+\centering
+\caption{Vertical GRF human-reference scores in controlled walking validation.
+Higher values indicate closer agreement with the human-reference vertical GRF
+range.}
+\label{tab:grf_scores}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{l r r r}
+\toprule
+\makecell{\textbf{Target}\\\textbf{speed}} &
+\textbf{E2E-RL} & \textbf{DEP-RL} & \makecell{\textbf{Residual-}\\\textbf{Reflex RL}} \\
+\midrule
+0.8 & 35.9 & 39.8 & \textbf{76.7} \\
+1.0 & 27.6 & 0.0 & \textbf{89.8} \\
+1.2 & 21.5 & 0.0 & \textbf{89.1} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{grf_morphology_comparison.png}}
