@@ -799,9 +799,10 @@ training. The soleus maximum isometric force was reduced while the trained
 1.2~m/s Residual-Reflex RL policy was kept unchanged, so the controller was
 evaluated on weakened models without additional training or parameter
 optimization. Under the same model changes, the CMA-ES-optimized reflex
-controller terminated early for all tested weakened models, as summarized in
-Table~\ref{tab:weakness_optimized_reflex}, whereas Residual-Reflex RL produced
-full 1000-step rollouts for soleus strength levels from 83\% to 100\%.
+controller terminated early for all tested weakened models, whereas
+Residual-Reflex RL produced full 1000-step rollouts for soleus strength levels
+from 83\% to 100\%, as summarized in
+Table~\ref{tab:weakness_survival}.
 
 Table~\ref{tab:weakness_adaptation} and
 Fig.~\ref{fig:weakness_speed_adaptation}
@@ -846,6 +847,35 @@ modulating the underlying reflex pathways online.
 
 \begin{table}[!t]
 \centering
+\caption{Survival comparison under soleus weakness. Full episode duration is
+25~s. The CMA-ES-optimized reflex controller remains stable only in the nominal
+100\% model, whereas Residual-Reflex RL completes the episode across all tested
+weakness levels without retraining.}
+\label{tab:weakness_survival}
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c}
+\toprule
+\textbf{Soleus} &
+\makecell{\textbf{Residual}\\\textbf{duration}} &
+\makecell{\textbf{Residual}\\\textbf{full}} &
+\makecell{\textbf{CMA-ES}\\\textbf{duration}} &
+\makecell{\textbf{CMA-ES}\\\textbf{full}} \\
+\midrule
+83\%  & 25.0~s & Yes & 1.27~s & No \\
+87\%  & 25.0~s & Yes & 1.28~s & No \\
+90\%  & 25.0~s & Yes & 1.28~s & No \\
+93\%  & 25.0~s & Yes & 1.29~s & No \\
+95\%  & 25.0~s & Yes & 1.48~s & No \\
+97\%  & 25.0~s & Yes & 1.47~s & No \\
+100\% & 25.0~s & Yes & 25.0~s & Yes \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{table}[!t]
+\centering
 \caption{Residual-Reflex RL under soleus weakness. The target speed was
 1.2~m/s. All listed residual rollouts reached 1000 steps.}
 \label{tab:weakness_adaptation}
@@ -864,30 +894,6 @@ modulating the underlying reflex pathways online.
 95\%  & 1.137 & 0.063 & 0.596 & 0.657 & \textbf{0.889} & 0.731 \\
 97\%  & 1.167 & 0.033 & 0.588 & 0.678 & \textbf{0.895} & 0.736 \\
 100\% & 1.201 & 0.001 & 0.580 & 0.681 & \textbf{0.898} & 0.753 \\
-\bottomrule
-\end{tabular*}
-\end{table}
-
-\begin{table}[!t]
-\centering
-\caption{CMA-ES-optimized reflex controller under soleus weakness. The full
-episode duration is 25~s; durations below 25~s indicate early termination.}
-\label{tab:weakness_optimized_reflex}
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c}
-\toprule
-\textbf{Soleus} & \makecell{\textbf{Duration}\\\textbf{(s)}} &
-\makecell{\textbf{Full}\\\textbf{episode}} \\
-\midrule
-83\%  & 1.27 & No \\
-87\%  & 1.28 & No \\
-90\%  & 1.28 & No \\
-93\%  & 1.29 & No \\
-95\%  & 1.48 & No \\
-97\%  & 1.47 & No \\
-100\% & 25.00 & Yes \\
 \bottomrule
 \end{tabular*}
 \end{table}
