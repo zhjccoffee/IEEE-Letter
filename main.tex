@@ -357,7 +357,7 @@ musculoskeletal model.
 \midrule
 E2E-RL & 18 & Direct muscle-level control actions. \\
 DEP-RL & 18 & Direct muscle-level control with DEP-style embodied exploration. \\
-Residual-Reflex RL & 4 & Residual modulation of selected reflex parameters. \\
+\textbf{Residual-Reflex RL} & \textbf{4} & \textbf{Residual modulation of selected reflex parameters.} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -526,15 +526,15 @@ speed.}
 \midrule
 \multirow[c]{3}{*}{0.8} & E2E-RL & 0.87 & 0.07 & 0.78 & 0.89 & 50 \\
  & DEP-RL & 0.83 & 0.03 & 1.09 & 1.31 & 33 \\
- & Residual-Reflex RL & 0.79 & \textbf{0.01} & 0.99 & 1.26 & 35 \\
+ & \textbf{Residual-Reflex RL} & 0.79 & \textbf{0.01} & 0.99 & 1.26 & 35 \\
 \midrule
 \multirow[c]{3}{*}{1.0} & E2E-RL & 1.18 & 0.18 & 1.39 & 1.18 & 37 \\
  & DEP-RL & 1.14 & 0.14 & 1.29 & 1.13 & 39 \\
- & Residual-Reflex RL & 1.05 & \textbf{0.05} & 1.23 & 1.17 & 37 \\
+ & \textbf{Residual-Reflex RL} & 1.05 & \textbf{0.05} & 1.23 & 1.17 & 37 \\
 \midrule
 \multirow[c]{3}{*}{1.2} & E2E-RL & 1.26 & 0.06 & 1.23 & 0.97 & 46 \\
  & DEP-RL & 1.30 & 0.10 & 1.37 & 1.06 & 42 \\
- & Residual-Reflex RL & 1.21 & \textbf{0.01} & 1.34 & 1.11 & 40 \\
+ & \textbf{Residual-Reflex RL} & 1.21 & \textbf{0.01} & 1.34 & 1.11 & 40 \\
 \bottomrule
 \end{tabular}%
 }
@@ -578,15 +578,15 @@ The kinematic average is the mean of the hip, knee, and ankle scores.}
 \midrule
 \multirow[c]{3}{*}{0.8} & E2E-RL & 0.87 & 39.0 & \textbf{98.3} & 18.6 & 0.0 \\
  & DEP-RL & 0.83 & 44.1 & 72.7 & 50.8 & 8.7 \\
- & Residual-Reflex RL & 0.79 & \textbf{81.3} & 96.6 & \textbf{68.9} & \textbf{78.5} \\
+ & \textbf{Residual-Reflex RL} & 0.79 & \textbf{81.3} & 96.6 & \textbf{68.9} & \textbf{78.5} \\
 \midrule
 \multirow[c]{3}{*}{1.0} & E2E-RL & 1.18 & 81.9 & 81.2 & 72.7 & \textbf{91.8} \\
  & DEP-RL & 1.14 & 58.5 & 62.5 & 64.2 & 48.7 \\
- & Residual-Reflex RL & 1.05 & \textbf{90.5} & \textbf{100.0} & \textbf{82.6} & 88.9 \\
+ & \textbf{Residual-Reflex RL} & 1.05 & \textbf{90.5} & \textbf{100.0} & \textbf{82.6} & 88.9 \\
 \midrule
 \multirow[c]{3}{*}{1.2} & E2E-RL & 1.26 & 75.6 & 88.4 & 52.4 & 85.9 \\
  & DEP-RL & 1.30 & 40.8 & 44.5 & 33.4 & 44.5 \\
- & Residual-Reflex RL & 1.21 & \textbf{92.3} & \textbf{99.6} & \textbf{88.7} & \textbf{88.6} \\
+ & \textbf{Residual-Reflex RL} & 1.21 & \textbf{92.3} & \textbf{99.6} & \textbf{88.7} & \textbf{88.6} \\
 \bottomrule
 \end{tabular}%
 }
@@ -679,17 +679,17 @@ Higher values indicate closer agreement with the human-reference vertical GRF
 range.}
 \label{tab:grf_scores}
 \small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{l r r r}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}l r r r}
 \toprule
-\makecell{\textbf{Target}\\\textbf{speed}} &
-\textbf{E2E-RL} & \textbf{DEP-RL} & \makecell{\textbf{Residual-}\\\textbf{Reflex RL}} \\
+\textbf{Method} & \textbf{0.8~m/s} & \textbf{1.0~m/s} & \textbf{1.2~m/s} \\
 \midrule
-0.8 & 35.9 & 39.8 & \textbf{76.7} \\
-1.0 & 27.6 & 0.0 & \textbf{89.8} \\
-1.2 & 21.5 & 0.0 & \textbf{89.1} \\
+E2E-RL & 35.9 & 27.6 & 21.5 \\
+DEP-RL & 39.8 & 0.0 & 0.0 \\
+\textbf{Residual-Reflex RL} & \textbf{76.7} & \textbf{89.8} & \textbf{89.1} \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
 \begin{figure}[!t]
@@ -743,15 +743,15 @@ more symmetric or more repeatable gait.}
 \midrule
 \multirow[c]{3}{*}{0.8} & E2E-RL & 2.92 & 5.75 & 6.36 & 0.10 & 9.05 & 14.88 \\
  & DEP-RL & 11.20 & 11.73 & 11.59 & 0.12 & 7.96 & 11.04 \\
- & Residual-Reflex RL & \textbf{0.80} & \textbf{1.03} & \textbf{0.89} & \textbf{0.04} & \textbf{1.98} & \textbf{5.66} \\
+ & \textbf{Residual-Reflex RL} & \textbf{0.80} & \textbf{1.03} & \textbf{0.89} & \textbf{0.04} & \textbf{1.98} & \textbf{5.66} \\
 \midrule
 \multirow[c]{3}{*}{1.0} & E2E-RL & 6.12 & 10.61 & 6.69 & 0.07 & 5.03 & 5.63 \\
  & DEP-RL & 4.54 & 10.12 & 16.27 & 0.28 & 2.62 & 5.27 \\
- & Residual-Reflex RL & \textbf{1.78} & \textbf{1.85} & \textbf{0.97} & \textbf{0.03} & \textbf{1.51} & \textbf{1.86} \\
+ & \textbf{Residual-Reflex RL} & \textbf{1.78} & \textbf{1.85} & \textbf{0.97} & \textbf{0.03} & \textbf{1.51} & \textbf{1.86} \\
 \midrule
 \multirow[c]{3}{*}{1.2} & E2E-RL & 3.43 & 3.00 & 9.84 & 0.04 & 3.87 & 5.83 \\
  & DEP-RL & 8.33 & 5.83 & 6.31 & 0.34 & 2.29 & 4.78 \\
- & Residual-Reflex RL & \textbf{0.87} & \textbf{0.87} & \textbf{0.46} & \textbf{0.02} & \textbf{0.70} & \textbf{0.74} \\
+ & \textbf{Residual-Reflex RL} & \textbf{0.87} & \textbf{0.87} & \textbf{0.46} & \textbf{0.02} & \textbf{0.70} & \textbf{0.74} \\
 \bottomrule
 \end{tabular}%
 }
