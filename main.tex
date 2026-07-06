@@ -361,7 +361,7 @@ trained policy, a 25~s rollout was exported as an STO file for post-hoc gait
 analysis. All detected gait cycles in the rollout were normalized to 0--100\%
 gait cycle. The comparison
 includes E2E-RL, DEP-RL, and Residual-Reflex RL, and uses four groups of
-metrics: task-level speed and stride measures, human-reference kinematics,
+metrics: task-level speed and stride measures, human-reference gait profiles,
 GRF morphology, and symmetry/repeatability.
 
 \subsubsection{Speed tracking and stride measures}
@@ -491,8 +491,10 @@ that the subsequent comparisons are made among controllers that can complete the
 basic walking objective, rather than between walking and failure cases. The
 stride measures also suggest different gait strategies: E2E-RL tends to use
 shorter and faster steps at lower speed, while DEP-RL and Residual-Reflex RL use
-longer strides. Therefore, speed tracking alone is not sufficient to determine
-which controller generates the more physiologically plausible gait.
+longer strides. These task-level measures therefore motivate the following
+gait-cycle analyses, which examine whether successful walking is also
+accompanied by human-reference joint motion, contact loading, and repeatable
+left--right coordination.
 
 \begin{table}[!t]
 \centering
@@ -524,7 +526,7 @@ speed.}
 }
 \end{table}
 
-\subsubsection{Kinematic gait analysis}
+\subsubsection{Human-reference gait analysis}
 The gait-cycle scores reveal a clearer separation between the three methods.
 As listed in Table~\ref{tab:gait_similarity}, Residual-Reflex RL achieved the highest
 overall human-reference score, with an average score of 89.9\%,
