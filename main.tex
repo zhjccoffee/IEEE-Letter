@@ -782,7 +782,8 @@ optimization. Under the same model changes, the CMA-ES-optimized reflex
 controller failed in the tested weakened models, whereas Residual-Reflex RL
 produced full 1000-step rollouts for soleus strength levels from 83\% to 100\%.
 
-Table~\ref{tab:weakness_adaptation} and Fig.~\ref{fig:weakness_adaptation}
+Table~\ref{tab:weakness_adaptation} and
+Fig.~\ref{fig:weakness_speed_adaptation}
 show that the residual policy did not simply force the weakened model to keep
 the nominal 1.2~m/s speed. Instead, the realized speed decreased as soleus
 strength was reduced, from 1.20~m/s in the nominal model to 0.95~m/s at 83\%
@@ -818,7 +819,7 @@ retraining, while still modulating the underlying reflex pathways online.
 \scriptsize
 \setlength{\tabcolsep}{2.0pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{l r r r r r r}
+\begin{tabular}{c c c c c c c}
 \toprule
 \textbf{Soleus} & \textbf{Speed} & \textbf{Err.} &
 \textbf{RMS $a_1$} & \textbf{RMS $a_2$} & \textbf{RMS $a_3$} & \textbf{RMS $a_4$} \\
@@ -842,7 +843,7 @@ computed from normalized hip, knee, and ankle gait-cycle profiles.}
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{l r r r r}
+\begin{tabular}{c c c c c}
 \toprule
 \textbf{Soleus} & \makecell{\textbf{Kinematic}\\\textbf{average}} &
 \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} \\
@@ -859,12 +860,19 @@ computed from normalized hip, knee, and ankle gait-cycle profiles.}
 \end{table}
 
 \begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{weakness_adaptation_summary.png}}
-\caption{Adaptation to plantarflexor weakness. Left: realized speed decreases
-as soleus force capacity is reduced, indicating a slower but stable gait
-strategy. Right: RMS residual actions show state-dependent modulation of the
-four selected reflex pathways under the same trained policy.}
-\label{fig:weakness_adaptation}
+\centerline{\includegraphics[width=0.92\columnwidth]{weakness_speed_adaptation.png}}
+\caption{Speed adaptation under plantarflexor weakness. The same trained
+Residual-Reflex RL policy remains stable across weakened soleus models but
+adopts a slower realized speed as force capacity is reduced.}
+\label{fig:weakness_speed_adaptation}
+\end{figure}
+
+\begin{figure}[!t]
+\centerline{\includegraphics[width=0.92\columnwidth]{weakness_residual_action_rms.png}}
+\caption{Residual-action modulation under plantarflexor weakness. RMS values
+show that the trained policy continues to adjust all four selected reflex
+channels, with the soleus-related channel $a_3$ showing the largest magnitude.}
+\label{fig:weakness_residual_action_rms}
 \end{figure}
 
 \begin{figure}[!t]
