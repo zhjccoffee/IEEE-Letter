@@ -438,6 +438,9 @@ where $z$ denotes either stride time or stride length, $\mu_z$ is the mean
 value of $z$, and $\sigma_z$ is its standard deviation over the analyzed gait
 cycles. The factor 100 expresses CV as a percentage. In the results, lower
 $\mathrm{CV}_z$ indicates more repeatable gait cycles.
+Accordingly, the Hip, Knee, Ankle, and GRF columns in the symmetry table report
+$D_y$ for the corresponding left--right waveform pair, whereas the Time CV and
+Length CV columns report $\mathrm{CV}_z$ for stride time and stride length.
 
 \subsection{Plantarflexor Weakness Adaptation}
 The weakness experiment evaluates whether the trained residual-reflex controller
@@ -693,22 +696,32 @@ evaluation, and the panel annotations report the GRF human-reference score.}
 The residual reflex representation also improved the regularity of the generated
 gait cycles. Table~\ref{tab:symmetry_variability} shows that Residual-Reflex RL
 consistently produced lower left--right waveform differences and lower stride
-time/length coefficients of variation than E2E-RL and DEP-RL. The largest
-differences occurred in ankle symmetry and stride variability, where E2E-RL and
-DEP-RL produced visibly less repeatable cycles. These
-metrics support the visual observation that residual reflex modulation yields a
-more bilaterally symmetric and repeatable gait pattern, rather than merely
-producing occasional successful walking cycles.
+time/length coefficients of variation than E2E-RL and DEP-RL. In this table,
+the Hip, Knee, Ankle, and GRF columns are the RMS differences between the
+average left and right gait-cycle waveforms for each quantity. The Time CV and
+Length CV columns are the coefficients of variation of stride time and stride
+length, computed as standard deviation divided by mean and multiplied by 100.
+The largest differences occurred in ankle symmetry and stride variability, where
+E2E-RL and DEP-RL produced visibly less repeatable cycles. These metrics support
+the visual observation that residual reflex modulation yields a more bilaterally
+symmetric and repeatable gait pattern, rather than merely producing occasional
+successful walking cycles.
 For example, at 1.2~m/s the stride time CV and stride length CV of
-Residual-Reflex RL were both below 1\%, whereas E2E-RL and DEP-RL showed larger
-cycle-to-cycle variation. This means that the proposed method did not only
-produce a good average gait cycle; it also generated more consistent steps
-throughout the analyzed trajectory.
+Residual-Reflex RL were 0.70\% and 0.74\%, respectively, both below 1\%.
+These values come directly from $\mathrm{CV}_{z}=100\sigma_z/\mu_z$, meaning
+that the standard deviation of stride timing and length was less than 1\% of
+their corresponding mean values. E2E-RL and DEP-RL showed larger
+cycle-to-cycle variation. Thus, the proposed method did not only produce a good
+average gait cycle; it also generated more consistent steps throughout the
+analyzed trajectory.
 
 \begin{table}[!t]
 \centering
 \caption{Cycle-level left--right waveform differences and stride variability.
-Lower values indicate more symmetric or more repeatable gait.}
+Hip, knee, ankle, and GRF columns report $D_y$, the RMS difference between the
+average left and right gait-cycle waveforms. Time CV and Length CV report
+$100\sigma_z/\mu_z$ for stride time and stride length. Lower values indicate
+more symmetric or more repeatable gait.}
 \label{tab:symmetry_variability}
 \small
 \setlength{\tabcolsep}{3.5pt}
