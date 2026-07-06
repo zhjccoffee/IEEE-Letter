@@ -475,12 +475,12 @@ moments of the gait cycle.
 The perturbation experiment evaluates whether the trained residual-reflex
 controller can retain closed-loop walking after an unexpected environmental
 disturbance, again without retraining. Backward force pulses were applied to the
-torso starting at 3~s. We tested 75, 100, and 125~N pushes, including both
-single pulses and repeated pulses every 5~s. Residual-Reflex RL was compared
-with the CMA-ES-optimized reflex controller under the same single-push setting.
-We report the best rollout duration and realized speed after the trained policy
-is evaluated without further learning. These metrics distinguish sustained
-recovery from a brief delayed fall after the push.
+torso starting at 3~s. We tested 75 and 100~N pushes, including both single
+pulses and repeated pulses every 5~s. Residual-Reflex RL was compared with the
+CMA-ES-optimized reflex controller under the same perturbation settings. We
+report the best rollout duration and realized speed after evaluation without
+further learning. These metrics distinguish sustained recovery from a brief
+delayed fall after the push.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
@@ -954,19 +954,20 @@ gray bands denote the human-reference ranges.}
 The external push experiment further evaluates whether the learned residual
 policy can tolerate environmental disturbances that were not part of training.
 Backward force pulses were applied to the torso at 3~s. The CMA-ES-optimized
-reflex controller terminated after approximately 4.3--4.6~s for the tested
-single-push forces. In contrast, Residual-Reflex RL produced representative
-full-episode recoveries in the single-push conditions.
+reflex controller terminated after approximately 4.5--4.6~s for both the single
+and repeated 75/100~N settings. In contrast, Residual-Reflex RL produced
+representative full-episode recoveries under the same 75/100~N single-push
+conditions.
 
 Table~\ref{tab:push_perturbation} summarizes the perturbation outcomes using
 the best recovered rollout for each perturbation setting. Under single backward
-pushes of 75, 100, and 125~N, Residual-Reflex RL maintained walking for the full
+pushes of 75 and 100~N, Residual-Reflex RL maintained walking for the full
 25~s evaluation window. Repeated perturbations every 5~s were substantially
-harder: the 75~N repeated-push case still produced a full rollout, the 100~N
-case lasted 20.1~s, and the 125~N case lasted 9.8~s. This pattern identifies a
-recovery boundary: isolated pushes can be absorbed by the learned
-reflex-parameter policy, whereas stronger repeated disturbances exceed the
-recovery capacity of the current controller.
+harder: the 75~N repeated-push case still produced a full rollout, whereas the
+100~N case lasted 20.1~s. In comparison, the CMA-ES-optimized reflex controller
+did not recover beyond roughly 4.5~s in the same perturbation settings. This
+pattern indicates that the learned reflex-parameter policy provides additional
+recovery capacity beyond the fixed optimized reflex gains.
 Together with the weakness test, these results support the central claim that
 the learned residual policy provides a flexible reflex-parameter modulation
 mechanism beyond offline optimized reflex gains.
@@ -977,27 +978,28 @@ mechanism beyond offline optimized reflex gains.
 25~s. The table reports the best recovered rollout for each perturbation
 setting.}
 \label{tab:push_perturbation}
-\small
-\setlength{\tabcolsep}{4.2pt}
+\scriptsize
+\setlength{\tabcolsep}{2.6pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{l l c c c}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}l l c c c}
 \toprule
-\textbf{Controller} & \textbf{Perturbation} & \textbf{Force} &
+\textbf{Method} & \textbf{Perturbation} & \textbf{Force} &
 \makecell{\textbf{Best}\\\textbf{duration}} &
 \makecell{\textbf{Best}\\\textbf{speed}} \\
 \midrule
-Residual-Reflex RL & Single push & 75~N  & 25.0~s & 1.188~m/s \\
-Residual-Reflex RL & Single push & 100~N & 25.0~s & 1.176~m/s \\
-Residual-Reflex RL & Single push & 125~N & 25.0~s & 1.162~m/s \\
-Residual-Reflex RL & Every 5~s & 75~N  & 25.0~s & 1.129~m/s \\
-Residual-Reflex RL & Every 5~s & 100~N & 20.1~s & 1.091~m/s \\
-Residual-Reflex RL & Every 5~s & 125~N & 9.8~s & 1.063~m/s \\
+\multirow{4}{*}{\makecell[l]{Residual-\\Reflex RL}} &
+\multirow{2}{*}{Single push} & 75~N  & 25.0~s & 1.188~m/s \\
+& & 100~N & 25.0~s & 1.176~m/s \\
+& \multirow{2}{*}{Every 5~s} & 75~N  & 25.0~s & 1.129~m/s \\
+& & 100~N & 20.1~s & 1.091~m/s \\
 \midrule
-CMA-ES reflex & Single push & 75~N  & 4.5~s & 1.098~m/s \\
-CMA-ES reflex & Single push & 100~N & 4.6~s & 1.069~m/s \\
-CMA-ES reflex & Single push & 125~N & 4.3~s & 1.061~m/s \\
+\multirow{4}{*}{\makecell[l]{CMA-ES-\\optimized\\Reflex}} &
+\multirow{2}{*}{Single push} & 75~N  & 4.5~s & 1.098~m/s \\
+& & 100~N & 4.6~s & 1.069~m/s \\
+& \multirow{2}{*}{Every 5~s} & 75~N  & 4.5~s & 1.098~m/s \\
+& & 100~N & 4.6~s & 1.069~m/s \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
 \subsection{Discussion}
