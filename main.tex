@@ -164,41 +164,47 @@ future work.
 \subsection{Residual-Reflex Control Architecture}
 The proposed method treats the reflex controller as a structured low-level
 motor prior inspired by spinal sensory feedback circuits and learns only a
-compact residual modulation on top of it. As
-shown in Fig.~\ref{framwork}, the musculoskeletal model returns proprioceptive
-and kinematic states to a high-level DRL policy. The policy outputs a
-low-dimensional residual action, which modifies selected reflex parameters
-before the reflex controller generates muscle excitations. The resulting muscle
-excitations are then transformed into skeletal motion and ground reaction forces
-by the musculoskeletal simulator. This hierarchy changes the role of DRL from
-direct muscle excitation control to reflex-parameter modulation.
+compact residual modulation on top of it. As shown in Fig.~\ref{framwork}, the
+framework contains three functional blocks. First, the high-level learning block
+receives the current observation and outputs a compact residual action. Second,
+the low-level reflex-feedback block maps this residual action to selected reflex
+parameters, and then computes muscle stimulation through sensory feedback
+pathways. Third, the physics-simulation block advances the musculoskeletal
+model, returns the next observation and reward, and provides transition data for
+off-policy learning. This hierarchy changes the role of DRL from direct muscle
+excitation control to reflex-parameter modulation.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{framwork.png}}
-\caption{Low-dimensional residual-reflex-informed DRL framework. The learned policy does
-not directly command all muscle excitations. Instead, it modulates selected
-parameters of a neural-feedback-inspired reflex controller, which then produces
-muscle-level stimulation for the
-musculoskeletal model.}
+\caption{Low-dimensional residual-reflex-informed DRL framework. The framework
+is organized into high-level residual policy learning, low-level reflex-feedback
+modulation, and physics simulation. The learned policy does not directly command
+all muscle excitations; instead, it modulates selected parameters of a
+neural-feedback-inspired reflex controller, which then produces muscle-level
+stimulation for the musculoskeletal model.}
 \label{framwork}
 \end{figure*}
 
-Let $\mathbf{s}_t$ denote the state observed by the policy at time $t$. The
-state contains muscle-level signals, foot states, whole-body kinematics, and
-joint-space variables:
+Let $\mathbf{s}_t$ denote the observation received by the policy at time $t$.
+In the present implementation, $\mathbf{s}_t\in\mathbb{R}^{122}$. It contains
+muscle-level sensory and activation signals from the 18 Hill-type muscles,
+foot-relative positions, body orientation and angular velocity, generalized
+coordinates and velocities, and the target walking speed:
 \begin{equation}
 \begin{aligned}
 \mathbf{s}_t = [
 &\mathbf{l}_t,\dot{\mathbf{l}}_t,\mathbf{f}_t,\mathbf{e}_t,
-\boldsymbol{\alpha}_t,\mathbf{p}_{feet,t},\\
-&\mathbf{q}_t,\dot{\mathbf{q}}_t,\theta_t,\dot{\theta}_t],
+\boldsymbol{\alpha}_t,\mathbf{p}_{feet,t},
+\boldsymbol{\psi}_t,\boldsymbol{\omega}_t,\\
+&\mathbf{q}_t,\dot{\mathbf{q}}_t,v_t^\ast],
 \end{aligned}
 \end{equation}
 where $\mathbf{l}$, $\dot{\mathbf{l}}$, and $\mathbf{f}$ are muscle fiber
 lengths, velocities, and forces; $\mathbf{e}$ and $\boldsymbol{\alpha}$ are
 muscle excitations and activations; $\mathbf{p}_{feet}$ represents foot
-positions; $\mathbf{q}$ and $\dot{\mathbf{q}}$ are joint angles and angular
-velocities; and $\theta$ is the trunk pitch angle.
+positions relative to the body; $\boldsymbol{\psi}$ and $\boldsymbol{\omega}$
+are body orientation and angular velocity; $\mathbf{q}$ and $\dot{\mathbf{q}}$
+are generalized coordinates and velocities; and $v^\ast$ is the target speed.
 
 \subsection{Reflex Controller}
 The low-level controller is a phase-dependent reflex controller inspired by
@@ -241,6 +247,7 @@ $\mathbf{a}_t\in\mathbb{R}^{4}$. Each action component modulates one selected
 reflex parameter around its nominal value:
 \begin{equation}
 p_i(t)=p_{i,0}(1+\lambda a_i(t)),
+\label{eq:residual_scaling}
 \end{equation}
 where $p_{i,0}$ is the nominal reflex parameter and $\lambda$ is the action
 scale. In the present implementation, $\lambda=0.5$. Thus $a_i(t)=0$ recovers
@@ -287,16 +294,29 @@ learned actions and neuromuscular function.
 \subsection{Policy Learning}
 The policy is trained with Maximum a Posteriori Policy Optimization (MPO)
 \cite{mpo2018}, an off-policy actor--critic algorithm for continuous control.
-The same optimizer is used across the compared policies. Therefore, the main experimental
-comparison isolates the control representation: low-dimensional
-reflex-parameter modulation versus direct muscle-level action, with and without
-DEP-style exploratory feedback.
+The actor network receives the 122-dimensional observation $\mathbf{s}_t$ and
+parameterizes a Gaussian policy $\pi_{\phi}(\mathbf{a}_t|\mathbf{s}_t)$. For
+Residual-Reflex RL, the policy output is the mean and standard deviation of a
+four-dimensional residual action distribution, with
+$\mathbf{a}_t\in[-1,1]^4$. During training, actions are sampled from this
+distribution; during deterministic evaluation, the policy mean is used. The
+critic receives the state-action pair and estimates
+$Q_{\psi}(\mathbf{s}_t,\mathbf{a}_t)$ for MPO updates.
 
-At each time step, the policy samples an action from a Gaussian action
-distribution conditioned on $\mathbf{s}_t$. The action is applied to the
-controller, the simulator advances one step, and the transition
-$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored for off-policy
-updates. The base reward combines target-speed tracking ($r_{vel}$) with
+At each control step, the sampled residual action is converted into reflex
+parameter changes through Eq.~\eqref{eq:residual_scaling}, the reflex
+controller generates muscle stimulation, and the simulator advances one step.
+The transition
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1},d_t)$ is stored in a replay
+buffer, where $d_t$ denotes the episode termination flag. MPO updates the critic
+from replayed Bellman targets and updates the actor under a KL constraint,
+which limits abrupt policy changes during continuous-control learning. The
+same MPO training loop is used for all DRL controllers. In E2E-RL and DEP-RL,
+however, the action is an 18-dimensional direct muscle-control vector rather
+than a four-dimensional reflex-parameter modulation. Thus, the comparison keeps
+the optimizer fixed while changing the control interface.
+
+The base reward combines target-speed tracking ($r_{vel}$) with
 regularization terms for excessive ground reaction force ($r_{grf}$), abrupt
 excitation changes ($r_{smooth}$), muscle usage ($r_{musc}$), joint-limit
 torques ($r_{constr}$), and non-foot self-contact ($r_{self}$):
