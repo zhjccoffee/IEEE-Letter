@@ -604,9 +604,10 @@ waveform observations are consistent with the knee and ankle scores in
 Table~\ref{tab:gait_similarity}.
 They also explain why the Residual-Reflex RL controller looks more repeatable in
 animation: the blue and red gait cycles occupy a narrower region, meaning that
-successive steps and the two legs follow more similar trajectories. For the
-direct muscle-control methods, the larger spread indicates that different steps
-within the same trial can use noticeably different joint coordination patterns.
+successive steps and the two legs follow more similar trajectories. For E2E-RL
+and DEP-RL, which directly output muscle-level actions, the larger waveform
+spread indicates less consistent joint coordination across steps within the same
+trial.
 GRF morphology is analyzed separately below because contact loading is not
 directly captured by joint-angle profiles alone.
 
@@ -672,8 +673,8 @@ The residual reflex representation also improved the regularity of the generated
 gait cycles. Table~\ref{tab:symmetry_variability} shows that Residual-Reflex RL
 consistently produced lower left--right waveform differences and lower stride
 time/length coefficients of variation than E2E-RL and DEP-RL. The largest
-differences occurred in ankle symmetry and stride variability, where the
-direct muscle-control methods produced visibly less repeatable cycles. These
+differences occurred in ankle symmetry and stride variability, where E2E-RL and
+DEP-RL produced visibly less repeatable cycles. These
 metrics support the visual observation that residual reflex modulation yields a
 more bilaterally symmetric and repeatable gait pattern, rather than merely
 producing occasional successful walking cycles.
