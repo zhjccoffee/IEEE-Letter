@@ -357,8 +357,9 @@ Residual-Reflex RL & 4 & Residual modulation of selected reflex parameters. \\
 The nominal walking experiment evaluates whether the proposed controller
 generates plausible steady gait under controlled target-speed tasks. Policies
 were evaluated at three target walking speeds: 0.8, 1.0, and 1.2~m/s. For each
-trained policy, a representative walking trajectory was exported as an STO file.
-All detected gait cycles were normalized to 0--100\% gait cycle. The comparison
+trained policy, a 25~s rollout was exported as an STO file for post-hoc gait
+analysis. All detected gait cycles in the rollout were normalized to 0--100\%
+gait cycle. The comparison
 includes E2E-RL, DEP-RL, and Residual-Reflex RL, and uses four groups of
 metrics: task-level speed and stride measures, human-reference kinematics,
 GRF morphology, and symmetry/repeatability.
