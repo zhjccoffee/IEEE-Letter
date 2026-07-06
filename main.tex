@@ -44,7 +44,7 @@ Hyfydy-based musculoskeletal simulation using target-speed walking,
 plantarflexor weakness, and external push perturbation tests. The proposed
 method is compared with direct muscle-control baselines and a fixed
 optimized-reflex controller. In nominal walking, Residual-Reflex RL achieves
-higher reference-envelope scores and produces more symmetric and repeatable gait
+higher human-reference gait scores and produces more symmetric and repeatable gait
 cycles than end-to-end reinforcement learning (E2E-RL) and DEP-RL. Under soleus
 weakness, the learned residual policy preserves full-episode walking by reducing
 realized speed and modulating selected reflex parameters, whereas the fixed
@@ -359,7 +359,7 @@ were evaluated at three target walking speeds: 0.8, 1.0, and 1.2~m/s. For each
 trained policy, a representative walking trajectory was exported as an STO file.
 All detected gait cycles were normalized to 0--100\% gait cycle. The comparison
 includes E2E-RL, DEP-RL, and Residual-Reflex RL, and uses four groups of
-metrics: task-level speed and stride measures, reference-envelope kinematics,
+metrics: task-level speed and stride measures, human-reference kinematics,
 GRF morphology, and symmetry/repeatability.
 
 \subsubsection{Speed tracking and stride measures}
@@ -371,17 +371,18 @@ stride length and stride time describe the gait strategy used to achieve the
 target speed. The stride measures were computed from the detected gait cycles
 in each evaluated trajectory.
 
-\subsubsection{Reference-envelope gait analysis}
-To quantify whether the generated motion follows reference gait-cycle shapes,
-we computed reference-envelope scores for pelvic tilt, hip angle, knee angle,
-ankle angle, and vertical GRF. The gray reference envelopes in the profile
-figures denote lower and upper bounds from the post-hoc reference-envelope data.
-They were used only for evaluation and were not included in the policy reward.
+\subsubsection{Human-reference gait analysis}
+To quantify whether the generated motion resembles human walking, we compared
+the simulated gait-cycle profiles with human-reference gait data for pelvic
+tilt, hip angle, knee angle, ankle angle, and vertical GRF. The gray bands in
+the profile figures denote lower and upper bounds derived from the reference
+data. They were used only for post-hoc evaluation and were not included in the
+policy reward.
 For each quantity, left and right gait cycles were time-normalized
 and averaged to obtain a mean simulated profile $\bar{y}(x)$, where $x$
 denotes gait-cycle percentage. Let $y_{\min}(x_k)$ and $y_{\max}(x_k)$ denote
-the lower and upper reference-envelope values at sample point $x_k$. The
-normalized envelope violation is
+the lower and upper human-reference bounds at sample point $x_k$. The
+normalized reference-range violation is
 \begin{equation}
 e = \frac{1}{N}\sum_{k=1}^{N}
 \frac{
@@ -397,16 +398,16 @@ The corresponding score is
 S = 100 \cdot \mathrm{clip}(1-e,0,1).
 \end{equation}
 Higher scores indicate that the averaged trajectory remains closer to the
-reference envelope; a score of 100 means that the mean profile stays entirely
-inside the envelope. The overall gait score is the average of the pelvic, hip,
-knee, ankle, and GRF component scores.
+human-reference range; a score of 100 means that the mean profile stays entirely
+inside the reference bounds. The overall gait score is the average of the
+pelvic, hip, knee, ankle, and GRF component scores.
 
 \subsubsection{GRF morphology}
 Because vertical GRF directly reflects stance loading and push-off behavior, we
 also visualize individual left and right GRF gait cycles. This analysis is used
 to assess whether the controller produces repeatable stance-phase loading,
 reasonable double-support/propulsion morphology, and avoids abnormal impact
-peaks. The numerical GRF score is the GRF component of the reference-envelope
+peaks. The numerical GRF score is the GRF component of the human-reference
 metric above, while the cycle plots show left--right and stride-to-stride
 consistency.
 
@@ -521,7 +522,7 @@ speed.}
 \subsubsection{Kinematic gait analysis}
 The gait-cycle scores reveal a clearer separation between the three methods.
 As listed in Table~\ref{tab:gait_similarity}, Residual-Reflex RL achieved the highest
-overall reference-envelope score, with an average score of 89.9\%,
+overall human-reference score, with an average score of 89.9\%,
 compared with 64.9\% for E2E-RL and 51.3\% for DEP-RL. The main differences appear in the knee,
 ankle, and vertical GRF components, where the Residual-Reflex RL controller more
 consistently preserved reference-like joint coordination and stance-phase
@@ -544,7 +545,7 @@ the full gait pattern is not reference-consistent.
 
 \begin{table}[!t]
 \centering
-\caption{Reference-envelope scores in controlled walking
+\caption{Human-reference gait scores in controlled walking
 validation. Scores are computed from normalized gait-cycle kinematics and
 vertical GRF.}
 \label{tab:gait_similarity}
@@ -574,7 +575,7 @@ vertical GRF.}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_score_comparison_bars.png}}
-\caption{Reference-envelope scores across target speeds. Numeric
+\caption{Human-reference gait scores across target speeds. Numeric
 labels indicate the score of each bar. The Residual-Reflex RL controller achieves
 the highest overall score and especially improves knee, ankle, and GRF
 components.}
@@ -605,28 +606,28 @@ always visually apparent from joint snapshots alone.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
-\caption{Reference-envelope kinematic gait-cycle visualization at target speed
+\caption{Human-reference kinematic gait-cycle visualization at target speed
 0.8~m/s for E2E-RL, DEP-RL, and Residual-Reflex RL. Blue and red
 curves denote left and right gait cycles, respectively; the black curve is the
-cycle average and the gray band is the reference envelope.}
+cycle average and the gray band is the human-reference range.}
 \label{fig:gait_profiles_08}
 \end{figure}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_1p0.png}}
-\caption{Reference-envelope kinematic gait-cycle visualization at target speed
+\caption{Human-reference kinematic gait-cycle visualization at target speed
 1.0~m/s for E2E-RL, DEP-RL, and Residual-Reflex RL. Blue and red
 curves denote left and right gait cycles, respectively; the black curve is the
-cycle average and the gray band is the reference envelope.}
+cycle average and the gray band is the human-reference range.}
 \label{fig:gait_profiles_10}
 \end{figure}
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_1p2.png}}
-\caption{Reference-envelope kinematic gait-cycle visualization at target speed
+\caption{Human-reference kinematic gait-cycle visualization at target speed
 1.2~m/s for E2E-RL, DEP-RL, and Residual-Reflex RL. Blue and red
 curves denote left and right gait cycles, respectively; the black curve is the
-cycle average and the gray band is the reference envelope.}
+cycle average and the gray band is the human-reference range.}
 \label{fig:gait_profiles_12}
 \end{figure}
 
@@ -655,8 +656,8 @@ phase, not only the joint-angle trajectories.
 \caption{Vertical GRF morphology across target speeds for E2E-RL, DEP-RL, and
 Residual-Reflex RL. Blue and red thin curves show individual left
 and right normalized gait cycles, respectively; the black curve denotes the
-cycle mean, the gray band denotes the reference envelope used for post-hoc
-evaluation, and the panel annotations report the GRF reference-envelope score.}
+cycle mean, the gray band denotes the human-reference range used for post-hoc
+evaluation, and the panel annotations report the GRF human-reference score.}
 \label{fig:grf_morphology}
 \end{figure}
 
@@ -902,7 +903,7 @@ space and preserves a structured neuromechanical prior within the control loop.
 
 Experiments in a Hyfydy-based musculoskeletal simulation showed that the
 Residual-Reflex RL controller produced gait cycles with higher
-reference-envelope scores than E2E-RL and DEP-RL at 0.8, 1.0, and 1.2~m/s.
+human-reference gait scores than E2E-RL and DEP-RL at 0.8, 1.0, and 1.2~m/s.
 The improvement was most evident in knee kinematics, ankle kinematics, and
 vertical GRF morphology. Additional cycle-level analysis showed lower
 left--right waveform differences and lower stride variability, indicating more
