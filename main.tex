@@ -476,13 +476,14 @@ moments of the gait cycle.
 \subsection{External Push Perturbation}
 The perturbation experiment evaluates whether the trained residual-reflex
 controller can retain closed-loop walking after an unexpected environmental
-disturbance, again without retraining. Backward force pulses were applied to the
-torso starting at 3~s. We tested 75 and 100~N pushes, including both single
-pulses and repeated pulses every 5~s. Residual-Reflex RL was compared with the
-CMA-ES-optimized reflex controller under the same perturbation settings. We
-report the best rollout duration and realized speed after evaluation without
-further learning. These metrics distinguish sustained recovery from a brief
-delayed fall after the push.
+disturbance, again without retraining. The same trained 1.2~m/s policy used in
+the nominal walking test was kept unchanged during perturbation evaluation.
+Backward force pulses were applied to the torso starting at 3~s. We tested 75
+and 100~N pushes, including both single pulses and repeated pulses every 5~s.
+Residual-Reflex RL was compared with the CMA-ES-optimized reflex controller
+under the same perturbation settings. We report rollout duration and realized
+speed after evaluation without further learning. These metrics distinguish
+sustained recovery from a brief delayed fall after the push.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
@@ -960,21 +961,21 @@ gray bands denote the human-reference ranges.}
 \label{sec:perturbation_results}
 The external push experiment further evaluates whether the learned residual
 policy can tolerate environmental disturbances that were not part of training.
-Backward force pulses were applied to the torso at 3~s. The CMA-ES-optimized
-reflex controller terminated after approximately 4.5--4.6~s for both the single
-and repeated 75/100~N settings. In contrast, Residual-Reflex RL produced
-representative full-episode recoveries under the same 75/100~N single-push
-conditions.
+The trained 1.2~m/s Residual-Reflex RL policy was evaluated directly, with no
+additional learning or parameter tuning. Backward force pulses were applied to
+the torso at 3~s. The CMA-ES-optimized reflex controller terminated after
+approximately 4.5--4.6~s for both the single and repeated 75/100~N settings. In
+contrast, Residual-Reflex RL produced representative full-episode recoveries
+under the same 75/100~N single-push conditions.
 
-Table~\ref{tab:push_perturbation} summarizes the perturbation outcomes using
-the best recovered rollout for each perturbation setting. Under single backward
-pushes of 75 and 100~N, Residual-Reflex RL maintained walking for the full
-25~s evaluation window. Repeated perturbations every 5~s were substantially
-harder: the 75~N repeated-push case still produced a full rollout, whereas the
-100~N case lasted 20.1~s. In comparison, the CMA-ES-optimized reflex controller
-did not recover beyond roughly 4.5~s in the same perturbation settings. This
-pattern indicates that the learned reflex-parameter policy provides additional
-recovery capacity beyond the fixed optimized reflex gains.
+Table~\ref{tab:push_perturbation} summarizes the perturbation outcomes. Under
+single backward pushes of 75 and 100~N, Residual-Reflex RL maintained walking
+for the full 25~s evaluation window. Repeated perturbations every 5~s were
+substantially harder: the 75~N repeated-push case still produced a full rollout,
+whereas the 100~N case lasted 20.1~s. In comparison, the CMA-ES-optimized reflex
+controller did not recover beyond roughly 4.5~s in the same perturbation
+settings. This pattern indicates that the learned reflex-parameter policy
+provides additional recovery capacity beyond the fixed optimized reflex gains.
 Together with the weakness test, these results support the central claim that
 the learned residual policy provides a flexible reflex-parameter modulation
 mechanism beyond offline optimized reflex gains.
@@ -982,8 +983,7 @@ mechanism beyond offline optimized reflex gains.
 \begin{table}[!t]
 \centering
 \caption{External backward push perturbation results. Full episode duration is
-25~s. The table reports the best recovered rollout for each perturbation
-setting.}
+25~s.}
 \label{tab:push_perturbation}
 \small
 \setlength{\tabcolsep}{1.8pt}
@@ -991,8 +991,8 @@ setting.}
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c}
 \toprule
 \textbf{Method} & \textbf{Perturbation} & \textbf{Force} &
-\makecell{\textbf{Best}\\\textbf{duration}} &
-\makecell{\textbf{Best}\\\textbf{speed}} \\
+\textbf{Duration} &
+\textbf{Speed} \\
 \midrule
 \multirow[c]{4}{*}{\makecell[c]{Residual-\\Reflex RL}} &
 \multirow{2}{*}{Single push} & 75~N  & 25.0~s & 1.188~m/s \\
