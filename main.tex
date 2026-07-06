@@ -42,15 +42,15 @@ structure of spinal-reflex-inspired control while allowing state-dependent
 adaptation of gait-relevant feedback pathways. We validate the framework in a
 Hyfydy-based musculoskeletal simulation using target-speed walking,
 plantarflexor weakness, and external push perturbation tests. The proposed
-method is compared with direct muscle-control baselines and a fixed
-optimized-reflex controller. In nominal walking, Residual-Reflex RL achieves
+method is compared with direct muscle-control baselines and a
+CMA-ES-optimized reflex controller. In nominal walking, Residual-Reflex RL achieves
 higher human-reference gait scores and produces more symmetric and repeatable gait
 cycles than end-to-end reinforcement learning (E2E-RL) and DEP-RL. Under soleus
 weakness, the learned residual policy preserves full-episode walking by reducing
-realized speed and modulating selected reflex parameters, whereas the fixed
-optimized-reflex controller fails in the tested weakened models. Under external
+realized speed and modulating selected reflex parameters, whereas the
+CMA-ES-optimized reflex controller fails in the tested weakened models. Under external
 backward pushes, Residual-Reflex RL also survives perturbation cases that
-terminate the fixed reflex controller. These results suggest that learning in a
+terminate the optimized-reflex controller. These results suggest that learning in a
 compact reflex-parameter space can improve both gait plausibility and
 adaptability in muscle-driven locomotion.
 \end{abstract}
@@ -123,8 +123,8 @@ action space itself be reduced by learning at the level of structured reflex
 modulation?
 
 In this study, we address this gap by combining the structure of reflex control
-with the adaptability of DRL. The goal is to avoid two extremes: hand-tuning a
-fixed reflex controller, or learning all muscle excitations directly in a
+with the adaptability of DRL. The goal is to avoid two extremes: relying on
+offline optimized reflex parameters, or learning all muscle excitations directly in a
 high-dimensional action space. Inspired by residual reinforcement learning
 \cite{residualrl2019}, the proposed method keeps the reflex controller as a
 low-level neuromuscular feedback prior and trains a policy to output residual
@@ -148,10 +148,10 @@ The main contributions are as follows:
     repeatability. The results show more reference-consistent knee, ankle, and
     contact-loading patterns under residual reflex modulation.
     \item To evaluate whether residual modulation provides adaptability beyond
-    fixed reflex parameters, we test the trained controller under plantarflexor
+    offline optimized reflex parameters, we test the trained controller under plantarflexor
     weakness and external push perturbations. The results show that
     state-dependent reflex-parameter modulation can preserve walking in
-    conditions where a fixed optimized-reflex controller fails.
+    conditions where a CMA-ES-optimized reflex controller fails.
 \end{enumerate}
 
 The remainder of the paper is organized as follows: Section II presents the residual reflex control formulation and learning framework; Section III describes the controlled walking validation setup and evaluation metrics; Section IV presents and analyzes the results; and Section V concludes the paper and outlines
@@ -328,11 +328,12 @@ setting commonly used in musculoskeletal DRL studies
 muscle-level action space, but adds DEP-style embodied exploration
 \cite{deprl2023}. The proposed \emph{Residual-Reflex RL} controller learns
 four-dimensional residual actions that modulate the selected reflex parameters
-in Table~\ref{tab:residual_actions}. The \emph{optimized-reflex} controller is
-the fixed reflex controller from which the residual policy is initialized, and
-is used as a non-learning reflex baseline in the weakness and perturbation
-tests. All DRL policies were trained with MPO-based off-policy reinforcement
-learning on the same musculoskeletal model.
+in Table~\ref{tab:residual_actions}. The \emph{CMA-ES-optimized reflex}
+controller is the reflex controller obtained by offline parameter optimization;
+its parameters are not updated during evaluation. It is used as a non-learning
+reflex baseline in the weakness and perturbation tests. All DRL policies were
+trained with MPO-based off-policy reinforcement learning on the same
+musculoskeletal model.
 
 \begin{table}[!t]
 \centering
@@ -437,14 +438,16 @@ cycles. The factor 100 expresses CV as a percentage. In the results, lower
 $\mathrm{CV}_z$ indicates more repeatable gait cycles.
 
 \subsection{Plantarflexor Weakness Adaptation}
-The weakness experiment evaluates whether the residual-reflex policy can adapt
-when the body model changes after training. Plantarflexor weakness was simulated
-by reducing the maximum isometric force of the soleus muscles while keeping the
-trained 1.2~m/s policy fixed. The evaluated soleus strength levels were
-83--100\% of the nominal value. Residual-Reflex RL was compared with the fixed
-optimized-reflex controller under the same weakened models. We report
-survival length, realized speed, gait quality, and the root-mean-square
-magnitude of the four residual actions:
+The weakness experiment evaluates whether the trained residual-reflex controller
+can remain usable after a change in muscle capacity without retraining. This
+directly tests the motivation for using a state-dependent policy on top of the
+reflex controller, rather than relying only on one offline-optimized parameter
+set. Plantarflexor weakness was simulated by reducing the maximum isometric
+force of the soleus muscles while keeping the trained 1.2~m/s policy fixed. The
+evaluated soleus strength levels were 83--100\% of the nominal value.
+Residual-Reflex RL was compared with the CMA-ES-optimized reflex controller
+under the same weakened models. We report survival length, realized speed, gait
+quality, and the root-mean-square magnitude of the four residual actions:
 \begin{equation}
 A_i^{\mathrm{RMS}} =
 \sqrt{\frac{1}{T}\sum_{t=1}^{T}a_i(t)^2},
@@ -460,7 +463,7 @@ The perturbation experiment evaluates whether the trained residual-reflex policy
 can recover from disturbances that were not present during training. Backward
 force pulses were applied to the torso starting at 3~s. We tested single pushes
 of 75, 100, and 125~N, as well as repeated pushes every 5~s. Residual-Reflex RL
-was compared with the fixed optimized-reflex controller. We report the number
+was compared with the CMA-ES-optimized reflex controller. We report the number
 of successful rollouts, best rollout duration, and realized speed after the
 trained policy is evaluated without further learning. Representative
 trajectories and snapshots are used to inspect whether recovery corresponds to
@@ -745,13 +748,13 @@ cycle detected from the corresponding STO trajectory and synchronized video.}
 
 \subsection{Plantarflexor Weakness Adaptation}
 \label{sec:weakness_results}
-The weakness experiment directly tests the question raised by the fixed-reflex
-baseline: if an optimized reflex controller already walks well in the nominal
-model, what does the learned residual policy add? To probe this, the soleus
-maximum isometric force was reduced while the trained 1.2~m/s policy was kept
-unchanged. The fixed optimized-reflex controller failed in the weakened models
-tested here, whereas Residual-Reflex RL produced full 1000-step rollouts for
-soleus strength levels from 83\% to 100\%.
+The weakness experiment directly tests the question raised by the optimized
+reflex baseline: if a CMA-ES-optimized reflex controller already walks well in
+the nominal model, what does the learned residual policy add? To probe this, the
+soleus maximum isometric force was reduced while the trained 1.2~m/s policy was
+kept unchanged. The CMA-ES-optimized reflex controller failed in the weakened
+models tested here, whereas Residual-Reflex RL produced full 1000-step rollouts
+for soleus strength levels from 83\% to 100\%.
 
 Table~\ref{tab:weakness_adaptation} and Fig.~\ref{fig:weakness_adaptation}
 show that the residual policy did not simply force the weakened model to keep
@@ -809,7 +812,7 @@ four selected reflex pathways under the same trained policy.}
 \label{sec:perturbation_results}
 The external push experiment further evaluates whether the learned residual
 policy can tolerate disturbances that were not part of training. Backward force
-pulses were applied to the torso at 3~s. The fixed optimized-reflex controller
+pulses were applied to the torso at 3~s. The CMA-ES-optimized reflex controller
 terminated after approximately 4.3--4.6~s for 75--125~N pushes. In contrast,
 Residual-Reflex RL produced full-episode recoveries in all three single-push
 conditions, although not every rollout succeeded because the policy remains
@@ -825,7 +828,7 @@ perturbations can be handled, whereas stronger repeated pushes exceed the
 recovery capacity of the current controller.
 Together with the weakness test, these results support the central claim that
 the learned residual policy provides a flexible reflex-parameter modulation
-mechanism beyond fixed optimized reflex gains.
+mechanism beyond offline optimized reflex gains.
 
 \begin{table}[!t]
 \centering
@@ -847,9 +850,9 @@ Residual-Reflex RL & Every 5~s & 75~N  & 1/10 & 25.0~s \\
 Residual-Reflex RL & Every 5~s & 100~N & 0/10 & 20.1~s \\
 Residual-Reflex RL & Every 5~s & 125~N & 0/10 & 9.8~s \\
 \midrule
-Optimized reflex & Single push & 75~N  & 0/1 & 4.5~s \\
-Optimized reflex & Single push & 100~N & 0/1 & 4.6~s \\
-Optimized reflex & Single push & 125~N & 0/1 & 4.3~s \\
+CMA-ES reflex & Single push & 75~N  & 0/1 & 4.5~s \\
+CMA-ES reflex & Single push & 100~N & 0/1 & 4.6~s \\
+CMA-ES reflex & Single push & 125~N & 0/1 & 4.3~s \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -858,7 +861,7 @@ Optimized reflex & Single push & 125~N & 0/1 & 4.3~s \\
 \centerline{\includegraphics[width=\columnwidth]{push_perturbation_summary.png}}
 \caption{Response to backward push perturbations. Residual-Reflex RL can
 recover in representative single-push trials and in the mild repeated-push
-condition, whereas the fixed optimized-reflex controller terminates shortly
+condition, whereas the CMA-ES-optimized reflex controller terminates shortly
 after the perturbation.}
 \label{fig:push_perturbation}
 \end{figure}
@@ -885,13 +888,13 @@ kinematic cycles, smoother GRF profiles, and lower stride variability are
 consistent with this structured action representation. The weakness and
 perturbation results further clarify why learning on top of the reflex
 controller is useful even when an optimized reflex baseline can walk in the
-nominal condition. A fixed optimized-reflex controller uses feedback, but its
-parameters are not adjusted by a learned state-dependent policy. Residual-Reflex
-RL keeps the same feedback pathways while allowing the policy to reshape their
-effective gains and offsets online. This distinction becomes visible when muscle
+nominal condition. A CMA-ES-optimized reflex controller uses feedback, but its
+parameters are selected offline and then held constant during evaluation.
+Residual-Reflex RL keeps the same feedback pathways while allowing the policy to
+reshape their effective gains and offsets online. This distinction becomes visible when muscle
 capacity is reduced or an external push is applied: the residual policy can
 trade off speed, posture, and reflex modulation to maintain walking, whereas the
-fixed reflex parameters are more brittle.
+offline optimized reflex parameters are more brittle.
 
 
 \section{Conclusion}
@@ -910,8 +913,8 @@ left--right waveform differences and lower stride variability, indicating more
 regular and symmetric gait patterns. Beyond nominal walking, the same trained
 policy preserved full-episode walking under reduced soleus strength by adopting
 a slower gait and modulating the selected reflex parameters. It also recovered
-from representative external push perturbations that caused the fixed
-optimized-reflex controller to terminate.
+from representative external push perturbations that caused the
+CMA-ES-optimized reflex controller to terminate.
 These findings suggest that reflex-parameter modulation can provide a compact
 and interpretable learning interface for musculoskeletal gait synthesis, where
 task success must be accompanied by physiologically plausible joint motion and
