@@ -773,13 +773,14 @@ cycle detected from the corresponding STO trajectory and synchronized video.}
 
 \subsection{Plantarflexor Weakness Adaptation}
 \label{sec:weakness_results}
-The weakness experiment directly tests the question raised by the optimized
-reflex baseline: if a CMA-ES-optimized reflex controller already walks well in
-the nominal model, what does the learned residual policy add? To probe this, the
-soleus maximum isometric force was reduced while the trained 1.2~m/s policy was
-kept unchanged. The CMA-ES-optimized reflex controller failed in the weakened
-models tested here, whereas Residual-Reflex RL produced full 1000-step rollouts
-for soleus strength levels from 83\% to 100\%.
+The weakness experiment examines whether the learned reflex-parameter
+modulation remains usable when the musculoskeletal model changes after
+training. The soleus maximum isometric force was reduced while the trained
+1.2~m/s Residual-Reflex RL policy was kept unchanged, so the controller was
+evaluated on weakened models without additional training or parameter
+optimization. Under the same model changes, the CMA-ES-optimized reflex
+controller failed in the tested weakened models, whereas Residual-Reflex RL
+produced full 1000-step rollouts for soleus strength levels from 83\% to 100\%.
 
 Table~\ref{tab:weakness_adaptation} and Fig.~\ref{fig:weakness_adaptation}
 show that the residual policy did not simply force the weakened model to keep
@@ -796,30 +797,31 @@ largest RMS magnitude across the weakness range, reflecting substantial
 modulation of the ankle support/propulsion pathway. The remaining channels also
 change with weakness, indicating that the adaptation is not a single-parameter
 effect: hip, knee, and ankle feedback pathways are jointly adjusted to preserve
-walking. Thus, the four-dimensional residual action space acts as a compact
-adaptive interface on top of the reflex controller, rather than as a fixed
-post-training parameter set.
+walking. These results indicate that the four-dimensional residual action space
+acts as a compact adaptive interface on top of the reflex controller: the same
+trained policy can be transferred across weakened body models without
+retraining, while still modulating the underlying reflex pathways online.
 
 \begin{table}[!t]
 \centering
 \caption{Residual-Reflex RL under soleus weakness. The target speed was
 1.2~m/s. All listed residual rollouts reached 1000 steps.}
 \label{tab:weakness_adaptation}
-\small
-\setlength{\tabcolsep}{2.5pt}
+\scriptsize
+\setlength{\tabcolsep}{2.0pt}
 \renewcommand{\arraystretch}{1.1}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Soleus} & \textbf{Speed} & \textbf{Err.} &
 \textbf{RMS $a_1$} & \textbf{RMS $a_2$} & \textbf{RMS $a_3$} & \textbf{RMS $a_4$} \\
 \midrule
-83\%  & 0.95 & 0.25 & 0.58 & 0.63 & 0.85 & 0.80 \\
-87\%  & 1.00 & 0.20 & 0.58 & 0.63 & 0.85 & 0.76 \\
-90\%  & 1.06 & 0.14 & 0.59 & 0.62 & 0.88 & 0.74 \\
-93\%  & 1.11 & 0.09 & 0.60 & 0.64 & 0.89 & 0.73 \\
-95\%  & 1.14 & 0.06 & 0.60 & 0.66 & 0.89 & 0.73 \\
-97\%  & 1.17 & 0.03 & 0.59 & 0.68 & 0.90 & 0.74 \\
-100\% & 1.20 & 0.00 & 0.58 & 0.68 & 0.90 & 0.75 \\
+83\%  & 0.949 & 0.251 & 0.584 & 0.635 & 0.846 & 0.797 \\
+87\%  & 1.002 & 0.198 & 0.579 & 0.627 & 0.851 & 0.761 \\
+90\%  & 1.063 & 0.137 & 0.594 & 0.620 & 0.878 & 0.741 \\
+93\%  & 1.112 & 0.088 & 0.601 & 0.641 & 0.885 & 0.735 \\
+95\%  & 1.137 & 0.063 & 0.596 & 0.657 & 0.889 & 0.731 \\
+97\%  & 1.167 & 0.033 & 0.588 & 0.678 & 0.895 & 0.736 \\
+100\% & 1.201 & 0.001 & 0.580 & 0.681 & 0.898 & 0.753 \\
 \bottomrule
 \end{tabular}
 \end{table}
