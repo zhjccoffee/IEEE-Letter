@@ -12,6 +12,7 @@
 \usepackage{tabularx} 
 \usepackage{multirow}
 \usepackage{booktabs}
+\usepackage{makecell}
 
 
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
@@ -508,7 +509,7 @@ speed.}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{l l r r r r r}
 \toprule
-\textbf{\shortstack{Target\\speed}} & \textbf{Method} & \textbf{\shortstack{Realized\\speed}} & \textbf{Error} & \textbf{Stride len.} & \textbf{Stride time} & \textbf{Cycles} \\
+\makecell{\textbf{Target}\\\textbf{speed}} & \textbf{Method} & \makecell{\textbf{Realized}\\\textbf{speed}} & \textbf{Error} & \textbf{Stride len.} & \textbf{Stride time} & \textbf{Cycles} \\
 \midrule
 0.8 & E2E-RL & 0.87 & 0.07 & 0.78 & 0.89 & 50 \\
  & DEP-RL & 0.83 & 0.03 & 1.09 & 1.31 & 33 \\
@@ -560,7 +561,7 @@ The kinematic average is the mean of the hip, knee, and ankle scores.}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{l l r r r r r}
 \toprule
-\textbf{\shortstack{Target\\speed}} & \textbf{Method} & \textbf{\shortstack{Realized\\speed}} & \textbf{\shortstack{Kinematic\\average}} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} \\
+\makecell{\textbf{Target}\\\textbf{speed}} & \textbf{Method} & \makecell{\textbf{Realized}\\\textbf{speed}} & \makecell{\textbf{Kinematic}\\\textbf{average}} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} \\
 \midrule
 0.8 & E2E-RL & 0.87 & 39.0 & \textbf{98.3} & 18.6 & 0.0 \\
  & DEP-RL & 0.83 & 44.1 & 72.7 & 50.8 & 8.7 \\
@@ -693,7 +694,7 @@ Lower values indicate more symmetric or more repeatable gait.}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{l l r r r r r r}
 \toprule
-\textbf{\shortstack{Target\\speed}} & \textbf{Method} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} & \textbf{Time CV} & \textbf{Length CV} \\
+\makecell{\textbf{Target}\\\textbf{speed}} & \textbf{Method} & \textbf{Hip} & \textbf{Knee} & \textbf{Ankle} & \textbf{GRF} & \textbf{Time CV} & \textbf{Length CV} \\
 \midrule
 0.8 & E2E-RL & 2.92 & 5.75 & 6.36 & 0.10 & 9.05 & 14.88 \\
  & DEP-RL & 11.20 & 11.73 & 11.59 & 0.12 & 7.96 & 11.04 \\
