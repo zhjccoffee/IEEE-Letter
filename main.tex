@@ -306,33 +306,33 @@ r_t = r_t^{base} + w_{\theta}r_{\theta}
 +w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
 \end{equation}
 \section{Experiments}
-\subsection{Environments and Tasks}\label{sec:experiments}
-\subsubsection{Simulation Environment}
+\label{sec:experiments}
+
+\subsection{Experimental Setting}
 The experiments were conducted in a Hyfydy-based musculoskeletal simulation
 \cite{hyfydy}. The model contains the pelvis, trunk, and bilateral lower-limb
 segments, with nine generalized coordinates comprising pelvis translation and
 orientation together with bilateral hip, knee, and ankle joint rotations.
-Actuation is provided by 18 Hill-type muscles, corresponding to nine muscle groups per leg: tibialis
-anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS), biceps femoris
-short head (BIF), iliopsoas (ILI), hamstrings (HAM), gluteus maximus (GLU), and
-rectus femoris (FEM). Foot--ground contact elements are used to compute
-vertical ground reaction forces for gait analysis.
+Actuation is provided by 18 Hill-type muscles, corresponding to nine muscle
+groups per leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS),
+vasti (VAS), biceps femoris short head (BIF), iliopsoas (ILI), hamstrings
+(HAM), gluteus maximus (GLU), and rectus femoris (FEM). Foot--ground contact
+elements are used to compute vertical ground reaction forces (GRFs) for gait
+analysis.
 
-\subsubsection{Compared Methods}
-Three DRL methods were compared in the nominal walking evaluation. \emph{E2E-RL} denotes an
-end-to-end reinforcement learning policy that directly outputs muscle-level
-control actions, following the direct muscle-control setting
-commonly used in musculoskeletal DRL studies
-\cite{weng2021,devree2021,ogum2024}. \emph{DEP-RL}
-uses the same direct muscle-level action space, but adds DEP-style embodied
-exploration \cite{deprl2023}. The proposed \emph{Residual-Reflex RL} controller learns
+Four controllers were considered across the validation experiments.
+\emph{E2E-RL} denotes an end-to-end reinforcement learning policy that directly
+outputs muscle-level control actions, following the direct muscle-control
+setting commonly used in musculoskeletal DRL studies
+\cite{weng2021,devree2021,ogum2024}. \emph{DEP-RL} uses the same direct
+muscle-level action space, but adds DEP-style embodied exploration
+\cite{deprl2023}. The proposed \emph{Residual-Reflex RL} controller learns
 four-dimensional residual actions that modulate the selected reflex parameters
-in Table~\ref{tab:residual_actions}. All policies were trained with MPO-based
-off-policy reinforcement learning on the same musculoskeletal model.
-For the weakness and perturbation tests, Residual-Reflex RL was additionally
-compared with the fixed optimized-reflex controller from which the residual
-policy is initialized. This comparison isolates the effect of online
-state-dependent parameter modulation from the underlying reflex structure.
+in Table~\ref{tab:residual_actions}. The \emph{optimized-reflex} controller is
+the fixed reflex controller from which the residual policy is initialized, and
+is used as a non-learning reflex baseline in the weakness and perturbation
+tests. All DRL policies were trained with MPO-based off-policy reinforcement
+learning on the same musculoskeletal model.
 
 \begin{table}[!t]
 \centering
@@ -352,22 +352,15 @@ Residual-Reflex RL & 4 & Residual modulation of selected reflex parameters. \\
 \end{tabularx}
 \end{table}
 
-\subsection{Evaluation Protocol}
-Policies were evaluated at three target walking speeds: 0.8, 1.0, and
-1.2~m/s. For each trained policy, a representative walking trajectory was
-exported as an STO file. All detected gait cycles were normalized to
-0--100\% gait cycle and analyzed using the following metrics.
-
-In addition to nominal walking, two out-of-distribution tests were used to
-evaluate adaptability of the residual-reflex interface. First, plantarflexor
-weakness was simulated by reducing the maximum isometric force of the soleus
-muscles while keeping the learned policy fixed. The evaluated soleus strength
-levels were 83--100\% of the nominal value. This test asks whether the trained
-policy can adapt its residual reflex modulation when ankle support and
-propulsion capacity are reduced. Second, external backward push perturbations
-were applied to the torso using force pulses starting at 3~s. We tested single
-pushes of 75, 100, and 125~N, as well as repeated pushes every 5~s. These tests
-were not used during training.
+\subsection{Nominal Walking Evaluation}
+The nominal walking experiment evaluates whether the proposed controller
+generates plausible steady gait under controlled target-speed tasks. Policies
+were evaluated at three target walking speeds: 0.8, 1.0, and 1.2~m/s. For each
+trained policy, a representative walking trajectory was exported as an STO file.
+All detected gait cycles were normalized to 0--100\% gait cycle. The comparison
+includes E2E-RL, DEP-RL, and Residual-Reflex RL, and uses four groups of
+metrics: task-level speed and stride measures, reference-envelope kinematics,
+GRF morphology, and symmetry/repeatability.
 
 \subsubsection{Speed tracking and stride measures}
 To verify that the policies satisfy the commanded locomotion task, we report
@@ -442,9 +435,15 @@ value of $z$, and $\sigma_z$ is its standard deviation over the analyzed gait
 cycles. The factor 100 expresses CV as a percentage. In the results, lower
 $\mathrm{CV}_z$ indicates more repeatable gait cycles.
 
-\subsubsection{Adaptation and perturbation metrics}
-For the plantarflexor weakness test, we report survival length, realized speed,
-and the root-mean-square magnitude of the four residual actions:
+\subsection{Plantarflexor Weakness Adaptation}
+The weakness experiment evaluates whether the residual-reflex policy can adapt
+when the body model changes after training. Plantarflexor weakness was simulated
+by reducing the maximum isometric force of the soleus muscles while keeping the
+trained 1.2~m/s policy fixed. The evaluated soleus strength levels were
+83--100\% of the nominal value. Residual-Reflex RL was compared with the fixed
+optimized-reflex controller under the same weakened models. We report
+survival length, realized speed, gait quality, and the root-mean-square
+magnitude of the four residual actions:
 \begin{equation}
 A_i^{\mathrm{RMS}} =
 \sqrt{\frac{1}{T}\sum_{t=1}^{T}a_i(t)^2},
@@ -453,19 +452,28 @@ where $a_i(t)$ is the $i$th residual action and $T$ is the number of evaluated
 policy steps in the rollout. The RMS value measures how strongly the policy
 uses each reflex-parameter channel regardless of sign. This is important because
 a residual action can increase or decrease a reflex parameter at different
-moments of the gait cycle. For the push-perturbation test, we report the number
+moments of the gait cycle.
+
+\subsection{External Push Perturbation}
+The perturbation experiment evaluates whether the trained residual-reflex policy
+can recover from disturbances that were not present during training. Backward
+force pulses were applied to the torso starting at 3~s. We tested single pushes
+of 75, 100, and 125~N, as well as repeated pushes every 5~s. Residual-Reflex RL
+was compared with the fixed optimized-reflex controller. We report the number
 of successful rollouts, best rollout duration, and realized speed after the
-trained policy is evaluated without further learning.
+trained policy is evaluated without further learning. Representative
+trajectories and snapshots are used to inspect whether recovery corresponds to
+continued walking rather than a brief delayed fall.
 
 \section{Results and Analysis}
 \label{sec:results-and-analysis}
-The comparison is designed to separate task completion from gait quality. We
-therefore first verify that all controllers generate forward walking near the
-commanded speeds, and then examine whether the resulting gait cycles preserve
-reference-like kinematics, contact loading, bilateral symmetry, and
-cycle-to-cycle repeatability.
+The results are organized to match the three evaluation blocks in
+Section~\ref{sec:experiments}. We first analyze nominal walking at the three
+target speeds, then examine plantarflexor weakness adaptation, and finally
+evaluate external push perturbation recovery.
 
-\subsection{Speed Tracking and Stride Measures}
+\subsection{Nominal Walking Evaluation}
+\subsubsection{Speed tracking and stride measures}
 All three methods were able to generate sustained forward walking in
 the controlled speed tasks. Table~\ref{tab:spatiotemporal_metrics} shows that Residual-Reflex RL tracked the commanded
 speed most closely at all three target speeds, with absolute speed errors of
@@ -510,7 +518,7 @@ speed.}
 }
 \end{table}
 
-\subsection{Reference-Envelope Gait Analysis}
+\subsubsection{Kinematic gait analysis}
 The gait-cycle scores reveal a clearer separation between the three methods.
 As listed in Table~\ref{tab:gait_similarity}, Residual-Reflex RL achieved the highest
 overall reference-envelope score, with an average score of 89.9\%,
@@ -622,7 +630,7 @@ cycle average and the gray band is the reference envelope.}
 \label{fig:gait_profiles_12}
 \end{figure}
 
-\subsection{GRF Morphology}
+\subsubsection{GRF morphology}
 Ground reaction force provides a direct view of how each controller loads and
 unloads the body during stance. Residual-Reflex RL produced smoother vertical
 GRF profiles with a more reference-consistent double-support pattern across the
@@ -652,7 +660,7 @@ evaluation, and the panel annotations report the GRF reference-envelope score.}
 \label{fig:grf_morphology}
 \end{figure}
 
-\subsection{Symmetry and Repeatability}
+\subsubsection{Symmetry and repeatability}
 The residual reflex representation also improved the regularity of the generated
 gait cycles. Table~\ref{tab:symmetry_variability} shows that Residual-Reflex RL
 consistently produced lower left--right waveform differences and lower stride
@@ -704,7 +712,7 @@ speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
 \label{fig:symmetry_variability_bars}
 \end{figure}
 
-\subsection{Qualitative Gait Visualization}
+\subsubsection{Qualitative gait visualization}
 The qualitative snapshots in Fig.~\ref{fig:qualitative_snapshots} give an
 intuitive view of the same result at the body posture level. E2E-RL appears
 reasonable at first glance: the trunk remains upright, and the 0--100\% sequence
@@ -734,7 +742,7 @@ cycle detected from the corresponding STO trajectory and synchronized video.}
 \label{fig:qualitative_snapshots}
 \end{figure}
 
-\subsection{Adaptation to Plantarflexor Weakness}
+\subsection{Plantarflexor Weakness Adaptation}
 \label{sec:weakness_results}
 The weakness experiment directly tests the question raised by the fixed-reflex
 baseline: if an optimized reflex controller already walks well in the nominal
@@ -796,7 +804,7 @@ four selected reflex pathways under the same trained policy.}
 \label{fig:weakness_adaptation}
 \end{figure}
 
-\subsection{Response to External Push Perturbations}
+\subsection{External Push Perturbation}
 \label{sec:perturbation_results}
 The external push experiment further evaluates whether the learned residual
 policy can tolerate disturbances that were not part of training. Backward force
