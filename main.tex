@@ -1013,23 +1013,23 @@ mechanism beyond offline optimized reflex gains.
 \renewcommand{\arraystretch}{1.08}
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c}
 \toprule
-\textbf{Method} & \textbf{Perturbation} & \textbf{Force} &
-\textbf{Duration} &
-\textbf{Speed} \\
+\textbf{Method} & \textbf{Perturbation} & \makecell{\textbf{Force}\\\textbf{(N)}} &
+\makecell{\textbf{Duration}\\\textbf{(s)}} &
+\makecell{\textbf{Speed}\\\textbf{(m/s)}} \\
 \midrule
 \multirow[c]{4}{*}{\makecell[c]{Residual-\\Reflex RL}} &
-\multirow{2}{*}{Single push} & 75N  & 25.0s & 1.188~m/s \\
-& & 100N & 25.0s & 1.176~m/s \\
+\multirow{2}{*}{Single push} & 75  & 25.0 & 1.188 \\
+& & 100 & 25.0 & 1.176 \\
 \cmidrule(lr){2-5}
-& \multirow{2}{*}{Every 5s} & 75N  & 25.0s & 1.129~m/s \\
-& & 100N & 20.1s & 1.091~m/s \\
+& \multirow{2}{*}{Every 5s} & 75  & 25.0 & 1.129 \\
+& & 100 & 20.1 & 1.091 \\
 \midrule
 \multirow[c]{4}{*}{\makecell[c]{CMA-ES-\\optimized\\Reflex}} &
-\multirow{2}{*}{Single push} & 75N  & 4.5s & 1.098~m/s \\
-& & 100N & 4.6s & 1.069~m/s \\
+\multirow{2}{*}{Single push} & 75  & 4.5 & 1.098 \\
+& & 100 & 4.6 & 1.069 \\
 \cmidrule(lr){2-5}
-& \multirow{2}{*}{Every 5s} & 75N  & 4.5s & 1.098~m/s \\
-& & 100N & 4.6s & 1.069~m/s \\
+& \multirow{2}{*}{Every 5s} & 75  & 4.5 & 1.098 \\
+& & 100 & 4.6 & 1.069 \\
 \bottomrule
 \end{tabular*}
 \end{table}
