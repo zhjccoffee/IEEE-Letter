@@ -31,29 +31,28 @@ Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculo
 \pagestyle{empty}
 
 \begin{abstract}
-Deep reinforcement learning (DRL) has been increasingly used for controlling
-musculoskeletal locomotion, but direct muscle-level policies must explore a
-high-dimensional and highly redundant action space. In this study, we propose
-Residual-Reflex RL, a low-dimensional residual-reflex-informed DRL framework for
-musculoskeletal gait generation. Instead of directly commanding all muscle
-excitations, the framework combines a reflex-based low-level controller with a
-DRL policy that applies residual modulation in a compact four-dimensional
-reflex-parameter space. This design preserves the biomechanical feedback
-structure of spinal-reflex-inspired control while allowing state-dependent
-adaptation of gait-relevant feedback pathways. We validate the framework in a
-Hyfydy-based musculoskeletal simulation using target-speed walking,
-plantarflexor weakness, and external push perturbation tests. The proposed
-method is compared with direct muscle-control baselines and a
-CMA-ES-optimized reflex controller. In nominal walking, Residual-Reflex RL achieves
-higher human-reference gait scores and produces more symmetric and repeatable gait
-cycles than end-to-end reinforcement learning (E2E-RL) and DEP-RL. Under soleus
-weakness, the learned residual policy preserves full-episode walking by reducing
-realized speed and modulating selected reflex parameters, whereas the
-CMA-ES-optimized reflex controller fails in the tested weakened models. Under external
-backward pushes, Residual-Reflex RL also survives perturbation cases that
-terminate the optimized-reflex controller. These results suggest that learning in a
-compact reflex-parameter space can improve both gait plausibility and
-adaptability in muscle-driven locomotion.
+Musculoskeletal gait generation requires controllers that coordinate many
+redundant muscles while preserving natural joint motion, contact loading, and
+adaptability to changes in the body or environment. Direct deep reinforcement
+learning (DRL) policies can learn state-dependent control, but they typically
+explore in a high-dimensional muscle-action space and provide limited
+interpretability. Conversely, reflex-based controllers provide compact
+neuromechanical feedback structure, but their parameters are commonly fixed after
+manual tuning or offline optimization. This study proposes Residual-Reflex RL, a
+low-dimensional residual-reflex-informed DRL framework that shifts the learning
+problem from direct muscle excitation synthesis to online modulation of selected
+reflex pathways. A reflex controller supplies the low-level phase-dependent
+sensory feedback scaffold, while the learned policy outputs a four-dimensional
+residual action that adjusts gait-relevant reflex parameters for hip, knee, and
+ankle control. The framework is evaluated in a muscle-driven simulation using
+nominal target-speed walking, plantarflexor weakness, and external push
+perturbations. Across these tests, the learned residual policy produces
+human-reference-consistent gait-cycle kinematics and vertical ground reaction
+forces, maintains symmetric and repeatable walking, and transfers to weakened
+muscle models and push-perturbation cases without retraining. The results
+support the central idea that learning over an interpretable reflex-parameter
+space can combine the structure of neuromuscular feedback control with the
+state-dependent adaptability of DRL.
 \end{abstract}
 
 \noindent\textit{Index Terms}---Deep reinforcement learning, gait generation,
