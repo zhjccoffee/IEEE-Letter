@@ -71,17 +71,18 @@ smooth contact loading, interpretable neuromuscular behavior, and the ability to
 cope with changes in the body or environment. Physics-based musculoskeletal
 models provide a powerful testbed for this goal because they explicitly connect
 muscle activation, muscle--tendon dynamics, skeletal motion, and foot--ground
-contact \cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. The same
-properties also make them difficult to control: the system is nonlinear,
-overactuated, and highly redundant, so many muscle-excitation patterns can
-complete a walking task while producing very different gait quality.
+contact \cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}.
+The same properties also make them difficult to control: the system is
+nonlinear, overactuated, and highly redundant, so many muscle-excitation
+patterns can complete a walking task while producing very different gait
+quality.
 
 Predictive simulation, trajectory optimization, and optimal control provide one
 major route for musculoskeletal gait generation. These methods can generate
 dynamically feasible motions under physical constraints and have provided
 important insight into gait mechanics, energetic objectives, and pathological
 walking
-\cite{anderson2001,ackermann2010,geijtenbeek2019,falisse2019,dembia2020,ezati2019,degroote2021}.
+\cite{anderson2001,ackermann2010,geijtenbeek2019,falisse2019,dembia2020,ezati2019,degroote2021,wang2010,wang2012,song2018}.
 Software frameworks and direct-collocation formulations have made predictive
 musculoskeletal simulation increasingly practical, but the resulting problem is
 still usually solved as an offline optimization over complete trajectories.
@@ -99,7 +100,8 @@ Such controllers are attractive because they are compact, interpretable, and
 closed-loop: sensory feedback can immediately influence muscle stimulation.
 Recent reflex-based and biologically motivated studies further show that
 physiologically meaningful control factors can support efficient and robust
-walking across speeds and model variants \cite{koseki2024,schumacher2025}.
+walking across speeds, perturbations, and model variants
+\cite{batts2015,koseki2024,schumacher2025}.
 However, the gains, thresholds, and offsets in these controllers are often
 selected manually or optimized offline. Once fixed, they may lack a
 policy-level mechanism for changing reflex parameters online when muscle
@@ -109,7 +111,7 @@ Deep reinforcement learning (DRL) offers a complementary strength by learning a
 state-dependent policy through interaction with the simulated body. DRL has
 generated locomotion in physics-based characters and musculoskeletal models,
 including end-to-end policies that directly output muscle activations or
-excitations \cite{peng2017,weng2021,devree2021,ogum2024,schumacher2025}. This
+excitations \cite{peng2017,peng2018,weng2021,devree2021,ogum2024,schumacher2025}. This
 adaptability, however, comes with a difficult action-representation problem.
 Direct muscle-level control exposes the learner to a high-dimensional and
 redundant action space. Exploration and reward design become harder as the
@@ -1128,6 +1130,10 @@ F. De Groote and A. Falisse, ``Perspective on musculoskeletal modelling and
 predictive simulations of human movement to assess the neuromechanics of
 gait,'' \textit{Proceedings of the Royal Society B}, vol. 288, no. 1946, 2021.
 
+\bibitem{uchida2020}
+T. K. Uchida and S. L. Delp, \textit{Biomechanics of Movement: The Science of
+Sports, Robotics, and Rehabilitation}. Cambridge, MA, USA: MIT Press, 2020.
+
 \bibitem{ackermann2010}
 M. Ackermann and A. J. van den Bogert, ``Optimality principles for model-based
 prediction of human gait,'' \textit{Journal of Biomechanics}, vol. 43, no. 6,
@@ -1154,6 +1160,21 @@ Biology}, vol. 16, no. 12, 2020.
 M. Ezati, B. Ghannadi, and J. McPhee, ``A review of simulation methods for
 human movement dynamics with emphasis on gait,'' \textit{Multibody System
 Dynamics}, vol. 47, pp. 265--292, 2019.
+
+\bibitem{wang2010}
+J. M. Wang, D. J. Fleet, and A. Hertzmann, ``Optimizing walking controllers for
+uncertain inputs and environments,'' \textit{ACM Transactions on Graphics},
+vol. 29, no. 4, Art. no. 73, 2010.
+
+\bibitem{wang2012}
+J. M. Wang, S. R. Hamner, S. L. Delp, and V. Koltun, ``Optimizing locomotion
+controllers using biologically-based actuators and objectives,'' \textit{ACM
+Transactions on Graphics}, vol. 31, no. 4, Art. no. 25, 2012.
+
+\bibitem{song2018}
+S. Song and H. Geyer, ``Predictive neuromechanical simulations indicate why
+walking performance declines with ageing,'' \textit{The Journal of Physiology},
+vol. 596, no. 7, pp. 1199--1210, 2018.
 
 \bibitem{ijspeert2008}
 A. J. Ijspeert, ``Central pattern generators for locomotion control in animals
@@ -1193,6 +1214,11 @@ pattern generators for bipedal locomotion learned through reinforced reflex
 neural networks,'' \textit{IEEE Robotics and Automation Letters}, vol. 9,
 no. 6, pp. 5190--5197, 2024.
 
+\bibitem{batts2015}
+Z. Batts, S. Song, and H. Geyer, ``Toward a virtual neuromuscular control for
+robust walking in bipedal robots,'' in \textit{Proc. IEEE/RSJ International
+Conference on Intelligent Robots and Systems}, 2015, pp. 6318--6323.
+
 \bibitem{koseki2024}
 S. Koseki, M. Hayashibe, and D. Owaki, ``Identifying essential factors for
 energy-efficient walking control across a wide range of velocities in
@@ -1209,6 +1235,11 @@ Art. no. 112203, 2025.
 X. B. Peng and M. van de Panne, ``Learning locomotion skills using DeepRL:
 Does the choice of action space matter?'' in \textit{Proc. ACM SIGGRAPH /
 Eurographics Symposium on Computer Animation}, 2017.
+
+\bibitem{peng2018}
+X. B. Peng, P. Abbeel, S. Levine, and M. van de Panne, ``DeepMimic:
+Example-guided deep reinforcement learning of physics-based character skills,''
+\textit{ACM Transactions on Graphics}, vol. 37, no. 4, Art. no. 143, 2018.
 
 \bibitem{weng2021}
 J. Weng, E. Hashemi, and A. Arami, ``Natural walking with musculoskeletal
