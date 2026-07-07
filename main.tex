@@ -62,54 +62,56 @@ musculoskeletal simulation, reflex control, residual reinforcement learning.
 \section{Introduction}
 \label{sec:introduction}
 
-Generating physically plausible gait is important for simulation-based studies
-of human locomotion, rehabilitation-oriented controller design, and the
-development of assistive devices. In these applications, a controller should not
-only move the body forward, but also produce natural joint coordination, stable
-contact loading, interpretable neuromuscular behavior, and adaptation to changes
-in the body or environment. Physics-based musculoskeletal models provide a
-powerful testbed for this goal because they explicitly connect muscle
-activation, muscle--tendon dynamics, skeletal motion, and foot--ground contact
-\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. At the same time,
-these models are difficult to control: they are overactuated, nonlinear, and
-highly redundant, so many different excitation patterns can satisfy the same
-task-level walking objective while producing very different gait quality.
+Generating natural, stable, and adaptable gait in muscle-driven bodies is a
+central problem for simulation-based human locomotion research, rehabilitation
+controller design, and assistive-device development. In these settings, success
+cannot be measured only by whether the model moves forward. A useful gait
+controller should also produce physiologically plausible joint coordination,
+smooth contact loading, interpretable neuromuscular behavior, and the ability to
+cope with changes in the body or environment. Physics-based musculoskeletal
+models provide a powerful testbed for this goal because they explicitly connect
+muscle activation, muscle--tendon dynamics, skeletal motion, and foot--ground
+contact \cite{anderson2001,geijtenbeek2013,lee2019,degroote2021}. The same
+properties also make them difficult to control: the system is nonlinear,
+overactuated, and highly redundant, so many muscle-excitation patterns can
+complete a walking task while producing very different gait quality.
 
-One classical route is predictive simulation, trajectory optimization, and
-optimal control. These methods can generate dynamically feasible motions and
-handle physical constraints, and they have provided important insight into gait
-mechanics and energetic objectives
-\cite{anderson2001,falisse2019,degroote2021}. However, they are typically
-offline procedures that optimize over complete trajectories, often requiring
-carefully designed cost functions and substantial computation. The resulting
-motion may explain a plausible gait pattern, but it does not necessarily provide
-a feedback policy that can respond naturally to unexpected perturbations, model
-changes, or online adaptation demands.
+Predictive simulation, trajectory optimization, and optimal control provide one
+major route for musculoskeletal gait generation. These methods can generate
+dynamically feasible motions under physical constraints and have provided
+important insight into gait mechanics, energetic objectives, and pathological
+walking \cite{anderson2001,falisse2019,degroote2021}. Their limitation is that
+they are usually offline procedures over complete trajectories. They often
+require carefully designed cost functions and substantial computation, and the
+optimized motion does not necessarily become a feedback policy that can respond
+online to perturbations, muscle-capacity changes, or other model variations.
 
-A second route is to build structure into the controller itself. Biological
-locomotion studies have motivated central-pattern-generator models, muscle
-synergies, and reflex-based neuromuscular controllers
-\cite{ijspeert2008,geyer2010,song2015,dzeladini2014,li2024}. Such controllers
-are attractive because they are compact, biologically interpretable, and
+A second route introduces biological structure directly into the controller.
+Central-pattern-generator models, muscle synergies, and reflex-based
+neuromuscular controllers reduce the control problem by exploiting modular and
+feedback-driven organization in biological locomotion
+\cite{ijspeert2008,davella2003,meyer2016,geyer2010,song2015,dzeladini2014,li2024}.
+Such controllers are attractive because they are compact, interpretable, and
 closed-loop: sensory feedback can immediately influence muscle stimulation.
-Recent reflex-based predictive studies further suggest that a relatively small
-set of physiologically meaningful control factors can explain efficient walking
-across speeds \cite{koseki2024}. Nevertheless, the gains, thresholds, and
-offsets in these controllers are usually selected manually or optimized offline.
-Once fixed, they may lack a policy-level mechanism for changing reflex
-parameters online when muscle capacity is altered or an external disturbance is
-applied.
+Recent reflex-based and biologically motivated studies further show that
+physiologically meaningful control factors can support efficient and robust
+walking across speeds and model variants \cite{koseki2024,schumacher2025}.
+However, the gains, thresholds, and offsets in these controllers are often
+selected manually or optimized offline. Once fixed, they may lack a
+policy-level mechanism for changing reflex parameters online when muscle
+capacity is altered or an external disturbance is applied.
 
-Deep reinforcement learning (DRL) offers a complementary strength: it learns a
+Deep reinforcement learning (DRL) offers a complementary strength by learning a
 state-dependent policy through interaction with the simulated body. DRL has
 generated locomotion in physics-based characters and musculoskeletal models,
 including end-to-end policies that directly output muscle activations or
-excitations \cite{peng2017,weng2021,devree2021,ogum2024}. However, direct
-muscle-level control exposes the learner to a high-dimensional and redundant
-action space. Exploration and reward design become difficult as the number of
-muscles increases, and successful episode completion alone does not guarantee
-human-like joint coordination, contact loading, or left--right symmetry
-\cite{song2021,nowakowski2021,su2023}. Methods such as DEP-RL improve
+excitations \cite{peng2017,weng2021,devree2021,ogum2024,schumacher2025}. This
+adaptability, however, comes with a difficult action-representation problem.
+Direct muscle-level control exposes the learner to a high-dimensional and
+redundant action space. Exploration and reward design become harder as the
+number of muscles increases, and successful episode completion alone does not
+guarantee human-like joint coordination, contact loading, or left--right
+symmetry \cite{song2021,nowakowski2021,su2023}. Methods such as DEP-RL improve
 exploration in overactuated and musculoskeletal systems, but still preserve the
 direct muscle-level action interface \cite{deprl2023}.
 
@@ -117,7 +119,7 @@ These observations reveal a gap: musculoskeletal gait generation needs a
 learning interface that combines the closed-loop stability and biological
 structure of reflex control, the state-dependent adaptability of DRL, and a
 low-dimensional action space that remains interpretable. Human motor control
-offers an intuitive analogy. Locomotion is not learned from scratch as an
+suggests such an organization. Locomotion is not learned from scratch as an
 arbitrary mapping from state to every muscle excitation. Fast spinal reflex
 pathways provide a low-level feedback substrate, while development and
 interaction with the environment shape how higher-level neural systems regulate
@@ -1121,6 +1123,56 @@ models suggest that diverse healthy and pathological human gaits can emerge
 from similar control strategies,'' \textit{Journal of the Royal Society
 Interface}, vol. 16, no. 157, 2019.
 
+\bibitem{ijspeert2008}
+A. J. Ijspeert, ``Central pattern generators for locomotion control in animals
+and robots: A review,'' \textit{Neural Networks}, vol. 21, no. 4, pp.
+642--653, 2008.
+
+\bibitem{davella2003}
+A. d'Avella, P. Saltiel, and E. Bizzi, ``Combinations of muscle synergies in
+the construction of a natural motor behavior,'' \textit{Nature Neuroscience},
+vol. 6, no. 3, pp. 300--308, 2003.
+
+\bibitem{meyer2016}
+A. J. Meyer, I. Eskinazi, J. N. Jackson, A. V. Rao, C. Patten, and
+B. J. Fregly, ``Muscle synergies facilitate computational prediction of
+subject-specific walking motions,'' \textit{Frontiers in Bioengineering and
+Biotechnology}, vol. 4, Art. no. 77, 2016.
+
+\bibitem{geyer2010}
+H. Geyer and H. Herr, ``A muscle-reflex model that encodes principles of
+legged mechanics produces human walking dynamics and muscle activities,''
+\textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
+vol. 18, no. 3, pp. 263--273, 2010.
+
+\bibitem{song2015}
+S. Song and H. Geyer, ``A neural circuitry that emphasizes spinal feedback
+generates diverse behaviours of human locomotion,'' \textit{The Journal of
+Physiology}, vol. 593, no. 16, pp. 3493--3511, 2015.
+
+\bibitem{dzeladini2014}
+F. Dzeladini, J. van den Kieboom, and A. Ijspeert, ``The contribution of a
+central pattern generator in a reflex-based neuromuscular model,''
+\textit{Frontiers in Human Neuroscience}, vol. 8, Art. no. 371, 2014.
+
+\bibitem{li2024}
+G. Li, A. Ijspeert, and M. Hayashibe, ``AI-CPG: Adaptive imitated central
+pattern generators for bipedal locomotion learned through reinforced reflex
+neural networks,'' \textit{IEEE Robotics and Automation Letters}, vol. 9,
+no. 6, pp. 5190--5197, 2024.
+
+\bibitem{koseki2024}
+S. Koseki, M. Hayashibe, and D. Owaki, ``Identifying essential factors for
+energy-efficient walking control across a wide range of velocities in
+reflex-based musculoskeletal systems,'' \textit{PLOS Computational Biology},
+vol. 20, no. 1, 2024.
+
+\bibitem{schumacher2025}
+P. Schumacher, T. Geijtenbeek, V. Caggiano, V. Kumar, S. Schmitt, G. Martius,
+and D. F. B. Haeufle, ``Emergence of natural and robust bipedal walking by
+learning from biologically plausible objectives,'' \textit{iScience}, vol. 28,
+Art. no. 112203, 2025.
+
 \bibitem{peng2017}
 X. B. Peng and M. van de Panne, ``Learning locomotion skills using DeepRL:
 Does the choice of action space matter?'' in \textit{Proc. ACM SIGGRAPH /
@@ -1160,50 +1212,11 @@ L. Su and E. M. Gutierrez-Farewik, ``Simulating human walking: A model-based
 reinforcement learning approach with musculoskeletal modeling,'' \textit{Frontiers
 in Neurorobotics}, vol. 17, 2023.
 
-\bibitem{geyer2010}
-H. Geyer and H. Herr, ``A muscle-reflex model that encodes principles of
-legged mechanics produces human walking dynamics and muscle activities,''
-\textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
-vol. 18, no. 3, pp. 263--273, 2010.
-
-\bibitem{song2015}
-S. Song and H. Geyer, ``A neural circuitry that emphasizes spinal feedback
-generates diverse behaviours of human locomotion,'' \textit{The Journal of
-Physiology}, vol. 593, no. 16, pp. 3493--3511, 2015.
-
-\bibitem{ijspeert2008}
-A. J. Ijspeert, ``Central pattern generators for locomotion control in animals
-and robots: A review,'' \textit{Neural Networks}, vol. 21, no. 4, pp.
-642--653, 2008.
-
-\bibitem{dzeladini2014}
-F. Dzeladini, J. van den Kieboom, and A. Ijspeert, ``The contribution of a
-central pattern generator in a reflex-based neuromuscular model,''
-\textit{Frontiers in Human Neuroscience}, vol. 8, Art. no. 371, 2014.
-
-\bibitem{li2024}
-G. Li, A. Ijspeert, and M. Hayashibe, ``AI-CPG: Adaptive imitated central
-pattern generators for bipedal locomotion learned through reinforced reflex
-neural networks,'' \textit{IEEE Robotics and Automation Letters}, vol. 9,
-no. 6, pp. 5190--5197, 2024.
-
-\bibitem{koseki2024}
-S. Koseki, M. Hayashibe, and D. Owaki, ``Identifying essential factors for
-energy-efficient walking control across a wide range of velocities in
-reflex-based musculoskeletal systems,'' \textit{PLOS Computational Biology},
-vol. 20, no. 1, 2024.
-
 \bibitem{deprl2023}
-F. Paulus, L. N. Haab, T. Geng, C. Pinneri, N. Reimers, S. Schmitt, and
-G. Martius, ``DEP-RL: Embodied exploration for reinforcement learning in
-overactuated and musculoskeletal systems,'' in \textit{International
-Conference on Learning Representations}, 2023.
-
-\bibitem{residualrl2019}
-T. Johannink, S. Bahl, A. Nair, J. Luo, A. Singh, M. Loskyll,
-J. A. Ojea, E. Solowjow, and S. Levine, ``Residual reinforcement learning for
-robot control,'' in \textit{IEEE International Conference on Robotics and
-Automation}, 2019, pp. 6023--6029.
+P. Schumacher, D. F. B. Haeufle, D. B{\"u}chler, S. Schmitt, and G. Martius,
+``DEP-RL: Embodied exploration for reinforcement learning in overactuated and
+musculoskeletal systems,'' in \textit{International Conference on Learning
+Representations}, 2023.
 
 \bibitem{mpo2018}
 A. Abdolmaleki, J. T. Springenberg, Y. Tassa, R. Munos, N. Heess, and
