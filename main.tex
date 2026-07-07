@@ -171,8 +171,10 @@ state and reward after the simulation step. Module (b) is the physiological
 environment, where the residual-reflex-informed controller converts the action
 into modulation of selected reflex parameters, the reflex controller generates
 muscle stimulation, and the musculoskeletal model produces motion and contact
-forces. Module (c) is the actor--critic learning module, where transitions from
-the rollout are stored in a replay buffer and used for off-policy MPO updates.
+forces. Module (c) is the actor--critic learning module, where rollout
+transitions are stored in a replay buffer and used to update the critic
+$q(\mathbf{s},\mathbf{a};\omega)$ and actor policy $\pi(\mathbf{s};\theta)$
+through off-policy MPO learning.
 This hierarchy changes the role of DRL from direct muscle excitation control to
 reflex-parameter modulation.
 
@@ -180,26 +182,29 @@ reflex-parameter modulation.
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
 \caption{Low-dimensional residual-reflex-informed DRL framework. (a) During
 agent--environment rollout, the policy maps the current state to a compact
-residual action. (b) In the physiological environment, the residual-reflex
-controller modulates selected reflex parameters and produces muscle activation
-for the musculoskeletal model. (c) In the actor--critic learning module,
-rollout transitions are stored in replay and used for MPO updates.}
+residual action and receives the next state and reward after simulation. (b) In
+the physiological environment, the residual-reflex controller modulates selected
+reflex parameters and produces muscle activation for the musculoskeletal model.
+(c) In the actor--critic learning module, rollout transitions are stored in the
+replay buffer; the critic $q(\mathbf{s},\mathbf{a};\omega)$ evaluates
+state--action pairs, and MPO updates the actor policy from
+$\pi(\mathbf{s};\theta)$ to $\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
 \label{framwork}
 \end{figure*}
 
 In module (a), let $\mathbf{s}_t$ denote the observation received by the policy
 at time $t$.
-In the present implementation, $\mathbf{s}_t\in\mathbb{R}^{122}$. It contains
+In the present fixed-speed implementation, $\mathbf{s}_t\in\mathbb{R}^{121}$. It contains
 muscle-level sensory and activation signals from the 18 Hill-type muscles,
 foot-relative positions, body orientation and angular velocity, generalized
-coordinates and velocities, and the target walking speed:
+coordinates and velocities:
 \begin{equation}
 \begin{aligned}
 \mathbf{s}_t = [
 &\mathbf{l}_t,\dot{\mathbf{l}}_t,\mathbf{f}_t,\mathbf{e}_t,
 \boldsymbol{\alpha}_t,\mathbf{p}_{feet,t},
 \boldsymbol{\psi}_t,\boldsymbol{\omega}_t,\\
-&\mathbf{q}_t,\dot{\mathbf{q}}_t,v_t^\ast],
+&\mathbf{q}_t,\dot{\mathbf{q}}_t],
 \end{aligned}
 \end{equation}
 where $\mathbf{l}$, $\dot{\mathbf{l}}$, and $\mathbf{f}$ are muscle fiber
@@ -207,14 +212,15 @@ lengths, velocities, and forces; $\mathbf{e}$ and $\boldsymbol{\alpha}$ are
 muscle excitations and activations; $\mathbf{p}_{feet}$ represents foot
 positions relative to the body; $\boldsymbol{\psi}$ and $\boldsymbol{\omega}$
 are body orientation and angular velocity; $\mathbf{q}$ and $\dot{\mathbf{q}}$
-are generalized coordinates and velocities; and $v^\ast$ is the target speed.
+are generalized coordinates and velocities.
 
 \subsection{Physiological Environment and Reflex Controller}
 Module (b) contains the musculoskeletal model and the residual-reflex-informed
 controller. The low-level controller is a phase-dependent reflex controller inspired by
 neuromuscular feedback pathways, including muscle-spindle-like length and
-velocity feedback and Golgi-tendon-organ-like force feedback. The gait cycle is divided into stance,
-liftoff, swing, and landing-related subphases. In each subphase, sparse
+velocity feedback and Golgi-tendon-organ-like force feedback. The gait cycle is
+divided into five controller phases: EarlyStance, LateStance, Liftoff, Swing,
+and Landing. In each phase, sparse
 reflex pathways map sensory feedback to target muscle stimulation. For a target
 muscle $i$ and a source muscle $j$, the controller includes length, velocity,
 and force feedback terms:
@@ -278,9 +284,10 @@ $a_4$ & $k_{F,\mathrm{VAS}}$ & S00011.vasti.KF & Knee extension / stance support
 \end{table}
 
 The pathway labels in Table~\ref{tab:residual_actions} follow the controller
-implementation notation: the binary code after ``S'' denotes the gait subphases
-in which the corresponding reflex pathway is active, and the suffix specifies
-the muscle and reflex parameter being modulated.
+implementation notation: the five-bit code after ``S'' denotes whether the
+pathway is active in EarlyStance, LateStance, Liftoff, Swing, and Landing,
+respectively, and the suffix specifies the muscle and reflex parameter being
+modulated.
 Thus, $a_1$ modulates hamstrings length feedback for hip extension and
 late-swing braking, $a_2$ modulates iliopsoas length-offset feedback for hip
 flexion and swing initiation, $a_3$ modulates soleus force feedback for ankle
@@ -298,24 +305,25 @@ learned actions and neuromuscular function.
 \subsection{Actor--Critic Policy Learning}
 Module (c) trains the policy with Maximum a Posteriori Policy Optimization (MPO)
 \cite{mpo2018}, an off-policy actor--critic algorithm for continuous control.
-The actor network receives the 122-dimensional observation $\mathbf{s}_t$ and
-parameterizes a Gaussian policy $\pi_{\phi}(\mathbf{a}_t|\mathbf{s}_t)$. For
+The actor network receives the 121-dimensional observation $\mathbf{s}_t$ and
+parameterizes a Gaussian policy $\pi(\mathbf{a}_t|\mathbf{s}_t;\theta)$. For
 Residual-Reflex RL, the policy output is the mean and standard deviation of a
 four-dimensional residual action distribution, with
 $\mathbf{a}_t\in[-1,1]^4$. During training, actions are sampled from this
 distribution; during deterministic evaluation, the policy mean is used. The
 critic receives the state-action pair and estimates
-$Q_{\psi}(\mathbf{s}_t,\mathbf{a}_t)$ for MPO updates.
+$q(\mathbf{s}_t,\mathbf{a}_t;\omega)$ for MPO updates.
 
 At each control step, the sampled residual action is converted into reflex
 parameter changes through Eq.~\eqref{eq:residual_scaling}, the reflex
 controller generates muscle stimulation, and the simulator advances one step.
 The transition
-$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1},d_t)$ is stored in a replay
-buffer, where $d_t$ denotes the episode termination flag. MPO updates the critic
-from replayed Bellman targets and updates the actor under a KL constraint,
-which limits abrupt policy changes during continuous-control learning. The
-same MPO training loop is used for all DRL controllers. In E2E-RL and DEP-RL,
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored in a replay
+buffer. MPO updates the critic parameters $\omega$ from replayed Bellman targets
+and updates the actor from $\pi(\mathbf{s};\theta)$ to
+$\pi(\mathbf{s};\theta_{\mathrm{new}})$ under a KL constraint, which limits
+abrupt policy changes during continuous-control learning. The same MPO training
+loop is used for all DRL controllers. In E2E-RL and DEP-RL,
 however, the action is an 18-dimensional direct muscle-control vector rather
 than a four-dimensional reflex-parameter modulation. Thus, the comparison keeps
 the optimizer fixed while changing the control interface.
