@@ -118,8 +118,10 @@ redundant action space. Exploration and reward design become harder as the
 number of muscles increases, and successful episode completion alone does not
 guarantee human-like joint coordination, contact loading, or left--right
 symmetry \cite{song2021,nowakowski2021,su2023}. Methods such as DEP-RL improve
-exploration in overactuated and musculoskeletal systems, but still preserve the
-direct muscle-level action interface \cite{deprl2023}.
+exploration in overactuated and musculoskeletal systems, but they still operate
+through direct muscle-level actions and can produce gait patterns whose
+kinematics or contact loading deviate from human walking references
+\cite{deprl2023}.
 
 Taken together, these studies reveal a gap between structured but fixed
 neuromuscular control and adaptive but high-dimensional direct muscle learning.
