@@ -31,14 +31,14 @@ Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculo
 \pagestyle{empty}
 
 \begin{abstract}
-Simulation-based musculoskeletal gait generation is an important tool for
-studying human locomotion, designing rehabilitation-oriented controllers, and
-developing bio-inspired assistive or robotic systems. In these applications, a
-controller must coordinate many redundant muscles while preserving natural joint
-motion, realistic contact loading, and adaptability to changes in the body or
-environment. Direct deep reinforcement learning (DRL) policies can learn
-state-dependent control, but they typically explore in a high-dimensional
-muscle-action space and provide limited interpretability. Conversely,
+Musculoskeletal gait generation is important for studying human locomotion,
+developing assistive systems, and building bio-inspired robots. These
+applications place stringent demands on control: many redundant muscles must be
+coordinated while natural joint motion, realistic contact loading, and
+adaptability to changes in the body or environment are preserved. Direct deep
+reinforcement learning (DRL) policies can learn state-dependent control, but
+they typically explore in a high-dimensional muscle-action space and provide
+limited interpretability. Conversely,
 reflex-based controllers provide compact neuromechanical feedback structure, but
 their parameters are commonly fixed after manual tuning or offline optimization.
 This study proposes Residual-Reflex RL, a
