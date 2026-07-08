@@ -208,7 +208,8 @@ $\pi(\mathbf{s};\theta)$ to $\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
 In module (a), let $\mathbf{s}_t$ denote the observation received by the policy
 at time $t$.
 In the present fixed-speed implementation, $\mathbf{s}_t\in\mathbb{R}^{121}$. It contains
-muscle-level sensory and activation signals from the 18 Hill-type muscles,
+muscle-level sensory and activation signals from the 18 Hill-type
+muscle--tendon actuators,
 foot-relative positions, body orientation and angular velocity, generalized
 coordinates and velocities.
 \begin{equation}
@@ -368,7 +369,7 @@ The experiments were conducted in a Hyfydy-based musculoskeletal simulation
 \cite{hyfydy}. The model contains the pelvis, trunk, and bilateral lower-limb
 segments, with nine generalized coordinates comprising pelvis translation and
 orientation together with bilateral hip, knee, and ankle joint rotations.
-Actuation is provided by 18 Hill-type muscles, corresponding to nine muscle
+Actuation is provided by 18 Hill-type muscle--tendon actuators, corresponding to nine muscle
 groups per leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS),
 vasti (VAS), biceps femoris short head (BIF), iliopsoas (ILI), hamstrings
 (HAM), gluteus maximus (GLU), and rectus femoris (FEM). Foot--ground contact
