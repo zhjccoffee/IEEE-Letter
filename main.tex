@@ -41,18 +41,17 @@ muscle-level deep reinforcement learning (DRL) policies must explore a
 high-dimensional and redundant action space, while traditional
 optimization-based approaches often produce fixed controller parameters that do
 not readily adapt to changes in the body or environment. This study proposes
-Residual-Reflex RL, a low-dimensional reflex-informed DRL framework that treats a
-phase-dependent reflex controller as a neuromechanical prior and learns residual
-modulation of selected reflex pathways. Instead of directly commanding all
-muscles, the policy adjusts four gait-relevant reflex parameters associated with
-hip swing, ankle propulsion, and stance support. Experiments in a muscle-driven
-simulation show that the proposed controller generates
-human-reference-consistent gait-cycle kinematics and vertical ground reaction
-forces, maintains symmetric and repeatable walking, and transfers to
-plantarflexor weakness and external push perturbations without retraining. These
-results suggest that learning over an interpretable reflex-parameter space can
-combine the biological structure of reflex control with the state-dependent
-adaptability of DRL.
+Residual-Reflex RL, a low-dimensional and interpretable reflex-informed DRL
+framework that treats a phase-dependent reflex controller as a neuromechanical
+prior and learns residual modulation of selected reflex pathways. Instead of
+directly commanding all muscles, the policy adjusts four gait-relevant reflex
+parameters associated with hip swing, ankle propulsion, and stance support. Tests
+on a musculoskeletal model show that the proposed controller produces
+human-like, stable, and repeatable gait, while adapting to plantarflexor weakness
+and external push perturbations without retraining. These results indicate that
+residual modulation of reflex pathways can preserve the biological structure of
+neuromuscular feedback control while providing the state-dependent adaptability
+of DRL.
 \end{abstract}
 
 \noindent\textit{Index Terms}---Deep reinforcement learning, gait generation,
@@ -180,28 +179,30 @@ mechanical states through the underlying reflex structure.
 
 \subsection{Residual-Reflex Framework}
 As shown in Fig.~\ref{framwork}, the framework is organized into three modules.
-Module (a) performs the agent--environment rollout, in which the policy observes the
-current state $\mathbf{s}_t$, outputs a residual action $\mathbf{a}_t$, and
-receives the next state and reward after the simulation step. Module (b) is the
+Module (a) performs the agent--environment rollout, in which the behavior policy
+$\pi_{\mathrm{b}}$ observes the current state $\mathbf{s}_t$, samples a residual
+action $\mathbf{a}_t$, and receives the next state and reward after the
+simulation step. Module (b) is the
 physiological environment, where the residual-reflex controller converts the
 action into modulation of selected reflex parameters, the reflex controller
 generates muscle stimulation, and the musculoskeletal model produces motion and
 contact forces. Module (c) is the actor--critic learning module, where rollout
 transitions are stored in a replay buffer and used to update the critic
-$q(\mathbf{s},\mathbf{a};\omega)$ and actor policy $\pi(\mathbf{s};\theta)$
-through off-policy MPO learning.
+$q_{\omega}(\mathbf{s},\mathbf{a})$ and the target policy
+$\pi_{\theta}(\mathbf{a}|\mathbf{s})$ through off-policy MPO learning.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
 \caption{Low-dimensional residual-reflex-informed DRL framework. (a) During
-agent--environment rollout, the policy maps the current state to a compact
-residual action and receives the next state and reward after simulation. (b) In
+agent--environment rollout, the behavior policy $\pi_{\mathrm{b}}$ maps the
+current state to a compact residual action and receives the next state and reward
+after simulation. (b) In
 the physiological environment, the residual-reflex controller modulates selected
 reflex parameters and produces muscle activation for the musculoskeletal model.
-(c) In the actor--critic learning module, rollout transitions are stored in the
-replay buffer; the critic $q(\mathbf{s},\mathbf{a};\omega)$ evaluates
-state--action pairs, and MPO updates the actor policy from
-$\pi(\mathbf{s};\theta)$ to $\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
+(c) In the actor--critic learning module, transitions collected by the behavior
+policy $\pi_{\mathrm{b}}$ are stored in the replay buffer $\mathcal{D}$. The
+critic $q_{\omega}(\mathbf{s},\mathbf{a})$ evaluates state--action pairs, and
+MPO updates the target policy $\pi_{\theta}(\mathbf{a}|\mathbf{s})$.}
 \label{framwork}
 \end{figure*}
 
@@ -319,24 +320,25 @@ learned actions and neuromuscular function.
 \subsection{Actor--Critic Learning}
 Module (c) trains the policy with Maximum a Posteriori Policy Optimization (MPO)
 \cite{mpo2018}, an off-policy actor--critic algorithm for continuous control.
-The actor network receives the 121-dimensional observation $\mathbf{s}_t$ and
-parameterizes a Gaussian policy $\pi(\mathbf{a}_t|\mathbf{s}_t;\theta)$. For
-Residual-Reflex RL, the policy output is the mean and standard deviation of a
-four-dimensional residual action distribution, with
-$\mathbf{a}_t\in[-1,1]^4$. During training, actions are sampled from this
-distribution; during deterministic evaluation, the policy mean is used. The
-critic receives the state-action pair and estimates
-$q(\mathbf{s}_t,\mathbf{a}_t;\omega)$ for MPO updates.
+Following Fig.~\ref{framwork}(c), rollouts are generated by a behavior policy
+$\pi_{\mathrm{b}}(\mathbf{a}_t|\mathbf{s}_t)$. The actor network receives the
+121-dimensional observation $\mathbf{s}_t$ and parameterizes a Gaussian target
+policy $\pi_{\theta}(\mathbf{a}_t|\mathbf{s}_t)$. For Residual-Reflex RL, the
+policy output is the mean and standard deviation of a four-dimensional residual
+action distribution, with $\mathbf{a}_t\in[-1,1]^4$. During training, actions are
+sampled from the behavior policy; during deterministic evaluation, the policy
+mean is used. The critic receives the state-action pair and estimates
+$q_{\omega}(\mathbf{s}_t,\mathbf{a}_t)$ for MPO updates.
 
 At each control step, the sampled residual action is converted into reflex
 parameter changes through Eq.~\eqref{eq:residual_scaling}, the reflex
 controller generates muscle stimulation, and the simulator advances one step.
 The transition
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is stored in a replay
-buffer. MPO updates the critic parameters $\omega$ from replayed Bellman targets
-and updates the actor from $\pi(\mathbf{s};\theta)$ to
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$ under a KL constraint, which limits
-abrupt policy changes during continuous-control learning. The same MPO training
+buffer $\mathcal{D}$. MPO updates the critic parameters $\omega$ from replayed
+Bellman targets and updates the target-policy parameters $\theta$ under a KL
+constraint, which limits abrupt policy changes during continuous-control learning.
+The same MPO training
 loop is used for all DRL controllers. In E2E-RL and DEP-RL,
 however, the action is an 18-dimensional direct muscle-control vector rather
 than a four-dimensional reflex-parameter modulation. Thus, the comparison keeps
