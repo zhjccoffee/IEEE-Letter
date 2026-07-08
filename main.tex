@@ -197,16 +197,18 @@ $\pi_{\theta}(\mathbf{a}|\mathbf{s})$ through off-policy MPO learning.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
-\caption{Low-dimensional residual-reflex-informed DRL framework. (a) During
-agent--environment rollout, the policy maps the current state $\mathbf{s}_t$ to
-a compact residual action $\mathbf{a}_t$ and receives the reward $r_t$ and next
-state $\mathbf{s}_{t+1}$ after simulation. (b) In
-the physiological environment, the residual-reflex controller modulates selected
-reflex parameters and produces muscle activation for the musculoskeletal model.
-(c) In the actor--critic learning module, rollout transitions are stored in the
-replay buffer $\mathcal{D}$. The critic $q(\mathbf{s},\mathbf{a};\omega)$
-evaluates state--action pairs, and MPO updates the policy
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
+\caption{Low-dimensional residual-reflex-informed DRL framework. The learning
+policy does not command muscle excitations directly, but outputs residual
+actions that modulate selected reflex parameters. (a) During agent--environment
+rollout, the policy maps the current state $\mathbf{s}_t$ to a residual action
+$\mathbf{a}_t$, and the resulting transition
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ is collected. (b) The
+physiological environment converts the residual action into reflex-parameter
+modulation, generates muscle activation through the reflex-informed controller,
+and advances the musculoskeletal model. (c) The actor--critic learning module
+stores rollout transitions in the replay buffer $\mathcal{D}$, evaluates
+state--action values with $q(\mathbf{s},\mathbf{a};\omega)$, and updates the
+policy $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using MPO.}
 \label{framwork}
 \end{figure*}
 
