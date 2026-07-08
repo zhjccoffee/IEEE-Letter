@@ -38,8 +38,9 @@ while preserving natural joint motion, realistic contact loading, and
 adaptability to changes in the body or environment. However,
 learning muscle-driven gait controllers remains challenging because direct
 muscle-level deep reinforcement learning (DRL) policies must explore a
-high-dimensional and redundant action space, while optimized reflex controllers
-often rely on fixed parameters that cannot adapt online. This study proposes
+high-dimensional and redundant action space, while traditional
+optimization-based approaches often produce fixed controller parameters that do
+not readily adapt to changes in the body or environment. This study proposes
 Residual-Reflex RL, a low-dimensional reflex-informed DRL framework that treats a
 phase-dependent reflex controller as a neuromechanical prior and learns residual
 modulation of selected reflex pathways. Instead of directly commanding all
