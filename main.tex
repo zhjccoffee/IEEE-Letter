@@ -249,8 +249,9 @@ velocity feedback and Golgi-tendon-organ-like force feedback. The gait cycle is
 divided into five controller phases, namely EarlyStance, LateStance, Liftoff, Swing,
 and Landing. In each phase, sparse
 reflex pathways map sensory feedback to target muscle stimulation. For a target
-muscle $i$ and a source muscle $j$, the controller includes length, velocity,
-and force feedback terms.
+muscle $i$ and a source muscle $j$, where $i\leftarrow j$ denotes feedback from
+source muscle $j$ to target muscle $i$, the controller includes length,
+velocity, and force feedback terms.
 \begin{align}
 u_{L,i\leftarrow j} &= k_{L,i\leftarrow j}
 \max(0,\tilde{l}_j(t-t_D)-\tilde{l}_{0,i\leftarrow j}),\\
@@ -261,14 +262,14 @@ u_{F,i\leftarrow j} &= k_{F,i\leftarrow j}
 \end{align}
 Here $u_{L,i\leftarrow j}$, $u_{V,i\leftarrow j}$, and
 $u_{F,i\leftarrow j}$ are the stimulation contributions from length, velocity,
-and force feedback from source muscle $j$ to target muscle $i$. The variables
-$\tilde{l}_j$, $\tilde{v}_j$, and $\tilde{f}_j$ denote normalized muscle length,
-velocity, and force, and $\tilde{l}_{0,i\leftarrow j}$,
-$\tilde{v}_{0,i\leftarrow j}$, and $\tilde{f}_{0,i\leftarrow j}$ are the
-corresponding feedback offsets or thresholds. The coefficients $k_L$, $k_V$, and
-$k_F$ are reflex gains, and $t_D$ is a sensorimotor delay. A reflex-like
-postural feedback term is also used to couple trunk pitch errors to selected
-lower-limb muscles.
+and force feedback, respectively. The variables $\tilde{l}_j$, $\tilde{v}_j$,
+and $\tilde{f}_j$ denote normalized length, velocity, and force of the source
+muscle. The offsets $\tilde{l}_{0,i\leftarrow j}$,
+$\tilde{v}_{0,i\leftarrow j}$, and $\tilde{f}_{0,i\leftarrow j}$ define the
+corresponding feedback thresholds, while $k_{L,i\leftarrow j}$,
+$k_{V,i\leftarrow j}$, and $k_{F,i\leftarrow j}$ are the corresponding reflex
+gains. The term $t_D$ is a sensorimotor delay. A reflex-like postural feedback
+term is also used to couple trunk pitch errors to selected lower-limb muscles.
 \begin{equation}
 u_{\text{PD},i}=k_{P,i}(\theta(t-t_D)-\theta_{0,i})+
 k_{D,i}\dot{\theta}(t-t_D).
@@ -340,35 +341,41 @@ learned actions and neuromuscular function.
 
 \subsection{Actor--Critic Learning}
 Module (c) implements the off-policy actor--critic learning loop shown in
-Fig.~\ref{framwork}(c). At time $t$, the rollout policy in module (a) receives
-the 121-dimensional observation $\mathbf{s}_t$ and outputs an action
-$\mathbf{a}_t$, as illustrated by the state--action loop in Fig.~\ref{framwork}.
-For Residual-Reflex RL, this action is four-dimensional,
-$\mathbf{a}_t\in[-1,1]^4$, and represents residual modulation of the four reflex
-parameters in Table~\ref{tab:residual_actions}. The sampled action is passed to
-module (b), converted into reflex-parameter changes by
-Eq.~\eqref{eq:residual_scaling}, and then used by the reflex controller to
-generate muscle stimulation for the musculoskeletal model. The simulator returns
-the reward $r_t$ and next observation $\mathbf{s}_{t+1}$, giving the transition
-$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ shown in Fig.~\ref{framwork}.
+Fig.~\ref{framwork}(c). The actor and critic are multilayer perceptrons with two
+hidden layers of 256 units and ReLU activations. The actor receives the
+121-dimensional observation $\mathbf{s}_t$ and parameterizes the Gaussian rollout
+policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ in module (a). For
+Residual-Reflex RL, its output is the mean and standard deviation of a
+four-dimensional residual-action distribution,
+$\mathbf{a}_t\in[-1,1]^4$, corresponding to the reflex parameters in
+Table~\ref{tab:residual_actions}. The critic receives the observation--action
+pair and outputs the scalar state--action value
+$q(\mathbf{s},\mathbf{a};\omega)$, where $\omega$ denotes critic parameters.
 
-The collected transitions are stored in the replay buffer $\mathcal{D}$ and used
-to train the critic and target policy with MPO. The critic has the form
-$q(\mathbf{s},\mathbf{a};\omega)$ shown in Fig.~\ref{framwork}(c), where
-$\omega$ denotes critic parameters; for each replayed transition, it is evaluated
-at the sampled pair $(\mathbf{s}_t,\mathbf{a}_t)$. The rollout actor is the
-Gaussian policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ shown in module (a); it
-maps an observation to the mean and standard deviation of a residual-action
-distribution. MPO updates the actor to the new policy parameters
-$\theta_{\mathrm{new}}$, corresponding to the policy block
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$ in module (c). During training, actions
-are sampled from the stochastic policy for exploration; during deterministic
-evaluation, the policy mean is used. MPO constrains the policy update with a KL
-bound, which limits abrupt policy changes during continuous-control learning.
-
-This learning loop is used to train the residual-reflex policy over the
-four-dimensional reflex-parameter action space. The baseline controllers used
-for comparison are defined in the experimental setting.
+Transitions collected during rollout,
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$, are stored in the replay
+buffer $\mathcal{D}$. MPO trains the critic from replayed transitions and updates
+the actor from the rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ to the
+new policy $\pi(\mathbf{s};\theta_{\mathrm{new}})$. Conceptually, the actor
+update increases the expected critic value while constraining the change from
+the rollout policy,
+\begin{equation}
+\begin{aligned}
+\theta_{\mathrm{new}} = \arg\max_{\theta}\;&
+\mathbb{E}_{\mathbf{s}\sim\mathcal{D},\,\mathbf{a}\sim\pi(\mathbf{s};\theta)}
+\left[q(\mathbf{s},\mathbf{a};\omega)\right]\\
+\mathrm{s.t.}\;&
+\mathbb{E}_{\mathbf{s}\sim\mathcal{D}}
+\left[D_{\mathrm{KL}}\!\left(
+\pi(\mathbf{s};\theta)\,\|\,\pi(\mathbf{s};\theta_{\mathrm{now}})
+\right)\right]\le\epsilon .
+\end{aligned}
+\end{equation}
+The KL constraint limits abrupt policy changes during continuous-control
+learning. During training, actions are sampled from the stochastic policy for
+exploration; during deterministic evaluation, the policy mean is used. The
+baseline controllers used for comparison are defined in the experimental
+setting.
 
 The base reward combines target-speed tracking ($r_{vel}$) with
 regularization terms for excessive ground reaction force ($r_{grf}$), abrupt
