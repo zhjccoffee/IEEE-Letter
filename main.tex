@@ -75,15 +75,16 @@ nonlinear, overactuated, and highly redundant, so many muscle-excitation
 patterns can complete a walking task while producing very different gait
 quality.
 
-Predictive simulation, trajectory optimization, and optimal control provide one
-major route for musculoskeletal gait generation. These methods can generate
-dynamically feasible motions under physical constraints and have provided
-important insight into gait mechanics, energetic objectives, and pathological
-walking
-\cite{anderson2001,ackermann2010,geijtenbeek2019,falisse2019,dembia2020,ezati2019,degroote2021,wang2010,wang2012,song2018}.
-Software frameworks and direct-collocation formulations have made predictive
-musculoskeletal simulation increasingly practical, but the resulting problem is
-still usually solved as an offline optimization over complete trajectories.
+Predictive simulation \cite{anderson2001,ackermann2010,geijtenbeek2019},
+trajectory optimization and direct collocation \cite{falisse2019}, and
+musculoskeletal optimal control \cite{dembia2020} provide one major route for
+musculoskeletal gait generation. These methods can generate dynamically feasible
+motions under physical constraints and have provided important insight into gait
+mechanics, energetic objectives, and pathological walking
+\cite{degroote2021,wang2010,wang2012,song2018}. Software frameworks have made
+predictive musculoskeletal simulation increasingly practical
+\cite{geijtenbeek2019,dembia2020}, but the resulting problem is still usually
+solved as an offline optimization over complete trajectories.
 Such approaches often require carefully designed cost functions and substantial
 computation, and the optimized motion does not necessarily become a feedback
 policy that can respond online to perturbations, muscle-capacity changes, or
@@ -339,17 +340,18 @@ $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ shown in Fig.~\ref{framwork}.
 
 The collected transitions are stored in the replay buffer $\mathcal{D}$ and used
 to train the critic and target policy with Maximum a Posteriori Policy
-Optimization (MPO) \cite{mpo2018}. The critic estimates the state--action value
-$q(\mathbf{s}_t,\mathbf{a}_t;\omega)$, where $\omega$ denotes critic parameters.
-The actor parameterizes a Gaussian policy $\pi(\mathbf{s}_t;\theta)$ that maps
-the observation to the mean and standard deviation of the action distribution.
-MPO updates the actor to the new policy parameters
+Optimization (MPO) \cite{mpo2018}. The critic has the form
+$q(\mathbf{s},\mathbf{a};\omega)$ shown in Fig.~\ref{framwork}(c), where
+$\omega$ denotes critic parameters; for each replayed transition, it is evaluated
+at the sampled pair $(\mathbf{s}_t,\mathbf{a}_t)$. The rollout actor is the
+Gaussian policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ shown in module (a); it
+maps an observation to the mean and standard deviation of a residual-action
+distribution. MPO updates the actor to the new policy parameters
 $\theta_{\mathrm{new}}$, corresponding to the policy block
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$ in Fig.~\ref{framwork}(c). During
-training, actions are sampled from this stochastic policy for exploration;
-during deterministic evaluation, the policy mean is used. MPO constrains the
-policy update with a KL bound, which limits abrupt policy changes during
-continuous-control learning.
+$\pi(\mathbf{s};\theta_{\mathrm{new}})$ in module (c). During training, actions
+are sampled from the stochastic policy for exploration; during deterministic
+evaluation, the policy mean is used. MPO constrains the policy update with a KL
+bound, which limits abrupt policy changes during continuous-control learning.
 
 This learning loop is used to train the residual-reflex policy over the
 four-dimensional reflex-parameter action space. The baseline controllers used
