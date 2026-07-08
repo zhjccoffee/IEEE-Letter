@@ -377,7 +377,9 @@ exploration; during deterministic evaluation, the policy mean is used. The
 baseline controllers used for comparison are defined in the experimental
 setting.
 
-The base reward combines target-speed tracking ($r_{vel}$) with
+The reward $r_t$ stored in each transition defines the learning objective used
+by the actor--critic update. The base reward combines target-speed tracking
+($r_{vel}$) with
 regularization terms for excessive ground reaction force ($r_{grf}$), abrupt
 excitation changes ($r_{smooth}$), muscle usage ($r_{musc}$), joint-limit
 torques ($r_{constr}$), and non-foot self-contact ($r_{self}$).
