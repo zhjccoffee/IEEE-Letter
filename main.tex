@@ -119,20 +119,24 @@ symmetry \cite{song2021,nowakowski2021,su2023}. Methods such as DEP-RL improve
 exploration in overactuated and musculoskeletal systems, but still preserve the
 direct muscle-level action interface \cite{deprl2023}.
 
-These observations reveal the need for a learning interface that combines the
-closed-loop stability and biological
-structure of reflex control, the state-dependent adaptability of DRL, and a
-low-dimensional action space that remains interpretable. Human motor control
-suggests such an organization. Locomotion is not learned from scratch as an
-arbitrary mapping from state to every muscle excitation. Fast spinal reflex
-pathways provide a low-level feedback substrate, while development and
-interaction with the environment shape how higher-level neural systems regulate
-and adapt these existing circuits. Inspired by this organization, this study
-treats a reflex controller as a low-level neuromechanical prior and trains a DRL
-policy to apply residual modulation to a small number of gait-relevant reflex
-parameters. This formulation provides a compact and interpretable learning
-interface that preserves reflex-based feedback structure while enabling
-state-dependent adaptation without exploring the full muscle-excitation space.
+Taken together, these studies suggest that the remaining challenge is not only
+how to learn a locomotion controller, but also at which level the learning
+should act. Offline optimization and structured neuromuscular controllers encode
+useful mechanics and feedback pathways, whereas end-to-end DRL can learn
+state-dependent behavior but does so through an unstructured muscle-level action
+space. A more suitable representation would allow learning to reshape existing
+neuromuscular feedback pathways online, without replacing them with direct
+commands to all muscles. Human motor control suggests such an organization.
+Locomotion is not learned from scratch as an arbitrary mapping from state to
+every muscle excitation. Fast spinal reflex pathways provide a low-level
+feedback substrate, while development and interaction with the environment shape
+how higher-level neural systems regulate and adapt these existing circuits.
+Inspired by this organization, this study treats a reflex controller as a
+low-level neuromechanical prior and trains a DRL policy to apply residual
+modulation to a small number of gait-relevant reflex parameters. This formulation
+places learning at the reflex-parameter level, preserving the feedback structure
+of the underlying controller while enabling state-dependent adaptation without
+exploring the full muscle-excitation space.
 
 The main contributions are listed below.
 \begin{enumerate}
@@ -149,8 +153,8 @@ The main contributions are listed below.
     \item We validate the framework in nominal walking, plantarflexor weakness,
     and external push perturbation tests, comparing against direct muscle-action
     DRL baselines and a CMA-ES-optimized reflex baseline to examine gait
-    plausibility, repeatability, and transfer to altered body and environment
-    conditions without retraining.
+    plausibility, repeatability, and the ability of the trained policy to
+    accommodate altered body and environment conditions without retraining.
 \end{enumerate}
 
 The remainder of the paper is organized as follows. Section II presents the residual reflex control formulation and learning framework; Section III describes the controlled walking validation setup and evaluation metrics; Section IV presents and analyzes the results; and Section V concludes the paper and outlines
