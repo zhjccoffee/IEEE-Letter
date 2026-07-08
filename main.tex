@@ -124,11 +124,11 @@ Taken together, these studies reveal a gap between structured but fixed
 neuromuscular control and adaptive but high-dimensional direct muscle learning.
 Offline optimization and structured neuromuscular controllers encode useful
 mechanics and feedback pathways, but their parameters are often fixed after
-optimization. End-to-end DRL can learn state-dependent behavior, but it usually
-does so through an unstructured muscle-level action space. A more suitable
-representation should retain the biological structure of reflex feedback while
-allowing the controller to adapt its parameters online. Human motor control
-provides a biological motivation for this representation.
+optimization. End-to-end DRL can learn state-dependent behavior, but direct
+muscle-level policies still require exploration in a high-dimensional and
+redundant action space. This motivates a compact and interpretable control
+representation that can remain adaptive after training. Human motor control
+provides a biological motivation for such a representation.
 Locomotion is not learned from scratch as an arbitrary mapping from state to
 every muscle excitation. Fast spinal reflex pathways provide a low-level
 feedback substrate, while development and interaction with the environment shape
