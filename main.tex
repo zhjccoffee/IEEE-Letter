@@ -184,17 +184,17 @@ mechanical states through the underlying reflex structure.
 
 \subsection{Residual-Reflex Framework}
 As shown in Fig.~\ref{framwork}, the framework is organized into three modules.
-Module (a) performs the agent--environment rollout, in which the behavior policy
-$\pi_{\mathrm{b}}$ observes the current state $\mathbf{s}_t$, samples a residual
-action $\mathbf{a}_t$, and receives the next state and reward after the
-simulation step. Module (b) is the
+Module (a) performs the agent--environment rollout, in which the current policy
+$\pi(\mathbf{s};\theta_{\mathrm{now}})$ maps the state $\mathbf{s}_t$ to a
+residual action $\mathbf{a}_t$ and collects the transition
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. Module (b) is the
 physiological environment, where the residual-reflex controller converts the
-action into modulation of selected reflex parameters, the reflex controller
-generates muscle stimulation, and the musculoskeletal model produces motion and
-contact forces. Module (c) is the actor--critic learning module, where rollout
-transitions are stored in a replay buffer and used to update the critic
-$q_{\omega}(\mathbf{s},\mathbf{a})$ and the target policy
-$\pi_{\theta}(\mathbf{a}|\mathbf{s})$ through off-policy MPO learning.
+action into modulation of selected reflex parameters, generates muscle
+stimulation, and drives the musculoskeletal model. Module (c) is the
+actor--critic learning module, where rollout transitions are stored in the
+replay buffer $\mathcal{D}$ and used to train the critic
+$q(\mathbf{s},\mathbf{a};\omega)$ and update the policy
+$\pi(\mathbf{s};\theta_{\mathrm{new}})$ through off-policy MPO learning.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
