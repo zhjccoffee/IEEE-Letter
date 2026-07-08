@@ -198,7 +198,8 @@ stimulation, and drives the musculoskeletal model. Module (c) is the
 actor--critic learning module, where rollout transitions are stored in the
 replay buffer $\mathcal{D}$ and used to train the critic
 $q(\mathbf{s},\mathbf{a};\omega)$ and update the policy
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$ through off-policy MPO learning.
+$\pi(\mathbf{s};\theta_{\mathrm{new}})$ through off-policy Maximum a Posteriori
+Policy Optimization (MPO) \cite{mpo2018}.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
@@ -219,7 +220,7 @@ policy $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using MPO.}
 
 In module (a), let $\mathbf{s}_t$ denote the observation received by the policy
 at time $t$.
-In the present fixed-speed implementation, $\mathbf{s}_t\in\mathbb{R}^{121}$. It contains
+In this implementation, $\mathbf{s}_t\in\mathbb{R}^{121}$. It contains
 muscle-level sensory and activation signals from the 18 Hill-type
 muscle--tendon actuators,
 foot-relative positions, body orientation and angular velocity, generalized
@@ -258,14 +259,23 @@ u_{V,i\leftarrow j} &= k_{V,i\leftarrow j}
 u_{F,i\leftarrow j} &= k_{F,i\leftarrow j}
 (\tilde{f}_j(t-t_D)-\tilde{f}_{0,i\leftarrow j}),
 \end{align}
-where $\tilde{l}$, $\tilde{v}$, and $\tilde{f}$ are normalized muscle length,
-velocity, and force; $k_L$, $k_V$, and $k_F$ are reflex gains; and $t_D$ is a
-sensorimotor delay. A reflex-like postural feedback term is also used to
-couple trunk pitch errors to selected lower-limb muscles.
+Here $u_{L,i\leftarrow j}$, $u_{V,i\leftarrow j}$, and
+$u_{F,i\leftarrow j}$ are the stimulation contributions from length, velocity,
+and force feedback from source muscle $j$ to target muscle $i$. The variables
+$\tilde{l}_j$, $\tilde{v}_j$, and $\tilde{f}_j$ denote normalized muscle length,
+velocity, and force, and $\tilde{l}_{0,i\leftarrow j}$,
+$\tilde{v}_{0,i\leftarrow j}$, and $\tilde{f}_{0,i\leftarrow j}$ are the
+corresponding feedback offsets or thresholds. The coefficients $k_L$, $k_V$, and
+$k_F$ are reflex gains, and $t_D$ is a sensorimotor delay. A reflex-like
+postural feedback term is also used to couple trunk pitch errors to selected
+lower-limb muscles.
 \begin{equation}
 u_{\text{PD},i}=k_{P,i}(\theta(t-t_D)-\theta_{0,i})+
 k_{D,i}\dot{\theta}(t-t_D).
 \end{equation}
+Here $\theta$ and $\dot{\theta}$ are the delayed trunk pitch angle and angular
+velocity, $\theta_{0,i}$ is the target pitch offset for muscle $i$, and $k_{P,i}$
+and $k_{D,i}$ are the proportional and derivative postural-feedback gains.
 The total stimulation of muscle $i$ is the sum of feedforward, local feedback,
 and postural feedback components.
 \begin{equation}
@@ -343,8 +353,7 @@ the reward $r_t$ and next observation $\mathbf{s}_{t+1}$, giving the transition
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ shown in Fig.~\ref{framwork}.
 
 The collected transitions are stored in the replay buffer $\mathcal{D}$ and used
-to train the critic and target policy with Maximum a Posteriori Policy
-Optimization (MPO) \cite{mpo2018}. The critic has the form
+to train the critic and target policy with MPO. The critic has the form
 $q(\mathbf{s},\mathbf{a};\omega)$ shown in Fig.~\ref{framwork}(c), where
 $\omega$ denotes critic parameters; for each replayed transition, it is evaluated
 at the sampled pair $(\mathbf{s}_t,\mathbf{a}_t)$. The rollout actor is the
