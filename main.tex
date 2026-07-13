@@ -1,12 +1,13 @@
-\documentclass[letterpaper, 10 pt, conference]{ieeeconf}
-\IEEEoverridecommandlockouts
-\overrideIEEEmargins
-\usepackage{cite}
+\documentclass[acmsmall,screen,review]{acmart}
+\setcopyright{none}
+\copyrightyear{2026}
+\acmYear{2026}
+\acmJournal{TOG}
+\settopmatter{printacmref=false,printfolios=true}
+\renewcommand\footnotetextcopyrightpermission[1]{}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
-\usepackage{hyperref}
-\hypersetup{hidelinks=true}
 \usepackage{textcomp}
 \usepackage{array}
 \usepackage{tabularx} 
@@ -21,14 +22,24 @@
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
-\title{\LARGE \bf
+\title{
 Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation
 }
-\author{First A. Author, Second B. Author, and Third C. Author}
-
-\maketitle
-\thispagestyle{empty}
-\pagestyle{empty}
+\author{First A. Author}
+\affiliation{%
+  \institution{University of Leeds}
+  \country{United Kingdom}}
+\email{author@example.com}
+\author{Second B. Author}
+\affiliation{%
+  \institution{University of Leeds}
+  \country{United Kingdom}}
+\email{author@example.com}
+\author{Third C. Author}
+\affiliation{%
+  \institution{University of Leeds}
+  \country{United Kingdom}}
+\email{author@example.com}
 
 \begin{abstract}
 Musculoskeletal gait generation is important for studying human locomotion,
@@ -55,8 +66,10 @@ interpretable reflex-parameter level, enabling adaptive muscle-driven gait
 generation without abandoning neuromuscular feedback structure.
 \end{abstract}
 
-\noindent\textit{Index Terms}---Deep reinforcement learning, gait generation,
-musculoskeletal simulation, reflex control, residual reinforcement learning.
+\keywords{Deep reinforcement learning, gait generation, musculoskeletal
+simulation, reflex control, residual reinforcement learning}
+
+\maketitle
 
 \section{Introduction}
 \label{sec:introduction}
