@@ -272,8 +272,14 @@ F_i^{\mathrm{MT}}=\mathcal{F}_i(\alpha_i,l_i,\dot l_i),
 \end{equation}
 where $\mathcal{A}_i$ denotes the activation dynamics and $\mathcal{F}_i$
 denotes the Hill-type force relation. Through configuration-dependent moment
-arms, the muscle forces generate generalized joint forces
-$\boldsymbol{\tau}_{\mathrm{mus}}$. The resulting character motion follows
+arms, the muscle forces generate generalized joint forces,
+\begin{equation}
+\tau_{\mathrm{mus},k}=
+\sum_{i\in\mathcal{M}_k}r_{i,k}(\mathbf{q})F_i^{\mathrm{MT}},
+\end{equation}
+where $r_{i,k}(\mathbf{q})$ is the signed moment arm of muscle $i$ about
+generalized coordinate $k$, and $\mathcal{M}_k$ is the set of muscles spanning
+that coordinate. The resulting character motion follows
 \begin{equation}
 \mathbf{M}(\mathbf{q})\ddot{\mathbf{q}}+
 \mathbf{h}(\mathbf{q},\dot{\mathbf{q}})=
@@ -294,8 +300,16 @@ length and velocity feedback, whereas Golgi-tendon-organ-like pathways provide
 force feedback. A finite-state gait controller gates these pathways over five
 phases: EarlyStance, LateStance, Liftoff, Swing, and Landing. This gating allows
 the same sensory signal to have a different functional role across the gait
-cycle. For a target muscle $i$ and a source muscle $j$, the notation
-$i\leftarrow j$ denotes feedback from source $j$ to target $i$. The controller
+cycle.
+
+For gait phase $\phi$, the active pathways form a sparse directed feedback
+graph $\mathcal{G}_{\phi}$. A connection $i\leftarrow j$ uses a signal measured
+at source muscle $j$ to modify stimulation of target muscle $i$. Connections
+with $i=j$ implement self-feedback, whereas connections with $i\neq j$ encode
+inter-muscle coordination. Their gains and thresholds are phase specific; an
+inactive connection has zero gain in the corresponding phase. The sign and
+magnitude of a gain determine how strongly its sensory signal facilitates or
+suppresses the target stimulation. For each active connection, the controller
 contains the following length, velocity, and force contributions:
 \begin{align}
 u_{L,i\leftarrow j} &= k_{L,i\leftarrow j}
@@ -329,6 +343,11 @@ u_i = u_{C,i}+u_{\text{PD},i}
 +\sum_{j\in\mathcal{M}}(u_{L,i\leftarrow j}
 +u_{V,i\leftarrow j}+u_{F,i\leftarrow j}).
 \end{equation}
+Here $u_{C,i}$ is the phase-dependent feedforward stimulation and
+$\mathcal{M}$ is the set of source muscles connected to target $i$ in the
+current phase. This sparse source--target organization is important because the
+reflex controller is not a collection of independent muscle servos. It couples
+muscles that jointly control limb support, propulsion, swing, and posture.
 The five phase gates select which terms contribute to each muscle at a given
 time. Consequently, changes in muscle length, shortening velocity, force, or
 trunk posture immediately alter stimulation even when the reflex parameters are
@@ -429,27 +448,40 @@ $q(\mathbf{s},\mathbf{a};\omega)$, where $\omega$ denotes critic parameters.
 Transitions collected during rollout,
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$, are stored in the replay
 buffer $\mathcal{D}$. MPO trains the critic from replayed transitions and updates
-the actor from the rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ to the
-new policy $\pi(\mathbf{s};\theta_{\mathrm{new}})$. Conceptually, the actor
-update increases the expected critic value while constraining the change from
-the rollout policy,
+the actor from the rollout policy $\pi(\mathbf{a}\mid\mathbf{s};
+\theta_{\mathrm{now}})$ to a new policy. Its policy update separates action
+improvement from parametric policy fitting. In the E-step, critic values
+reweight actions sampled from the rollout policy to form a non-parametric
+improved distribution
+\begin{equation}
+\rho(\mathbf{a}\mid\mathbf{s})=
+\frac{\pi(\mathbf{a}\mid\mathbf{s};\theta_{\mathrm{now}})
+\exp\!\left(q(\mathbf{s},\mathbf{a};\omega)/\eta\right)}
+{Z(\mathbf{s})},
+\end{equation}
+where $Z(\mathbf{s})$ normalizes the distribution and the temperature $\eta$ is
+chosen under an E-step KL budget. In the M-step, the actor is fitted to this
+improved distribution while constraining its departure from the rollout policy,
 \begin{equation}
 \begin{aligned}
-\theta_{\mathrm{new}} = \arg\max_{\theta}\;&
-\mathbb{E}_{\mathbf{s}\sim\mathcal{D},\,\mathbf{a}\sim\pi(\mathbf{s};\theta)}
-\left[q(\mathbf{s},\mathbf{a};\omega)\right]\\
+\theta_{\mathrm{new}}=\arg\max_{\theta}\;&
+\mathbb{E}_{\substack{\mathbf{s}\sim\mathcal{D}\\
+\mathbf{a}\sim\rho(\cdot\mid\mathbf{s})}}
+[\log \pi(\mathbf{a}\mid\mathbf{s};\theta)]\\
 \mathrm{s.t.}\;&
 \mathbb{E}_{\mathbf{s}\sim\mathcal{D}}
 \left[D_{\mathrm{KL}}\!\left(
-\pi(\mathbf{s};\theta)\,\|\,\pi(\mathbf{s};\theta_{\mathrm{now}})
-\right)\right]\le\epsilon .
+\pi(\cdot\mid\mathbf{s};\theta_{\mathrm{now}})\,\|\,
+\pi(\cdot\mid\mathbf{s};\theta)
+\right)\right]\le\epsilon_{\pi}.
 \end{aligned}
 \end{equation}
-The KL constraint limits abrupt policy changes during continuous-control
-learning. During training, actions are sampled from the stochastic policy for
-exploration; during deterministic evaluation, the policy mean is used. The
-baseline controllers used for comparison are defined in the experimental
-setting.
+The critic supplies the value ranking used in the E-step, whereas the KL
+constraint prevents the actor from changing abruptly when it fits the improved
+action distribution. During training, actions are sampled from the stochastic
+rollout policy for exploration; during deterministic evaluation, its mean is
+used. The baseline controllers used for comparison are defined in the
+experimental setting.
 
 The reward $r_t$ stored in each transition defines the learning objective used
 by the actor--critic update. The base reward combines target-speed tracking
