@@ -255,9 +255,25 @@ $\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
 \end{figure*}
 
 \subsection{Musculoskeletal Model}
-Module (b) couples the reflex controller to a muscle-driven musculoskeletal
-character. The character has 18 Hill-type muscle--tendon actuators, with nine
-muscle groups on each leg. For muscle $i$, neural stimulation $u_i$ is first
+\label{sec:musculoskeletal-model}
+\paragraph{Simulation platform and character.}
+The physiological environment in module (b) is implemented with the Hyfydy
+musculoskeletal simulation engine \cite{hyfydy} through a Python-based
+SCONE Gym interface. We use the sagittal-plane H0918v2j human model, which
+contains a pelvis, a rigidly attached torso, and bilateral thigh, shank, and
+foot segments. Its nine generalized coordinates comprise horizontal and
+vertical pelvis translation, pelvis tilt, and bilateral hip flexion, knee
+flexion, and ankle plantarflexion--dorsiflexion. The character is actuated by
+18 Hill-type muscle--tendon units, corresponding to nine muscle groups on each
+leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS),
+biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI),
+hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the
+rigid ground through spherical heel and toe contact elements. The controller
+is updated at fixed 0.005s intervals.
+
+\paragraph{Muscle-driven dynamics.}
+Module (b) couples the reflex controller to this character through the full
+stimulation-to-motion chain. For muscle $i$, neural stimulation $u_i$ is first
 filtered by activation dynamics to obtain activation $\alpha_i$. The
 muscle--tendon model then converts activation, fiber length, and fiber velocity
 into tensile force,
@@ -537,16 +553,10 @@ r_t = r_t^{base} + w_{\theta}r_{\theta}
 \label{sec:evaluation-protocol}
 
 \subsection{Experimental Setup}
-The experiments were conducted in a Hyfydy-based musculoskeletal simulation
-\cite{hyfydy}. The model contains the pelvis, trunk, and bilateral lower-limb
-segments, with nine generalized coordinates comprising pelvis translation and
-orientation together with bilateral hip, knee, and ankle joint rotations.
-Actuation is provided by 18 Hill-type muscle--tendon actuators, corresponding to nine muscle
-groups per leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS),
-vasti (VAS), biceps femoris short head (BIF), iliopsoas (ILI), hamstrings
-(HAM), gluteus maximus (GLU), and rectus femoris (FEM). Foot--ground contact
-elements are used to compute vertical ground reaction forces (GRFs) for gait
-analysis.
+The simulator, musculoskeletal character, muscle-driven dynamics, and
+foot--ground contact model are described in Section~\ref{sec:musculoskeletal-model}. The same character and
+simulation settings were used for all controllers unless a plantarflexor
+weakness condition was explicitly introduced.
 
 Four controllers were considered across the validation experiments.
 E2E-RL denotes an end-to-end reinforcement learning policy that directly
