@@ -204,9 +204,10 @@ remain mediated by sensory feedback and muscle mechanics.
 \section{Method}
 \label{sec:method}
 \subsection{Framework Overview}
-We propose a hierarchical control framework for muscle-driven character
-locomotion that couples phase-dependent neuromuscular feedback with learned
-residual regulation. The low-level reflex controller synthesizes muscle
+We propose Residual-Reflex RL, a low-dimensional residual-reflex-informed deep
+reinforcement learning framework for musculoskeletal gait generation. The
+framework couples phase-dependent neuromuscular feedback with learned residual
+regulation. The low-level reflex controller synthesizes muscle
 stimulation from delayed proprioceptive and postural feedback, while a learned
 policy modifies four selected reflex parameters according to the current
 musculoskeletal state. The object learned by the policy is therefore not a
