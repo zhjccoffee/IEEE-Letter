@@ -106,31 +106,29 @@ control from scratch.
 Muscle-driven characters make it possible to explore this principle
 computationally because they explicitly connect neural stimulation to activation
 dynamics, muscle--tendon force, skeletal motion, and foot--ground contact.
-The same physiological detail, however, creates substantial actuation
-redundancy because many muscle-excitation patterns can accomplish the same
-locomotor task while producing different joint coordination and contact
-loading. A useful gait controller must therefore satisfy two coupled
-requirements. It should represent muscle coordination compactly enough to
-reduce this redundancy, and it should remain responsive to the current state so
-that coordination can adapt when muscle capacity or external conditions change.
-Dimensionality reduction alone is insufficient if it produces a fixed motion
-pattern, just as adaptability is difficult to obtain when learning must search
-through redundant muscle commands. The central problem is thus to obtain a
-compact control representation that supports both natural gait generation and
-state-dependent adaptation to changes in the body or environment.
+Translating the layered adaptability of human locomotion into such models is
+nevertheless difficult. At the muscle level, locomotion is highly redundant.
+Many excitation patterns can realize the same task while producing different
+joint coordination and contact loading. Asking a policy to command every muscle
+independently therefore requires it to rediscover useful coordination within a
+large space of equivalent actions. Simply compressing that space into a fixed
+coordination pattern addresses the search problem, but not the need to
+reorganize gait when the body or environment changes. The representation must
+therefore express coordination through a small number of meaningful variables
+without freezing their contribution to movement. Those variables should remain
+adjustable from the current sensory state.
 
-We address these coupled requirements with Residual-Reflex RL, a low-dimensional
-residual-reflex-informed deep reinforcement learning framework. A
-phase-dependent reflex controller converts muscle and body feedback into
-low-level stimulation, while a learned policy applies state-dependent residual
-modulation to four gait-relevant reflex parameters. The policy therefore learns
-how a compact neuromuscular representation should respond to the current
-movement state rather than directly commanding all muscles. This formulation
-reduces the learned control space while retaining an interpretable feedback
-structure whose operation can change online. Experiments evaluate whether the
-resulting controller produces natural and repeatable nominal gait and whether
-the same trained policy can accommodate plantarflexor weakness and external
-pushes without retraining.
+Motivated by this principle, we propose Residual-Reflex RL, a low-dimensional
+residual-reflex-informed deep reinforcement learning framework. The framework
+retains a phase-dependent reflex controller that transforms muscle and body
+feedback into low-level stimulation, and places learning at the level of reflex
+regulation. A learned policy continuously modulates four gait-relevant reflex
+parameters instead of directly commanding individual muscles. The resulting
+control space is compact and interpretable, yet remains state dependent so that
+the underlying coordination can change as walking conditions change.
+Experiments evaluate whether the controller produces natural and repeatable
+nominal gait and whether the same trained policy can accommodate plantarflexor
+weakness and external pushes without retraining.
 
 This study makes three main contributions.
 \begin{enumerate}
