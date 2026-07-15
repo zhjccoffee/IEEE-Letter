@@ -281,6 +281,15 @@ is updated at fixed 0.005s intervals. The lower-left and lower-center panels
 of Fig.~\ref{framwork}(b) show the simulated character and the modeled muscle
 groups, respectively.
 
+As illustrated by the muscle paths in the lower-center panel of
+Fig.~\ref{framwork}(b), GLU and HAM contribute primarily to hip extension,
+whereas ILI and FEM contribute to hip flexion and leg advancement. VAS and BIF
+provide knee extension and flexion, respectively. At the ankle, SOL and GAS
+generate plantarflexion for stance support and propulsion, while TA produces
+dorsiflexion for foot clearance and landing. The biarticular HAM, FEM, and GAS
+span adjacent joints and couple their motion, contributing to the redundancy
+of the muscle-driven system.
+
 \paragraph{Muscle-driven dynamics.}
 Module (b) couples the reflex controller to this character through the full
 stimulation-to-motion chain. For muscle $i$, neural stimulation $u_i$ is first
@@ -342,9 +351,9 @@ force-feedback gain used in Liftoff, Swing, and Landing. Consequently, the same
 type of sensory feedback can serve loading in stance, propulsion near liftoff,
 or limb placement during swing and landing without requiring one gain to serve
 all phases. The lower-right panel of Fig.~\ref{framwork}(b) summarizes this
-topology for the nine muscle groups on each leg: tibialis anterior (TA), soleus (SOL),
-gastrocnemius (GAS), vasti (VAS), biceps femoris short head (BIF), rectus
-femoris (FEM), iliopsoas (ILI), hamstrings (HAM), and gluteus maximus (GLU).
+topology across the nine muscle groups defined in
+Sec.~\ref{sec:musculoskeletal-model}, including the ankle-related TA, SOL, and
+GAS, the knee-related VAS and BIF, and the hip-related FEM, ILI, HAM, and GLU.
 
 Let $\phi(t)$ denote the current gait phase and let $\Gamma(\phi)$ denote its
 set of active parameter-sharing groups. For EarlyStance and LateStance,
