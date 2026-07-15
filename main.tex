@@ -127,14 +127,18 @@ of neuromuscular feedback.
 Based on this insight, we propose Residual-Reflex RL, a low-dimensional
 residual-reflex-informed deep reinforcement learning framework for muscle-driven
 gait generation. The framework retains a phase-dependent reflex controller as
-the low-level feedback organization and learns residual modulation of four
-gait-relevant reflex parameters. The learned policy therefore adapts how
-existing feedback pathways contribute to movement rather than reconstructing
-muscle coordination from scratch. We evaluate the framework in nominal walking,
-plantarflexor weakness, and external push perturbations. The resulting gait is
-natural and repeatable under nominal conditions, while the same trained policy
-accommodates changes in muscle capacity and external disturbances without
-retraining.
+the low-level feedback organization. At each control step, a learned policy
+observes the musculoskeletal state and outputs residual changes to four selected
+reflex gains and thresholds associated with hip swing, ankle propulsion, and
+stance support. These actions reshape how sensory feedback is converted into
+muscle stimulation rather than adding muscle excitations directly. The learned
+interface is consequently compact and interpretable, while its state-dependent
+modulation allows the underlying coordination to change continuously with the
+body and environment. We evaluate nominal gait against direct muscle-control
+policies, and test the same trained controller under plantarflexor weakness and
+external push perturbations. The resulting gait is natural and repeatable under
+nominal conditions, while changes in muscle capacity and external disturbances
+are accommodated without retraining.
 
 This study makes three main contributions.
 \begin{enumerate}
@@ -214,20 +218,8 @@ remain mediated by sensory feedback and muscle mechanics.
 \section{Method}
 \label{sec:method}
 \subsection{Framework Overview}
-We propose Residual-Reflex RL, a low-dimensional residual-reflex-informed deep
-reinforcement learning framework for musculoskeletal gait generation. Its
-central design choice concerns where learning enters the muscle-driven control
-loop. Rather than replacing neuromuscular feedback with direct muscle commands,
-the policy acts one level above it and continuously reshapes selected reflex
-pathways. The low-level reflex controller remains responsible for rapid,
-phase-dependent conversion of delayed proprioceptive and postural feedback into
-muscle stimulation, while the learned policy provides state-dependent residual
-modulation of four selected feedback parameters. The learned object is thus not
-a sequence of muscle excitations, but a rule for regulating how existing
-feedback pathways contribute to locomotion as the musculoskeletal state evolves.
-
-Figure~\ref{framwork} summarizes the resulting closed loop. In module (a), the
-rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ observes the current
+Figure~\ref{framwork} summarizes the framework as three coupled modules. In
+module (a), the rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ observes the current
 musculoskeletal state $\mathbf{s}_t$ and produces the four-dimensional residual
 action $\mathbf{a}_t$. In module (b), this action changes four parameters of the
 phase-dependent reflex controller described below. The modulated controller
@@ -238,19 +230,13 @@ buffer $\mathcal{D}$, trains a critic $q(\mathbf{s},\mathbf{a};\omega)$, and
 updates the policy to $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using off-policy
 Maximum a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
 
-The separation between feedback synthesis and learned regulation gives the two
-layers distinct roles. The reflex layer preserves phase-dependent sensory
-feedback and converts its output through activation dynamics and muscle--tendon
-mechanics into physically simulated force and motion. The residual layer changes
-the operating characteristics of selected pathways as the character state
-evolves. This organization reduces the learned action interface from 18 direct
-muscle commands to four reflex-parameter adjustments. Each action changes the
-gain or threshold of a named feedback pathway, and its mechanical effect
-therefore depends on the current gait phase and sensed muscle state. The policy
-learns to reorganize an existing closed-loop controller instead of reconstructing
-the complete muscle-coordination mapping from scratch. Once trained, the policy
-and reflex controller can be evaluated under altered muscle capacity or external
-forces without reoptimizing the controller parameters.
+During execution, modules (a) and (b) form a state-feedback loop from
+$\mathbf{s}_t$ through residual parameter modulation and muscle stimulation to
+$\mathbf{s}_{t+1}$. During learning, module (c) forms a second loop that reuses
+the collected transitions to improve the rollout policy. The following sections
+define the musculoskeletal dynamics, the phase-dependent reflex pathways, the
+four-dimensional residual parameterization, and the MPO update used in these
+loops.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
