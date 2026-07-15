@@ -77,18 +77,18 @@ simulation, reflex control, residual reinforcement learning}
 \section{Introduction}
 \label{sec:introduction}
 
-Muscle-driven virtual humans are increasingly expected to do more than reproduce
-a visually plausible motion under one nominal condition. They serve as
-computational bodies for studying human locomotion and as testbeds for
-bio-inspired assistive and robotic systems
-\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}. In these
-roles, a convincing gait controller should retain coherent coordination when
-the body's physical capacity or its surroundings change. Humans display this
-property routinely. Reduced plantarflexor capacity can be accommodated through
-a slower, redistributed gait, while an unexpected push evokes corrective steps
-without requiring locomotion to be learned again. A character that walks only
-with an intact body in an undisturbed environment captures a nominal motion, but
-not the adaptive organization that makes human locomotion compelling.
+Muscle-driven characters promise more than visually plausible animation. By
+connecting neural stimulation, muscle force, skeletal motion, and physical
+contact, they provide a computational account of how locomotion emerges from the
+body. Such characters serve as computational bodies for studying human movement
+and as testbeds for bio-inspired assistive and robotic systems
+\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}. This promise
+remains incomplete, however, when a controller reproduces only one nominal gait
+for an intact body in an undisturbed environment. Human locomotion remains
+coordinated when physical capacity changes and can recover from unexpected
+disturbances without relearning movement from scratch. Reproducing this
+combination of physical plausibility and adaptability remains a fundamental
+challenge for muscle-driven character control.
 
 Human locomotion provides a useful clue for how such adaptability can be
 organized. Walking is not acquired as an arbitrary mapping from body state to
@@ -103,10 +103,7 @@ physical capacity or external conditions change, adaptation can therefore
 reshape an existing sensorimotor organization rather than reconstructing muscle
 control from scratch.
 
-Muscle-driven characters make it possible to explore this principle
-computationally because they explicitly connect neural stimulation to activation
-dynamics, muscle--tendon force, skeletal motion, and foot--ground contact.
-Translating the layered adaptability of human locomotion into such models is
+Translating this layered organization into a learned muscle-driven controller is
 nevertheless difficult. At the muscle level, locomotion is highly redundant.
 Many excitation patterns can realize the same task while producing different
 joint coordination and contact loading. Asking a policy to command every muscle
@@ -118,17 +115,24 @@ therefore to reduce redundancy in muscle-driven control while preserving
 natural gait and retaining the ability to adapt coordination to changes in
 physical capacity and external conditions.
 
-To address this challenge, we propose Residual-Reflex RL, a low-dimensional
-residual-reflex-informed deep reinforcement learning framework. The framework
-retains a phase-dependent reflex controller that transforms muscle and body
-feedback into low-level stimulation, and places learning at the level of reflex
-regulation. A learned policy continuously modulates four gait-relevant reflex
-parameters instead of directly commanding individual muscles. The resulting
-control space is compact and interpretable, yet remains state dependent so that
-the underlying coordination can change as walking conditions change.
-Experiments evaluate whether the controller produces natural and repeatable
-nominal gait and whether the same trained policy can accommodate plantarflexor
-weakness and external pushes without retraining.
+These observations suggest that compactness and adaptability need not be
+competing objectives. Our key insight is that adaptability can arise not from
+learning more muscle commands, but from learning how to regulate a compact set
+of feedback pathways that already organize muscle coordination. This shifts the
+role of learning from muscle-excitation synthesis to state-dependent regulation
+of neuromuscular feedback.
+
+Based on this insight, we propose Residual-Reflex RL, a low-dimensional
+residual-reflex-informed deep reinforcement learning framework for muscle-driven
+gait generation. The framework retains a phase-dependent reflex controller as
+the low-level feedback organization and learns residual modulation of four
+gait-relevant reflex parameters. The learned policy therefore adapts how
+existing feedback pathways contribute to movement rather than reconstructing
+muscle coordination from scratch. We evaluate the framework in nominal walking,
+plantarflexor weakness, and external push perturbations. The resulting gait is
+natural and repeatable under nominal conditions, while the same trained policy
+accommodates changes in muscle capacity and external disturbances without
+retraining.
 
 This study makes three main contributions.
 \begin{enumerate}
