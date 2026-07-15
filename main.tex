@@ -56,9 +56,10 @@ exploration in a
 high-dimensional and redundant action space, while traditional
 optimization-based approaches often produce fixed controller parameters that do
 not readily adapt to changes in the body or environment. This study proposes
-Residual-Reflex RL, a low-dimensional and interpretable reflex-informed DRL
-framework that treats a phase-dependent reflex controller as a neuromechanical
-prior and learns residual modulation of selected reflex pathways. Instead of
+Residual-Reflex RL, a low-dimensional residual-reflex-informed DRL framework
+for musculoskeletal gait generation. The framework treats a phase-dependent
+reflex controller as a neuromechanical prior and learns residual modulation of
+selected reflex pathways. Instead of
 directly commanding all muscles, the policy adjusts four gait-relevant reflex
 parameters associated with hip swing, ankle propulsion, and stance support.
 Experiments with a musculoskeletal model show that the proposed controller produces
@@ -115,8 +116,9 @@ muscle command anew, while preserving natural gait and accommodating changes in
 the body or environment.
 
 We address this question with Residual-Reflex RL, a low-dimensional
-residual-reflex-informed deep reinforcement learning framework. A
-phase-dependent reflex controller converts muscle and body feedback into
+residual-reflex-informed deep reinforcement learning framework for
+musculoskeletal gait generation. A phase-dependent reflex controller converts
+muscle and body feedback into
 low-level stimulation, while a learned policy applies state-dependent residual
 modulation to four gait-relevant reflex parameters. The policy therefore learns
 how the existing feedback pathways should contribute to the current movement,
