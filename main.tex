@@ -112,13 +112,13 @@ Many excitation patterns can realize the same task while producing different
 joint coordination and contact loading. Asking a policy to command every muscle
 independently therefore requires it to rediscover useful coordination within a
 large space of equivalent actions. Simply compressing that space into a fixed
-coordination pattern addresses the search problem, but not the need to
-reorganize gait when the body or environment changes. The representation must
-therefore express coordination through a small number of meaningful variables
-without freezing their contribution to movement. Those variables should remain
-adjustable from the current sensory state.
+coordination pattern may ease the search, but can restrict the capacity to
+reorganize gait when the body or environment changes. The core challenge is
+therefore to reduce redundancy in muscle-driven control while preserving
+natural gait and retaining the ability to adapt coordination to changes in
+physical capacity and external conditions.
 
-Motivated by this principle, we propose Residual-Reflex RL, a low-dimensional
+To address this challenge, we propose Residual-Reflex RL, a low-dimensional
 residual-reflex-informed deep reinforcement learning framework. The framework
 retains a phase-dependent reflex controller that transforms muscle and body
 feedback into low-level stimulation, and places learning at the level of reflex
