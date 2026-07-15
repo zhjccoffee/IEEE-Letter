@@ -196,9 +196,54 @@ modulates a small set of reflex gains and thresholds whose downstream effects
 remain mediated by sensory feedback and muscle mechanics.
 
 
-\section{Neuromuscular Character Control}
-\label{sec:neuromuscular-control}
-\subsection{Muscle-Driven Character Model}
+\section{Method}
+\label{sec:method}
+\subsection{Framework Overview}
+Our central design choice concerns where learning enters the muscle-driven
+control loop. Rather than replacing neuromuscular feedback with direct muscle
+commands, the policy acts one level above it and continuously reshapes selected
+reflex pathways. The reflex controller therefore remains responsible for rapid,
+phase-dependent conversion of sensory feedback into muscle stimulation, while
+the learned policy provides state-dependent residual modulation of a compact
+set of feedback parameters.
+
+Figure~\ref{framwork} summarizes the resulting closed loop. In module (a), the
+rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ observes the current
+musculoskeletal state $\mathbf{s}_t$ and produces the four-dimensional residual
+action $\mathbf{a}_t$. In module (b), this action changes four parameters of the
+phase-dependent reflex controller described below. The modulated controller
+maps delayed muscle and body feedback to muscle stimulation; muscle activation
+and muscle--tendon forces then advance the skeletal dynamics and generate the
+next state and reward. Module (c) stores the collected transitions in a replay
+buffer $\mathcal{D}$, trains a critic $q(\mathbf{s},\mathbf{a};\omega)$, and
+updates the policy to $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using off-policy
+Maximum a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
+
+This organization reduces the learned action interface from 18 direct muscle
+commands to four reflex-parameter adjustments. More importantly, an action no
+longer denotes an isolated muscle excitation. It changes the gain or threshold
+of a feedback pathway whose effect depends on the current gait phase and sensed
+muscle state. The policy thus learns how to reshape an existing closed-loop
+controller instead of learning the entire muscle-coordination mapping from
+scratch.
+
+\begin{figure*}[!t]
+\centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
+\caption{Residual-reflex learning framework. (a) The rollout policy maps the
+musculoskeletal state $\mathbf{s}_t$ to a four-dimensional residual action
+$\mathbf{a}_t$ and collects the transition
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The action modulates
+selected parameters of the phase-dependent reflex controller. Delayed sensory
+feedback is converted into muscle stimulation, which drives muscle activation,
+muscle--tendon force, and skeletal motion. (c) The collected transitions are
+stored in $\mathcal{D}$; the critic $q(\mathbf{s},\mathbf{a};\omega)$ evaluates
+candidate actions and MPO updates the rollout policy from
+$\pi(\mathbf{s};\theta_{\mathrm{now}})$ to
+$\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
+\label{framwork}
+\end{figure*}
+
+\subsection{Musculoskeletal Model}
 Module (b) couples the reflex controller to a muscle-driven musculoskeletal
 character. The character has 18 Hill-type muscle--tendon actuators, with nine
 muscle groups on each leg. For muscle $i$, neural stimulation $u_i$ is first
@@ -273,54 +318,6 @@ time. Consequently, changes in muscle length, shortening velocity, force, or
 trunk posture immediately alter stimulation even when the reflex parameters are
 held fixed. The reflex controller therefore supplies an existing closed-loop
 coordination structure on which residual learning can act.
-
-\section{Residual-Reflex Learning}
-\label{sec:residual-learning}
-\subsection{Framework Overview}
-Our central design choice concerns where learning enters the muscle-driven
-control loop. Rather than replacing neuromuscular feedback with direct muscle
-commands, the policy acts one level above it and continuously reshapes selected
-reflex pathways. The reflex controller therefore remains responsible for rapid,
-phase-dependent conversion of sensory feedback into muscle stimulation, while
-the learned policy provides state-dependent residual modulation of a compact
-set of feedback parameters.
-
-Figure~\ref{framwork} summarizes the resulting closed loop. In module (a), the
-rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ observes the current
-musculoskeletal state $\mathbf{s}_t$ and produces the four-dimensional residual
-action $\mathbf{a}_t$. In module (b), this action changes four parameters of the
-phase-dependent reflex controller introduced in
-Section~\ref{sec:neuromuscular-control}. The modulated controller maps delayed
-muscle and body feedback to muscle stimulation; muscle activation and
-muscle--tendon forces then advance the skeletal dynamics and generate the next
-state and reward. Module (c) stores the collected transitions in a replay buffer
-$\mathcal{D}$, trains a critic $q(\mathbf{s},\mathbf{a};\omega)$, and updates
-the policy to $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using off-policy Maximum
-a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
-
-This organization reduces the learned action interface from 18 direct muscle
-commands to four reflex-parameter adjustments. More importantly, an action no
-longer denotes an isolated muscle excitation. It changes the gain or threshold
-of a feedback pathway whose effect depends on the current gait phase and sensed
-muscle state. The policy thus learns how to reshape an existing closed-loop
-controller instead of learning the entire muscle-coordination mapping from
-scratch.
-
-\begin{figure*}[!t]
-\centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
-\caption{Residual-reflex learning framework. (a) The rollout policy maps the
-musculoskeletal state $\mathbf{s}_t$ to a four-dimensional residual action
-$\mathbf{a}_t$ and collects the transition
-$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The action modulates
-selected parameters of the phase-dependent reflex controller. Delayed sensory
-feedback is converted into muscle stimulation, which drives muscle activation,
-muscle--tendon force, and skeletal motion. (c) The collected transitions are
-stored in $\mathcal{D}$; the critic $q(\mathbf{s},\mathbf{a};\omega)$ evaluates
-candidate actions and MPO updates the rollout policy from
-$\pi(\mathbf{s};\theta_{\mathrm{now}})$ to
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
-\label{framwork}
-\end{figure*}
 
 \subsection{Four-Dimensional Residual Modulation}
 The learned policy does not output the 18 muscle stimulations. Instead, it uses
@@ -459,10 +456,10 @@ center-of-mass velocity ($r_{com}$), and residual-action changes
 r_t = r_t^{base} + w_{\theta}r_{\theta}
 +w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
 \end{equation}
-\section{Evaluation Protocol}
+\section{Evaluation}
 \label{sec:evaluation-protocol}
 
-\subsection{Character, Controllers, and Training}
+\subsection{Experimental Setup}
 The experiments were conducted in a Hyfydy-based musculoskeletal simulation
 \cite{hyfydy}. The model contains the pelvis, trunk, and bilateral lower-limb
 segments, with nine generalized coordinates comprising pelvis translation and
@@ -507,7 +504,7 @@ DEP-RL & 18 & Direct muscle-level control with DEP-style embodied exploration. \
 \end{tabularx}
 \end{table}
 
-\subsection{Nominal Walking Protocol and Metrics}
+\subsection{Tasks and Evaluation Metrics}
 The nominal walking experiment evaluates whether the proposed controller
 generates plausible steady gait under controlled target-speed tasks. Policies
 were evaluated at target walking speeds of 0.8, 1.0, and 1.2~m/s. For each
@@ -595,22 +592,9 @@ Accordingly, the Hip, Knee, Ankle, and GRF columns in the symmetry table report
 $D_y$ for the corresponding left--right waveform pair, whereas the Time CV and
 Length CV columns report $\mathrm{CV}_z$ for stride time and stride length.
 
-\subsection{Supplementary Video}
-The accompanying \suppvideo{} presents the continuous motion underlying these
-evaluations. The first part compares nominal gait generated by E2E-RL, DEP-RL,
-and Residual-Reflex RL at 1.2m/s. The second part evaluates the unchanged
-1.2m/s policy on the plantarflexor-weakened models and contrasts its response
-with the CMA-ES-optimized reflex controller. Character motion is synchronized
-with the four residual-action channels to show how reflex modulation changes as
-soleus strength is reduced. The final part shows single and repeated backward
-pushes, including the instant of force application, the resulting loss of
-forward momentum, and the subsequent recovery or fall. These sequences
-distinguish sustained adaptation from a transient motion that only delays
-termination.
-
-\section{Nominal Gait Generation}
+\subsection{Nominal Gait Generation}
 \label{sec:nominal-gait}
-\subsection{Speed Tracking and Stride Measures}
+\subsubsection{Speed Tracking and Stride Measures}
 All three methods were able to generate sustained forward walking in
 the controlled speed tasks. Table~\ref{tab:spatiotemporal_metrics} shows that Residual-Reflex RL tracked the commanded
 speed most closely at all three target speeds, with absolute speed errors of
@@ -657,7 +641,7 @@ speed.}
 }
 \end{table}
 
-\subsection{Human-Reference Kinematic Gait Analysis}
+\subsubsection{Human-Reference Kinematic Gait Analysis}
 The kinematic gait-cycle scores reveal a clearer separation between the three
 methods. As listed in Table~\ref{tab:gait_similarity}, Residual-Reflex RL
 achieved the highest kinematic-average score at all three speeds, with an
@@ -771,7 +755,7 @@ show normalized gait cycle percentage.}
 \label{fig:gait_profiles_12}
 \end{figure}
 
-\subsection{GRF Morphology}
+\subsubsection{GRF Morphology}
 Ground reaction force provides a direct view of how each controller loads and
 unloads the body during stance. Residual-Reflex RL produced smoother vertical
 GRF profiles with a more reference-consistent double-support pattern across the
@@ -823,7 +807,7 @@ Horizontal axes show normalized gait cycle percentage.}
 \label{fig:grf_morphology}
 \end{figure}
 
-\subsection{Symmetry and Repeatability}
+\subsubsection{Symmetry and Repeatability}
 The residual reflex representation also improved the regularity of the generated
 gait cycles. Table~\ref{tab:symmetry_variability} shows that Residual-Reflex RL
 consistently produced lower left--right waveform differences and lower stride
@@ -885,7 +869,7 @@ speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
 \label{fig:symmetry_variability_bars}
 \end{figure}
 
-\subsection{Qualitative Gait Visualization}
+\subsubsection{Qualitative Gait Visualization}
 The qualitative snapshots in Fig.~\ref{fig:qualitative_snapshots} give an
 intuitive view of the same result at the body posture level. E2E-RL appears
 reasonable at first glance because the trunk remains upright, and the 0--100\% sequence
@@ -918,7 +902,7 @@ cycle detected from the corresponding STO trajectory and synchronized video.}
 \label{fig:qualitative_snapshots}
 \end{figure}
 
-\section{Adaptation to Plantarflexor Weakness}
+\subsection{Adaptation to Plantarflexor Weakness}
 \label{sec:weakness-adaptation}
 This evaluation asks whether the trained residual-reflex controller remains
 usable after muscle capacity changes, without updating the policy. This
@@ -1103,7 +1087,7 @@ gray bands denote the human-reference ranges.}
 \label{fig:weakness_kinematic_profiles}
 \end{figure}
 
-\section{Recovery from External Pushes}
+\subsection{Recovery from External Pushes}
 \label{sec:push-recovery}
 This evaluation asks whether the unchanged trained policy can restore sustained
 walking after an environmental disturbance that was absent during training.
@@ -1171,6 +1155,19 @@ remains stable for the full rollout, whereas accumulated disturbances in the
 \bottomrule
 \end{tabular*}
 \end{table}
+
+\subsection{Supplementary Video}
+The accompanying \suppvideo{} presents the continuous motion underlying these
+evaluations. The first part compares nominal gait generated by E2E-RL, DEP-RL,
+and Residual-Reflex RL at 1.2m/s. The second part evaluates the unchanged
+1.2m/s policy on the plantarflexor-weakened models and contrasts its response
+with the CMA-ES-optimized reflex controller. Character motion is synchronized
+with the four residual-action channels to show how reflex modulation changes as
+soleus strength is reduced. The final part shows single and repeated backward
+pushes, including the instant of force application, the resulting loss of
+forward momentum, and the subsequent recovery or fall. These sequences
+distinguish sustained adaptation from a transient motion that only delays
+termination.
 
 \section{Discussion and Limitations}
 \label{sec:discussion}
