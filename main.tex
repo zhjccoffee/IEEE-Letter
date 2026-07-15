@@ -239,17 +239,25 @@ four-dimensional residual parameterization, and the MPO update used in these
 loops.
 
 \begin{figure*}[!t]
-\centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
-\caption{Residual-reflex learning framework. (a) The rollout policy maps the
-musculoskeletal state $\mathbf{s}_t$ to a four-dimensional residual action
-$\mathbf{a}_t$ and collects the transition
-$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The action modulates
-selected parameters of the phase-dependent reflex controller. Delayed sensory
-feedback is converted into muscle stimulation, which drives muscle activation,
-muscle--tendon force, and skeletal motion. (c) The collected transitions are
-stored in $\mathcal{D}$; the critic $q(\mathbf{s},\mathbf{a};\omega)$ evaluates
-candidate actions and MPO updates the rollout policy from
-$\pi(\mathbf{s};\theta_{\mathrm{now}})$ to
+\centerline{\includegraphics[width=\textwidth]{Picture1.png}}
+\caption{Overview of the proposed Residual-Reflex RL framework. (a) The
+rollout policy maps the musculoskeletal state $\mathbf{s}_t$ to a
+four-dimensional residual action $\mathbf{a}_t$ and collects transitions
+$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The physiological
+environment combines a muscle-driven character with a phase-dependent
+residual-reflex-informed controller. The enlarged lower row shows, from left
+to right, the H0918v2j character, the nine bilateral muscle groups and their
+primary joint functions, and the phase-dependent reflex topology. Magenta
+entries denote the four reflex parameters modulated by $\mathbf{a}_t$.
+Superscripts $(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ identify
+parameters shared across all five phases, EarlyStance--LateStance, and
+Liftoff--Swing--Landing, respectively. The notation $i\leftarrow j$ indicates
+that feedback measured from source muscle $j$ modulates target muscle $i$;
+terms without an indicated source are self-feedback pathways. Horizontal
+placement within a merged all-phase block is for layout only. (c) The
+collected transitions are stored in $\mathcal{D}$; the critic
+$q(\mathbf{s},\mathbf{a};\omega)$ evaluates candidate actions and MPO updates
+the rollout policy from $\pi(\mathbf{s};\theta_{\mathrm{now}})$ to
 $\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
 \label{framwork}
 \end{figure*}
@@ -269,7 +277,9 @@ leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS),
 biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI),
 hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the
 rigid ground through spherical heel and toe contact elements. The controller
-is updated at fixed 0.005s intervals.
+is updated at fixed 0.005s intervals. The lower-left and lower-center panels
+of Fig.~\ref{framwork}(b) show the simulated character and the modeled muscle
+groups, respectively.
 
 \paragraph{Muscle-driven dynamics.}
 Module (b) couples the reflex controller to this character through the full
@@ -331,29 +341,10 @@ force-feedback gain used in EarlyStance and LateStance is distinct from the BIF
 force-feedback gain used in Liftoff, Swing, and Landing. Consequently, the same
 type of sensory feedback can serve loading in stance, propulsion near liftoff,
 or limb placement during swing and landing without requiring one gain to serve
-all phases. Figure~\ref{fig:reflex_topology} summarizes this topology for the
-nine muscle groups on each leg: tibialis anterior (TA), soleus (SOL),
+all phases. The lower-right panel of Fig.~\ref{framwork}(b) summarizes this
+topology for the nine muscle groups on each leg: tibialis anterior (TA), soleus (SOL),
 gastrocnemius (GAS), vasti (VAS), biceps femoris short head (BIF), rectus
 femoris (FEM), iliopsoas (ILI), hamstrings (HAM), and gluteus maximus (GLU).
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=0.88\textwidth]{RIC.png}
-\caption{Phase-dependent reflex-control topology. Rows denote the nine
-lower-limb muscle groups and columns denote the five gait phases. $K_L$,
-$\tilde l_0$, and $K_F$ denote the length-feedback gain, length threshold, and
-force-feedback gain; $K_P$, $K_D$, and $\theta_0$ denote the proportional and
-derivative posture gains and posture reference. Superscripts
-$(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ denote parameters shared
-across all five phases, EarlyStance--LateStance, and
-Liftoff--Swing--Landing, respectively. The notation $i\leftarrow j$ means that
-feedback measured from source muscle $j$ modulates stimulation of target muscle
-$i$; terms without an indicated source are self-feedback pathways. Horizontal
-placement within a merged all-phase block is for layout only, and every
-parameter in that block is active throughout all five phases. Blank regions
-indicate inactive pathways.}
-\label{fig:reflex_topology}
-\end{figure*}
 
 Let $\phi(t)$ denote the current gait phase and let $\Gamma(\phi)$ denote its
 set of active parameter-sharing groups. For EarlyStance and LateStance,
