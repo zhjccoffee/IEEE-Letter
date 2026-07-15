@@ -106,14 +106,19 @@ control from scratch.
 
 Muscle-driven characters make it possible to explore this principle
 computationally because they explicitly connect neural stimulation to activation
-dynamics, muscle--tendon force, skeletal motion, and foot--ground contact. The
-same physiological detail, however, makes control highly redundant. Many muscle
-excitation patterns can accomplish the same locomotor task while producing very
-different joint coordination, contact loading, and responses to disturbance.
-The central design question is therefore whether a learned controller can adjust
-a compact neuromuscular feedback organization, instead of synthesizing every
-muscle command anew, while preserving natural gait and accommodating changes in
-the body or environment.
+dynamics, muscle--tendon force, skeletal motion, and foot--ground contact.
+Turning this physiological detail into a learning problem raises two coupled
+requirements. First, the controller must resolve substantial actuation
+redundancy. Even the relatively compact model considered here exposes a direct
+policy to 18 muscle-level commands, and many excitation patterns can accomplish
+the same locomotor task while producing different joint coordination and
+contact loading. Second, a compact representation must remain responsive to the
+current state. Reducing action dimensionality is of limited value if the
+resulting coordination becomes a fixed pattern that cannot reorganize when
+muscle capacity or external forces change. The central design question is
+therefore whether a learned policy can regulate a small set of neuromechanically
+meaningful variables while retaining the feedback-mediated adaptability needed
+to preserve natural gait under changes in the body or environment.
 
 We address this question with Residual-Reflex RL, a low-dimensional
 residual-reflex-informed deep reinforcement learning framework for
