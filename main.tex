@@ -204,13 +204,17 @@ remain mediated by sensory feedback and muscle mechanics.
 \section{Method}
 \label{sec:method}
 \subsection{Framework Overview}
-Our central design choice concerns where learning enters the muscle-driven
-control loop. Rather than replacing neuromuscular feedback with direct muscle
-commands, the policy acts one level above it and continuously reshapes selected
-reflex pathways. The reflex controller therefore remains responsible for rapid,
-phase-dependent conversion of sensory feedback into muscle stimulation, while
-the learned policy provides state-dependent residual modulation of a compact
-set of feedback parameters.
+We propose a hierarchical control framework for muscle-driven character
+locomotion that couples phase-dependent neuromuscular feedback with learned
+residual regulation. The low-level reflex controller synthesizes muscle
+stimulation from delayed proprioceptive and postural feedback, while a learned
+policy modifies four selected reflex parameters according to the current
+musculoskeletal state. The object learned by the policy is therefore not a
+sequence of muscle excitations, but a state-dependent rule for regulating how
+existing feedback pathways contribute to locomotion. Once trained, the policy
+and reflex controller form a closed-loop controller that can be deployed without
+reoptimizing its parameters when the body model or external conditions are
+changed during evaluation.
 
 Figure~\ref{framwork} summarizes the resulting closed loop. In module (a), the
 rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ observes the current
@@ -224,13 +228,17 @@ buffer $\mathcal{D}$, trains a critic $q(\mathbf{s},\mathbf{a};\omega)$, and
 updates the policy to $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using off-policy
 Maximum a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
 
-This organization reduces the learned action interface from 18 direct muscle
-commands to four reflex-parameter adjustments. More importantly, an action no
-longer denotes an isolated muscle excitation. It changes the gain or threshold
-of a feedback pathway whose effect depends on the current gait phase and sensed
-muscle state. The policy thus learns how to reshape an existing closed-loop
-controller instead of learning the entire muscle-coordination mapping from
-scratch.
+The separation between feedback synthesis and learned regulation gives the two
+layers distinct roles. The reflex layer preserves phase-dependent sensory
+feedback and converts its output into physically simulated muscle force and
+motion. The residual layer changes the operating characteristics of selected
+pathways as the character state evolves. This organization reduces the learned
+action interface from 18 direct muscle commands to four reflex-parameter
+adjustments. Each action changes the gain or threshold of a named feedback
+pathway, and its mechanical effect consequently depends on the current gait
+phase and sensed muscle state. Learning is thereby used to reorganize an
+existing closed-loop controller rather than reconstructing the complete
+muscle-coordination mapping from scratch.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=0.95\textwidth]{Picture1.png}}
