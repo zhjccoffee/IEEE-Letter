@@ -340,17 +340,18 @@ femoris (FEM), iliopsoas (ILI), hamstrings (HAM), and gluteus maximus (GLU).
 \centering
 \includegraphics[width=0.88\textwidth]{RIC.png}
 \caption{Phase-dependent reflex-control topology. Rows denote the nine
-lower-limb muscle groups and columns denote the five gait phases. $K_L$, $L_0$,
-and $K_F$ indicate active length-gain, length-threshold, and force-gain terms,
-respectively. A source muscle shown in parentheses denotes an inter-muscle
-connection; terms without a parenthesized source are self-feedback pathways.
-$K_P$, $K_V$, and $P_0$ are the implementation labels for the proportional
-posture gain, angular-velocity gain, and posture reference, corresponding to
-$k_P$, $k_D$, and $\theta_0$ below. Blank regions indicate that the
-corresponding pathway is inactive in that gait phase. In the equations,
-superscripts $(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ distinguish
-parameters shared across all phases, the two stance phases, and the three
-swing-related phases, respectively.}
+lower-limb muscle groups and columns denote the five gait phases. $K_L$,
+$\tilde l_0$, and $K_F$ denote the length-feedback gain, length threshold, and
+force-feedback gain; $K_P$, $K_D$, and $\theta_0$ denote the proportional and
+derivative posture gains and posture reference. Superscripts
+$(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ denote parameters shared
+across all five phases, EarlyStance--LateStance, and
+Liftoff--Swing--Landing, respectively. The notation $i\leftarrow j$ means that
+feedback measured from source muscle $j$ modulates stimulation of target muscle
+$i$; terms without an indicated source are self-feedback pathways. Horizontal
+placement within a merged all-phase block is for layout only, and every
+parameter in that block is active throughout all five phases. Blank regions
+indicate inactive pathways.}
 \label{fig:reflex_topology}
 \end{figure*}
 
@@ -373,11 +374,11 @@ facilitates or suppresses the target stimulation.
 For an active group $g\in\Gamma(\phi(t))$, each connection contains length,
 velocity, and force feedback contributions.
 \begin{align}
-u_{L,i\leftarrow j}^{(g)}(t) &= k_{L,i\leftarrow j}^{(g)}
+u_{L,i\leftarrow j}^{(g)}(t) &= K_{L,i\leftarrow j}^{(g)}
 \max(0,\tilde{l}_j(t-t_D)-\tilde{l}_{0,i\leftarrow j}^{(g)}),\\
-u_{V,i\leftarrow j}^{(g)}(t) &= k_{V,i\leftarrow j}^{(g)}
+u_{V,i\leftarrow j}^{(g)}(t) &= K_{V,i\leftarrow j}^{(g)}
 \max(0,\tilde{v}_j(t-t_D)-\tilde{v}_{0,i\leftarrow j}^{(g)}),\\
-u_{F,i\leftarrow j}^{(g)}(t) &= k_{F,i\leftarrow j}^{(g)}
+u_{F,i\leftarrow j}^{(g)}(t) &= K_{F,i\leftarrow j}^{(g)}
 (\tilde{f}_j(t-t_D)-\tilde{f}_{0,i\leftarrow j}^{(g)}),
 \end{align}
 Here $u_{L,i\leftarrow j}^{(g)}$, $u_{V,i\leftarrow j}^{(g)}$, and
@@ -388,19 +389,19 @@ muscle $j$; their instantaneous values are not phase indexed. The offsets
 $\tilde{l}_{0,i\leftarrow j}^{(g)}$,
 $\tilde{v}_{0,i\leftarrow j}^{(g)}$, and
 $\tilde{f}_{0,i\leftarrow j}^{(g)}$ define group-dependent feedback
-thresholds, while $k_{L,i\leftarrow j}^{(g)}$,
-$k_{V,i\leftarrow j}^{(g)}$, and $k_{F,i\leftarrow j}^{(g)}$ are the
+thresholds, while $K_{L,i\leftarrow j}^{(g)}$,
+$K_{V,i\leftarrow j}^{(g)}$, and $K_{F,i\leftarrow j}^{(g)}$ are the
 corresponding group-dependent reflex gains. The term $t_D$ is a sensorimotor
 delay. A reflex-like postural feedback term is also used to couple trunk pitch
 errors to selected lower-limb muscles.
 \begin{equation}
 u_{\text{PD},i}^{(g)}(t)=
-k_{P,i}^{(g)}(\theta(t-t_D)-\theta_{0,i}^{(g)})+
-k_{D,i}^{(g)}\dot{\theta}(t-t_D).
+K_{P,i}^{(g)}(\theta(t-t_D)-\theta_{0,i}^{(g)})+
+K_{D,i}^{(g)}\dot{\theta}(t-t_D).
 \end{equation}
 Here $\theta$ and $\dot{\theta}$ are the delayed trunk pitch angle and angular
 velocity, $\theta_{0,i}^{(g)}$ is the target pitch offset for muscle $i$, and
-$k_{P,i}^{(g)}$ and $k_{D,i}^{(g)}$ are the proportional and derivative
+$K_{P,i}^{(g)}$ and $K_{D,i}^{(g)}$ are the proportional and derivative
 postural-feedback gains for the active group.
 The total stimulation of muscle $i$ is the sum of feedforward, local feedback,
 and postural feedback components from all groups enabled in the current phase.
@@ -448,10 +449,10 @@ residual modulation.
 \toprule
 \textbf{Action} & \textbf{Parameter} & \textbf{Pathway} & \textbf{Functional role} \\
 \midrule
-$a_1$ & $k_{L,\mathrm{HAM}}^{(\mathrm{sw})}$ & S11100.hamstrings.KL & Hip extension / knee flexion \\
+$a_1$ & $K_{L,\mathrm{HAM}}^{(\mathrm{sw})}$ & S11100.hamstrings.KL & Hip extension / knee flexion \\
 $a_2$ & $\tilde{l}_{0,\mathrm{ILI}}^{(\mathrm{st})}$ & S00011.iliopsoas.L0 & Hip flexion / leg advancement \\
-\textbf{$a_3$} & \textbf{$k_{F,\mathrm{SOL}}^{(\mathrm{all})}$} & \textbf{S11111.soleus.KF} & \textbf{Ankle support / propulsion} \\
-$a_4$ & $k_{F,\mathrm{VAS}}^{(\mathrm{st})}$ & S00011.vasti.KF & Knee extension / stance support \\
+\textbf{$a_3$} & \textbf{$K_{F,\mathrm{SOL}}^{(\mathrm{all})}$} & \textbf{S11111.soleus.KF} & \textbf{Ankle support / propulsion} \\
+$a_4$ & $K_{F,\mathrm{VAS}}^{(\mathrm{st})}$ & S00011.vasti.KF & Knee extension / stance support \\
 \bottomrule
 \end{tabularx}
 \end{table}
