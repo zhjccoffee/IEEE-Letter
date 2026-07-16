@@ -219,15 +219,16 @@ remain mediated by sensory feedback and muscle mechanics.
 \label{sec:method}
 \subsection{Framework Overview}
 Figure~\ref{framwork} summarizes the framework as three coupled modules. In
-module (a), the rollout policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ observes the current
+module (a), the rollout policy $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ observes the current
 musculoskeletal state $\mathbf{s}_t$ and produces the four-dimensional residual
 action $\mathbf{a}_t$. In module (b), this action changes four parameters of the
 phase-dependent reflex controller described below. The modulated controller
 maps delayed muscle and body feedback to muscle stimulation; muscle activation
 and muscle--tendon forces then advance the skeletal dynamics and generate the
 next state and reward. Module (c) stores the collected transitions in a replay
-buffer $\mathcal{D}$, trains a critic $q(\mathbf{s},\mathbf{a};\omega)$, and
-updates the policy to $\pi(\mathbf{s};\theta_{\mathrm{new}})$ using off-policy
+buffer $\mathcal{D}$, trains a critic
+$q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$, and updates the policy to
+$\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$ using off-policy
 Maximum a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
 
 During execution, modules (a) and (b) form a state-feedback loop from
@@ -256,9 +257,10 @@ that feedback measured from source muscle $j$ modulates target muscle $i$;
 terms without an indicated source are self-feedback pathways. Horizontal
 placement within a merged all-phase block is for layout only. (c) The
 collected transitions are stored in $\mathcal{D}$; the critic
-$q(\mathbf{s},\mathbf{a};\omega)$ evaluates candidate actions and MPO updates
-the rollout policy from $\pi(\mathbf{s};\theta_{\mathrm{now}})$ to
-$\pi(\mathbf{s};\theta_{\mathrm{new}})$.}
+    $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ evaluates candidate actions
+    and MPO updates the rollout policy from
+    $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ to
+    $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$.}
 \label{framwork}
 \end{figure*}
 
@@ -533,40 +535,58 @@ observation received by the policy at time $t$,
 \mathbf{s}_t = [
 &\mathbf{l}_t,\dot{\mathbf{l}}_t,\mathbf{f}_t,\mathbf{e}_t,
 \boldsymbol{\alpha}_t,\mathbf{p}_{feet,t},
-\boldsymbol{\psi}_t,\boldsymbol{\omega}_t,\\
+\boldsymbol{\psi}_t,\boldsymbol{\Omega}_t,\\
 &\mathbf{q}_t,\dot{\mathbf{q}}_t].
 \end{aligned}
 \end{equation}
 Here $\mathbf{l}$, $\dot{\mathbf{l}}$, and $\mathbf{f}$ are muscle-fiber
 lengths, velocities, and forces; $\mathbf{e}$ and $\boldsymbol{\alpha}$ are
 muscle excitations and activations; $\mathbf{p}_{feet}$ represents foot
-positions relative to the body; $\boldsymbol{\psi}$ and $\boldsymbol{\omega}$
+positions relative to the body; $\boldsymbol{\psi}$ and $\boldsymbol{\Omega}$
 are body orientation and angular velocity; and $\mathbf{q}$ and
 $\dot{\mathbf{q}}$ are generalized coordinates and velocities.
 
-The actor and critic are multilayer perceptrons with two
-hidden layers of 256 units and ReLU activations. The actor receives the
-121-dimensional observation $\mathbf{s}_t$ and parameterizes the Gaussian rollout
-policy $\pi(\mathbf{s};\theta_{\mathrm{now}})$ in module (a). For
-Residual-Reflex RL, its output is the mean and standard deviation of a
-four-dimensional residual-action distribution,
-$\mathbf{a}_t\in[-1,1]^4$, corresponding to the reflex parameters in
-Table~\ref{tab:residual_actions}. The critic receives the observation--action
-pair and outputs the scalar state--action value
-$q(\mathbf{s},\mathbf{a};\omega)$, where $\omega$ denotes critic parameters.
+The actor and critic are multilayer perceptrons with two hidden layers of 256
+units and ReLU activations. Bold symbols denote vectors throughout this
+section. The actor shown in Fig.~\ref{framwork} maps the 121-dimensional
+observation to the parameters of a Gaussian action distribution,
+\begin{equation}
+\pi(\mathbf{s};\boldsymbol{\theta})=
+\left[\boldsymbol{\mu}_{\boldsymbol{\theta}}(\mathbf{s}),
+\boldsymbol{\sigma}_{\boldsymbol{\theta}}(\mathbf{s})\right],
+\end{equation}
+where $\boldsymbol{\theta}$ is the actor-parameter vector. The corresponding
+conditional probability density is denoted
+\begin{equation}
+p_{\boldsymbol{\theta}}(\mathbf{a}\mid\mathbf{s})=
+\mathcal{N}\!\left(
+\mathbf{a};\boldsymbol{\mu}_{\boldsymbol{\theta}}(\mathbf{s}),
+\operatorname{diag}\!\left(
+\boldsymbol{\sigma}_{\boldsymbol{\theta}}^2(\mathbf{s})\right)\right).
+\end{equation}
+This distinction keeps the notation consistent with Fig.~\ref{framwork}:
+$\pi(\mathbf{s};\boldsymbol{\theta})$ denotes the actor network, whereas
+$p_{\boldsymbol{\theta}}(\mathbf{a}\mid\mathbf{s})$ denotes the density used
+by MPO. For Residual-Reflex RL, both output vectors are four-dimensional and
+$\mathbf{a}_t\in[-1,1]^4$ corresponds to the reflex parameters in
+Table~\ref{tab:residual_actions}. The critic receives the state--action pair
+and outputs the scalar value $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$,
+where $\boldsymbol{\omega}$ is the critic-parameter vector.
 
 Transitions collected during rollout,
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$, are stored in the replay
-buffer $\mathcal{D}$. MPO trains the critic from replayed transitions and updates
-the actor from the rollout policy $\pi(\mathbf{a}\mid\mathbf{s};
-\theta_{\mathrm{now}})$ to a new policy. Its policy update separates action
+buffer $\mathcal{D}$. MPO trains the critic from replayed transitions and
+updates the actor from $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$
+to $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$. Its policy update
+separates action
 improvement from parametric policy fitting. In the E-step, critic values
 reweight actions sampled from the rollout policy to form a non-parametric
 improved distribution
 \begin{equation}
 \rho(\mathbf{a}\mid\mathbf{s})=
-\frac{\pi(\mathbf{a}\mid\mathbf{s};\theta_{\mathrm{now}})
-\exp\!\left(q(\mathbf{s},\mathbf{a};\omega)/\eta\right)}
+\frac{p_{\boldsymbol{\theta}_{\mathrm{now}}}
+(\mathbf{a}\mid\mathbf{s})
+\exp\!\left(q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})/\eta\right)}
 {Z(\mathbf{s})},
 \end{equation}
 where $Z(\mathbf{s})$ normalizes the distribution and the temperature $\eta$ is
@@ -574,15 +594,16 @@ chosen under an E-step KL budget. In the M-step, the actor is fitted to this
 improved distribution while constraining its departure from the rollout policy,
 \begin{equation}
 \begin{aligned}
-\theta_{\mathrm{new}}=\arg\max_{\theta}\;&
+\boldsymbol{\theta}_{\mathrm{new}}=
+\arg\max_{\boldsymbol{\theta}}\;&
 \mathbb{E}_{\substack{\mathbf{s}\sim\mathcal{D}\\
 \mathbf{a}\sim\rho(\cdot\mid\mathbf{s})}}
-[\log \pi(\mathbf{a}\mid\mathbf{s};\theta)]\\
+[\log p_{\boldsymbol{\theta}}(\mathbf{a}\mid\mathbf{s})]\\
 \mathrm{s.t.}\;&
 \mathbb{E}_{\mathbf{s}\sim\mathcal{D}}
 \left[D_{\mathrm{KL}}\!\left(
-\pi(\cdot\mid\mathbf{s};\theta_{\mathrm{now}})\,\|\,
-\pi(\cdot\mid\mathbf{s};\theta)
+p_{\boldsymbol{\theta}_{\mathrm{now}}}(\cdot\mid\mathbf{s})\,\|\,
+p_{\boldsymbol{\theta}}(\cdot\mid\mathbf{s})
 \right)\right]\le\epsilon_{\pi}.
 \end{aligned}
 \end{equation}
@@ -594,26 +615,48 @@ used. The baseline controllers used for comparison are defined in the
 experimental setting.
 
 The reward $r_t$ stored in each transition defines the learning objective used
-by the actor--critic update. The base reward combines target-speed tracking
-($r_{vel}$) with
-regularization terms for excessive ground reaction force ($r_{grf}$), abrupt
-excitation changes ($r_{smooth}$), muscle usage ($r_{musc}$), joint-limit
-torques ($r_{constr}$), and non-foot self-contact ($r_{self}$).
+by the actor--critic update. It contains a target-speed term and positive costs
+that discourage excessive loading, unnecessary recruitment, abrupt control
+changes, joint-limit loading, and unstable trunk motion,
 \begin{equation}
 \begin{aligned}
-r_t^{base} =\,
-&w_{vel}r_{vel}+w_{grf}r_{grf}+w_{smooth}r_{smooth}\\
-&+w_{musc}r_{musc}+w_{constr}r_{constr}+w_{self}r_{self}.
+r_t={}&w_v r_v
+-\lambda_{grf}c_{grf}-\lambda_e c_e-\lambda_m c_m
+-\lambda_q c_q\\
+&-\lambda_{\theta}c_{\theta}
+-\lambda_{\dot\theta}c_{\dot\theta}
+-\lambda_{com}c_{com}-\lambda_{\Delta a}c_{\Delta a},
 \end{aligned}
 \end{equation}
-For the Residual-Reflex RL controller, additional terms regularize pelvis pitch
-($r_{\theta}$), pelvis pitch rate ($r_{\dot{\theta}}$), vertical
-center-of-mass velocity ($r_{com}$), and residual-action changes
-($r_{\Delta a}$).
+where all $\lambda$ values are nonnegative. Let $v_x$ and $v^*$ denote the
+forward center-of-mass speed and commanded speed, respectively. The plateaued
+speed reward is
 \begin{equation}
-r_t = r_t^{base} + w_{\theta}r_{\theta}
-+w_{\dot{\theta}}r_{\dot{\theta}}+w_{com}r_{com}+w_{\Delta a}r_{\Delta a}.
+r_v=\begin{cases}
+\exp[-(v_x-v^*)^2], & v_x<v^*,\\
+1, & v_x\ge v^*.
+\end{cases}
 \end{equation}
+The contact-load cost is $c_{grf}=[L_c-1.2]_+$, where $L_c$ is the total
+contact load normalized by body weight and $[x]_+=\max(0,x)$. Temporal
+excitation variation is penalized by
+$c_e=N_m^{-1}\|\mathbf{e}_t-\mathbf{e}_{t-1}\|_2^2$, and $c_m$ is
+proportional to the number of muscles whose activation exceeds $0.15$.
+The term $c_q$ is the mean absolute joint-limit torque. For the
+residual-reflex controller, trunk and residual-action regularization are
+\begin{equation}
+\begin{aligned}
+c_{\theta}&=(\theta_t-\theta^*)^2,&
+c_{\dot\theta}&=\dot\theta_t^2,&
+c_{com}&=(v_{com,y})^2,\\
+c_{\Delta a}&=\tfrac{1}{4}\|\Delta\mathbf{k}_t-
+\Delta\mathbf{k}_{t-1}\|_2^2,
+\end{aligned}
+\end{equation}
+where $\theta^*$ is the target pelvis pitch, $v_{com,y}$ is vertical
+center-of-mass velocity, and $\Delta\mathbf{k}_t$ is the four-dimensional
+reflex-parameter change produced by the residual mapping in
+Eq.~\eqref{eq:residual_scaling}.
 \section{Evaluation}
 \label{sec:evaluation-protocol}
 
