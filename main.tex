@@ -1222,23 +1222,26 @@ weakness levels without retraining.}
 \begin{table}[!t]
 \centering
 \caption{Residual-Reflex RL under soleus weakness. The target speed was
-1.2~m/s. All listed residual rollouts reached 1000 steps.}
+1.2~m/s. All listed residual rollouts reached 1000 steps. Channel $a_3$ is the
+soleus force-feedback modulation defined in Table~\ref{tab:residual_actions}.}
 \label{tab:weakness_adaptation}
-\scriptsize
-\setlength{\tabcolsep}{2.0pt}
+\small
+\setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c c c}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c}
 \toprule
-\textbf{Soleus} & \textbf{Speed} & \textbf{Err.} &
-\textbf{RMS $a_1$} & \textbf{RMS $a_2$} & \textbf{RMS $\boldsymbol{a_3}$} & \textbf{RMS $a_4$} \\
+\makecell{\textbf{Soleus}\\\textbf{strength}} &
+\makecell{\textbf{Realized speed}\\\textbf{(m/s)}} &
+\makecell{\textbf{Speed error}\\\textbf{(m/s)}} &
+\textbf{RMS $\boldsymbol{a_3}$} \\
 \midrule
-83\%  & 0.949 & 0.251 & 0.584 & 0.635 & \textbf{0.846} & 0.797 \\
-87\%  & 1.002 & 0.198 & 0.579 & 0.627 & \textbf{0.851} & 0.761 \\
-90\%  & 1.063 & 0.137 & 0.594 & 0.620 & \textbf{0.878} & 0.741 \\
-93\%  & 1.112 & 0.088 & 0.601 & 0.641 & \textbf{0.885} & 0.735 \\
-95\%  & 1.137 & 0.063 & 0.596 & 0.657 & \textbf{0.889} & 0.731 \\
-97\%  & 1.167 & 0.033 & 0.588 & 0.678 & \textbf{0.895} & 0.736 \\
-100\% & 1.201 & 0.001 & 0.580 & 0.681 & \textbf{0.898} & 0.753 \\
+83\%  & 0.949 & 0.251 & \textbf{0.846} \\
+87\%  & 1.002 & 0.198 & \textbf{0.851} \\
+90\%  & 1.063 & 0.137 & \textbf{0.878} \\
+93\%  & 1.112 & 0.088 & \textbf{0.885} \\
+95\%  & 1.137 & 0.063 & \textbf{0.889} \\
+97\%  & 1.167 & 0.033 & \textbf{0.895} \\
+100\% & 1.201 & 0.001 & \textbf{0.898} \\
 \bottomrule
 \end{tabular*}
 \end{table}
