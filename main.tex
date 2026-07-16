@@ -351,7 +351,25 @@ here is a computational abstraction of this organization rather than a detailed
 neural model. Muscle-spindle-like pathways supply normalized length and velocity
 signals, Golgi-tendon-organ-like pathways supply normalized force signals, and
 their weighted contributions form the stimulation sent to the muscle activation
-dynamics described above.
+dynamics described above. Figure~\ref{fig:reflex-physiology} makes this
+biological-to-computational correspondence explicit.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{reflex_physiology_pathway.pdf}
+    \caption{Biological motivation and computational abstraction of the
+    proprioceptive reflex pathways. (a) Muscle spindles provide muscle-length
+    and contraction-velocity feedback, whereas Golgi tendon organs provide
+    force-related feedback. These afferent signals are transformed by spinal
+    circuitry into motoneuron drive that modulates muscle stimulation.
+    (b) The controller abstracts this organization using normalized length,
+    velocity, and force signals from source muscle $j$. Phase-dependent gains
+    and thresholds define sparse source-to-target pathways $i\leftarrow j$;
+    their weighted contributions form stimulation $u_i$, which is subsequently
+    converted into muscle activation $\alpha_i$. The diagram represents a
+    control abstraction rather than a detailed neural model.}
+    \label{fig:reflex-physiology}
+\end{figure*}
 
 \paragraph{Phase-dependent topology.}
 Reflex engagement also changes over the gait cycle. A finite-state controller
