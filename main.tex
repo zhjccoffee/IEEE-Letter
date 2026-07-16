@@ -561,71 +561,24 @@ $\dot{\mathbf{q}}$ are generalized coordinates and velocities.
 
 The actor and critic are multilayer perceptrons with two hidden layers of 256
 units and ReLU activations. Bold symbols denote vectors throughout this
-section. The actor shown in Fig.~\ref{framwork} maps the 121-dimensional
-observation to the parameters of a Gaussian action distribution,
-\begin{equation}
-\pi(\mathbf{s};\boldsymbol{\theta})=
-\left[\boldsymbol{\mu}_{\boldsymbol{\theta}}(\mathbf{s}),
-\boldsymbol{\sigma}_{\boldsymbol{\theta}}(\mathbf{s})\right],
-\end{equation}
-where $\boldsymbol{\theta}$ is the actor-parameter vector. The corresponding
-conditional probability density is denoted
-\begin{equation}
-p_{\boldsymbol{\theta}}(\mathbf{a}\mid\mathbf{s})=
-\mathcal{N}\!\left(
-\mathbf{a};\boldsymbol{\mu}_{\boldsymbol{\theta}}(\mathbf{s}),
-\operatorname{diag}\!\left(
-\boldsymbol{\sigma}_{\boldsymbol{\theta}}^2(\mathbf{s})\right)\right).
-\end{equation}
-This distinction keeps the notation consistent with Fig.~\ref{framwork}:
-$\pi(\mathbf{s};\boldsymbol{\theta})$ denotes the actor network, whereas
-$p_{\boldsymbol{\theta}}(\mathbf{a}\mid\mathbf{s})$ denotes the density used
-by MPO. For Residual-Reflex RL, both output vectors are four-dimensional and
-$\mathbf{a}_t\in[-1,1]^4$ corresponds to the reflex parameters in
-Table~\ref{tab:residual_actions}. The critic receives the state--action pair
-and outputs the scalar value $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$,
-where $\boldsymbol{\omega}$ is the critic-parameter vector.
+section. The actor $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ shown
+in Fig.~\ref{framwork} maps the 121-dimensional observation to the mean and
+standard deviation of a Gaussian action distribution. For Residual-Reflex RL,
+both outputs are four-dimensional and an action
+$\mathbf{a}_t\in[-1,1]^4$ is sampled during training. During deterministic
+evaluation, the distribution mean is used. Each action component corresponds
+to one reflex parameter in Table~\ref{tab:residual_actions}. The critic
+$q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ receives the observation--action
+pair and estimates its scalar value.
 
-Transitions collected during rollout,
-$(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$, are stored in the replay
-buffer $\mathcal{D}$. MPO trains the critic from replayed transitions and
-updates the actor from $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$
-to $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$. Its policy update
-separates action
-improvement from parametric policy fitting. In the E-step, critic values
-reweight actions sampled from the rollout policy to form a non-parametric
-improved distribution
-\begin{equation}
-\rho(\mathbf{a}\mid\mathbf{s})=
-\frac{p_{\boldsymbol{\theta}_{\mathrm{now}}}
-(\mathbf{a}\mid\mathbf{s})
-\exp\!\left(q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})/\eta\right)}
-{Z(\mathbf{s})},
-\end{equation}
-where $Z(\mathbf{s})$ normalizes the distribution and the temperature $\eta$ is
-chosen under an E-step KL budget. In the M-step, the actor is fitted to this
-improved distribution while constraining its departure from the rollout policy,
-\begin{equation}
-\begin{aligned}
-\boldsymbol{\theta}_{\mathrm{new}}=
-\arg\max_{\boldsymbol{\theta}}\;&
-\mathbb{E}_{\substack{\mathbf{s}\sim\mathcal{D}\\
-\mathbf{a}\sim\rho(\cdot\mid\mathbf{s})}}
-[\log p_{\boldsymbol{\theta}}(\mathbf{a}\mid\mathbf{s})]\\
-\mathrm{s.t.}\;&
-\mathbb{E}_{\mathbf{s}\sim\mathcal{D}}
-\left[D_{\mathrm{KL}}\!\left(
-p_{\boldsymbol{\theta}_{\mathrm{now}}}(\cdot\mid\mathbf{s})\,\|\,
-p_{\boldsymbol{\theta}}(\cdot\mid\mathbf{s})
-\right)\right]\le\epsilon_{\pi}.
-\end{aligned}
-\end{equation}
-The critic supplies the value ranking used in the E-step, whereas the KL
-constraint prevents the actor from changing abruptly when it fits the improved
-action distribution. During training, actions are sampled from the stochastic
-rollout policy for exploration; during deterministic evaluation, its mean is
-used. The baseline controllers used for comparison are defined in the
-experimental setting.
+Transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ are stored in
+the replay buffer $\mathcal{D}$. MPO trains the critic from replayed
+transitions, uses its value estimates to favor higher-valued sampled actions,
+and fits the updated actor
+$\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$ under a KL-divergence
+constraint. The constraint limits abrupt policy changes while retaining
+off-policy data reuse. We use the standard MPO update of
+Abdolmaleki et al.~\cite{mpo2018}; its derivation is not repeated here.
 
 The reward $r_t$ stored in each transition defines the learning objective used
 by the actor--critic update. It contains a target-speed term and positive costs
