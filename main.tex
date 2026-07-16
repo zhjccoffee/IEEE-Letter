@@ -245,9 +245,9 @@ rollout policy maps the musculoskeletal state $\mathbf{s}_t$ to a
 four-dimensional residual action $\mathbf{a}_t$ and collects transitions
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The physiological
 environment combines a muscle-driven character with a phase-dependent
-residual-reflex-informed controller. The enlarged lower row shows, from left
-to right, the H0918v2j character, the nine bilateral muscle groups and their
-primary joint functions, and the phase-dependent reflex topology. Magenta
+residual-reflex-informed controller. The enlarged lower row shows (b1) the
+H0918v2j character, (b2) the nine bilateral muscle groups and their primary
+joint functions, and (b3) the phase-dependent reflex topology. Magenta
 entries denote the four reflex parameters modulated by $\mathbf{a}_t$.
 Superscripts $(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ identify
 parameters shared across all five phases, EarlyStance--LateStance, and
@@ -277,12 +277,12 @@ leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS),
 biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI),
 hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the
 rigid ground through spherical heel and toe contact elements. The controller
-is updated at fixed 0.005s intervals. The lower-left and lower-center panels
-of Fig.~\ref{framwork}(b) show the simulated character and the modeled muscle
-groups, respectively.
+is updated at fixed 0.005s intervals. Panels (b1) and (b2) of
+Fig.~\ref{framwork} show the simulated character and the modeled muscle groups,
+respectively.
 
-As illustrated by the muscle paths in the lower-center panel of
-Fig.~\ref{framwork}(b), GLU and HAM contribute primarily to hip extension,
+As illustrated by the muscle paths in panel (b2) of Fig.~\ref{framwork}, GLU
+and HAM contribute primarily to hip extension,
 whereas ILI and FEM contribute to hip flexion and leg advancement. VAS and BIF
 provide knee extension and flexion, respectively. At the ankle, SOL and GAS
 generate plantarflexion for stance support and propulsion, while TA produces
@@ -350,8 +350,8 @@ force-feedback gain used in EarlyStance and LateStance is distinct from the BIF
 force-feedback gain used in Liftoff, Swing, and Landing. Consequently, the same
 type of sensory feedback can serve loading in stance, propulsion near liftoff,
 or limb placement during swing and landing without requiring one gain to serve
-all phases. The lower-right panel of Fig.~\ref{framwork}(b) summarizes this
-topology across the nine muscle groups defined in
+all phases. Panel (b3) of Fig.~\ref{framwork} summarizes this topology across
+the nine muscle groups defined in
 Sec.~\ref{sec:musculoskeletal-model}, including the ankle-related TA, SOL, and
 GAS, the knee-related VAS and BIF, and the hip-related FEM, ILI, HAM, and GLU.
 
@@ -1204,7 +1204,7 @@ This evaluation asks whether the unchanged trained policy can restore sustained
 walking after an environmental disturbance that was absent during training.
 The same 1.2m/s policy used for nominal walking and weakness evaluation was
 retained without further learning. Backward force pulses were applied to the
-torso starting at 3s. We tested 75N and 100N pushes as both single pulses and
+torso for 0.1s starting at 3s. We tested 75N and 100N pushes as both single pulses and
 repeated pulses every 5s. Residual-Reflex RL was compared with the
 CMA-ES-optimized reflex controller under identical perturbation settings.
 Rollout duration and realized speed are reported to distinguish recovery of
@@ -1227,6 +1227,14 @@ provides additional recovery capacity beyond the fixed optimized reflex gains.
 Together with the weakness test, these results support the central claim that
 the learned residual policy provides a flexible reflex-parameter modulation
 mechanism beyond offline optimized reflex gains.
+Figure~\ref{fig:push_snapshots} provides a time-aligned visual comparison for
+the 100N single-push condition. Before the push, both controllers produce an
+upright walking configuration. After the force pulse, the CMA-ES-optimized
+reflex controller progressively leans backward, loses support, and terminates
+at 4.57s. Under the identical disturbance, Residual-Reflex RL reorganizes the
+subsequent steps, remains upright, and continues walking for the full 25s
+evaluation. The matched frames therefore distinguish sustained post-push
+walking from a trajectory that only delays termination.
 The final part of the \suppvideo{} visualizes the disturbance and its temporal
 consequences. Residual-Reflex RL is displaced backward immediately after the
 force pulse, reorganizes the following steps, and resumes periodic forward
@@ -1266,6 +1274,17 @@ remains stable for the full rollout, whereas accumulated disturbances in the
 \bottomrule
 \end{tabular*}
 \end{table}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{push_perturbation_snapshots_100N.png}
+\caption{Time-aligned response to a 100N backward torso push applied for 0.1s
+at $t=3.0$s. The CMA-ES-optimized reflex controller (top) progressively loses
+upright balance and terminates at 4.57s. Residual-Reflex RL (bottom) modifies
+the following steps and continues walking for the full 25s rollout under the
+same perturbation. Red arrows indicate the direction of the applied force.}
+\label{fig:push_snapshots}
+\end{figure*}
 
 \subsection{Supplementary Video}
 The accompanying \suppvideo{} presents the continuous motion underlying these
