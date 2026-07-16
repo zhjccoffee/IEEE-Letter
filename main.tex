@@ -610,15 +610,21 @@ $c_e=N_m^{-1}\|\mathbf{e}_t-\mathbf{e}_{t-1}\|_2^2$, and $c_m$ is
 proportional to the number of muscles whose activation exceeds $0.15$.
 The term $c_q$ is the mean absolute joint-limit torque. For the
 residual-reflex controller, trunk and residual-action regularization are
+\begin{subequations}\label{eq:residual_regularization}
 \begin{equation}
-\begin{aligned}
-c_{\theta}&=(\theta_t-\theta^*)^2,&
-c_{\dot\theta}&=\dot\theta_t^2,&
-c_{com}&=(v_{com,y})^2,\\
-c_{\Delta a}&=\tfrac{1}{4}\|\Delta\mathbf{k}_t-
-\Delta\mathbf{k}_{t-1}\|_2^2,
-\end{aligned}
+c_{\theta}=(\theta_t-\theta^*)^2,
 \end{equation}
+\begin{equation}
+c_{\dot\theta}=\dot\theta_t^2,
+\end{equation}
+\begin{equation}
+c_{com}=(v_{com,y})^2,
+\end{equation}
+\begin{equation}
+c_{\Delta a}=\tfrac{1}{4}\|\Delta\mathbf{k}_t-
+\Delta\mathbf{k}_{t-1}\|_2^2.
+\end{equation}
+\end{subequations}
 where $\theta^*$ is the target pelvis pitch, $v_{com,y}$ is vertical
 center-of-mass velocity, and $\Delta\mathbf{k}_t$ is the four-dimensional
 reflex-parameter change produced by the residual mapping in
@@ -1118,26 +1124,20 @@ surviving motion is accompanied by ongoing modulation rather than playback of a
 fixed excitation sequence.
 
 The residual-action RMS values also show that the policy remains actively
-engaged under the weakened conditions. The four channels correspond directly to
-the selected reflex pathways in Table~\ref{tab:residual_actions}. Specifically, $a_1$
-modulates hamstrings length feedback for hip extension and late-swing braking,
-$a_2$ modulates iliopsoas length-offset feedback for hip flexion and swing
-initiation, $a_3$ modulates soleus force feedback for ankle support and
-propulsion, and $a_4$ modulates vasti force feedback for knee extension and
-stance support. The soleus-related channel $a_3$ has the largest RMS magnitude
-across the weakness range, indicating that ankle support/propulsion remains the
-dominant modulated pathway even when the soleus force capacity is altered.
-However, the policy does not simply increase the soleus-related action as the
+engaged under the weakened conditions. The channel definitions are given in
+Table~\ref{tab:residual_actions}; here we focus on how their modulation changes
+with soleus capacity. The soleus-related channel $a_3$ has the largest RMS
+magnitude across the weakness range, indicating that ankle support and
+propulsion remain strongly modulated as soleus force capacity changes. The
+policy does not, however, compensate by monotonically increasing $a_3$ as the
 muscle becomes weaker. Instead, it accepts a lower walking speed and
-redistributes modulation across the other pathways. In particular, the
-vasti-related channel $a_4$ is more strongly engaged under larger weakness,
-which is consistent with increased reliance on knee-extension support when
-ankle push-off capacity is reduced. The hamstrings channel $a_1$ and iliopsoas
-channel $a_2$ vary more mildly, helping adjust late-swing braking, swing
-initiation, leg placement, and step timing. The paired trends between the hip
-extension/flexion channels ($a_1$, $a_2$) and the ankle/knee support channels
-($a_3$, $a_4$) suggest a coordinated redistribution of reflex modulation rather
-than a single-parameter compensation. These results indicate that the
+redistributes modulation across the other pathways. The stronger response of
+$a_4$ under greater weakness is consistent with increased reliance on
+knee-extension support when ankle push-off capacity is reduced, whereas $a_1$
+and $a_2$ change more mildly. The paired trends of ($a_1$, $a_2$) and ($a_3$,
+$a_4$) therefore indicate coordinated redistribution across swing-related and
+stance-support pathways rather than single-parameter compensation. These
+results indicate that the
 four-dimensional residual action space acts as a compact adaptive interface on
 top of the reflex controller. The same trained policy can be transferred across
 weakened body models without retraining, while still modulating the underlying
@@ -1200,7 +1200,7 @@ soleus force-feedback modulation defined in Table~\ref{tab:residual_actions}.}
 \end{table}
 
 \begin{figure}[!t]
-\centerline{\includegraphics[width=0.92\columnwidth]{weakness_speed_adaptation.png}}
+\centerline{\includegraphics[width=0.78\columnwidth]{weakness_speed_adaptation.png}}
 \caption{Speed adaptation under plantarflexor weakness. The same trained
 Residual-Reflex RL policy remains stable across weakened soleus models but
 adopts a slower realized speed as force capacity is reduced.}
@@ -1208,7 +1208,7 @@ adopts a slower realized speed as force capacity is reduced.}
 \end{figure}
 
 \begin{figure}[!t]
-\centerline{\includegraphics[width=0.92\columnwidth]{weakness_residual_action_rms.png}}
+\centerline{\includegraphics[width=0.78\columnwidth]{weakness_residual_action_rms.png}}
 \caption{Residual-action modulation under plantarflexor weakness. RMS values
 show that the trained policy continues to adjust all four selected reflex
 channels. Channel $a_3$ modulates soleus force feedback for ankle
@@ -1303,16 +1303,17 @@ remains stable for the full rollout, whereas accumulated disturbances in the
 \end{tabular*}
 \end{table}
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
 \centering
-\includegraphics[width=0.82\textwidth]{push_perturbation_snapshots_100N.png}
+\includegraphics[width=\columnwidth]{push_perturbation_snapshots_100N.png}
 \caption{Time-aligned response to a 100N backward torso push applied for 0.1s
-at $t=3.0$s. The CMA-ES-optimized reflex controller (top) progressively loses
-upright balance and terminates at 4.57s. Residual-Reflex RL (bottom) modifies
-the following steps and continues walking for the full 25s rollout under the
-same perturbation. Red arrows indicate the direction of the applied force.}
+at $t=3.0$s. Columns show synchronized frames from 2.8s to 6.0s. The
+CMA-ES-optimized reflex controller (top) progressively loses upright balance
+and terminates at 4.57s. Residual-Reflex RL (bottom) modifies the following
+steps and continues walking for the full 25s rollout under the same
+perturbation. Red arrows indicate the applied force.}
 \label{fig:push_snapshots}
-\end{figure*}
+\end{figure}
 
 \subsection{Supplementary Video}
 The accompanying \suppvideo{} presents the continuous motion underlying these
@@ -1329,9 +1330,9 @@ termination.
 
 \section{Discussion and Limitations}
 \label{sec:discussion}
-The results indicate that the main benefit of residual reflex learning is a
-more structured and physiologically plausible gait pattern together with a
-limited but measurable form of adaptability. In the nominal-speed data, E2E-RL
+The results show that residual reflex learning provides both a structured,
+physiologically plausible gait pattern and state-dependent adaptation to the
+tested changes in body capacity and external loading. In the nominal-speed data, E2E-RL
 and DEP-RL can achieve successful forward walking, yet their gait-cycle profiles
 may deviate substantially from reference kinematics and GRF. This observation
 suggests that learned musculoskeletal gait should be assessed not only by task
@@ -1358,24 +1359,19 @@ capacity is reduced or an external push is applied, because the residual policy 
 trade off speed, posture, and reflex modulation to maintain walking, whereas the
 offline optimized reflex parameters are more brittle.
 
-The present evidence also has several limitations. All policies were trained
-and evaluated on one musculoskeletal character, and the nominal experiments use
-separately trained fixed-speed policies rather than one controller conditioned
-on a continuous speed command. The weakness study changes only soleus force
-capacity, while the perturbation study considers prescribed backward torso
-forces. Moreover, the reported transfer behavior demonstrates post-training
-adaptation within these conditions rather than universal robustness to arbitrary
-model changes or disturbances. Broader characters, randomized impairment and
-perturbation distributions, and repeated training seeds are needed to establish
-the generality of the learned reflex-parameter representation.
+The current evaluation uses one musculoskeletal character and separately
+trained fixed-speed policies. Establishing broader generality will require
+additional character morphologies, continuous speed commands, randomized body
+impairments and external disturbances, and repeated training seeds.
 
 
 \section{Conclusion}
-We presented a Residual-Reflex RL framework for musculoskeletal gait
-generation. Rather than directly commanding all muscle
-excitations, the learned policy modulates four gait-relevant reflex parameters
-around a reflex-based controller. This formulation reduces the effective action
-space and preserves a structured neuromechanical prior within the control loop.
+We presented Residual-Reflex RL for adaptive muscle-driven character
+locomotion. Rather than synthesizing all muscle excitations directly, the
+learned policy modulates four gait-relevant parameters of a phase-dependent
+reflex controller. This formulation reduces the learned action space while
+retaining the sensory feedback and muscle mechanics that organize the resulting
+motion.
 
 Experiments in a Hyfydy-based musculoskeletal simulation showed that the
 Residual-Reflex RL controller produced gait cycles with higher
@@ -1388,15 +1384,18 @@ policy preserved full-episode walking under reduced soleus strength by adopting
 a slower gait and modulating the selected reflex parameters. It also recovered
 from representative external push perturbations that caused the
 CMA-ES-optimized reflex controller to terminate.
-These findings suggest that reflex-parameter modulation can provide a compact
-and interpretable learning interface for musculoskeletal gait synthesis, where
-task success must be accompanied by physiologically plausible joint motion and
-contact loading. Such a framework may be useful for simulation-based studies of
-human locomotion, rehabilitation-oriented controller design, and assistive
-device control where both adaptability and neuromuscular interpretability are
-important. Future work will extend the framework to online speed transitions,
-more systematic perturbation-recovery protocols, and broader musculoskeletal
-models.
+The accompanying \suppvideo{} further shows these behaviors as continuous
+animation. It visualizes the slower but coordinated gait that emerges under
+plantarflexor weakness and the corrective stepping response following an
+external push, temporal behaviors that cannot be conveyed fully by isolated
+poses or aggregate scores. For muscle-driven character animation, the framework
+therefore provides a compact control layer that preserves recognizable gait
+structure while allowing motion to reorganize when the character or its
+environment changes. The same property is also relevant to computational
+studies of human locomotion and bio-inspired assistive control, where adaptive
+behavior must remain connected to interpretable neuromuscular mechanisms.
+Future work will extend the framework to continuous speed transitions, broader
+character morphologies, and more diverse physical interactions.
 
 \begin{thebibliography}{99}
 \bibitem{anderson2001}
