@@ -385,16 +385,21 @@ force-feedback gain used in Liftoff, Swing, and Landing. Consequently, the same
 type of sensory feedback can serve loading in stance, propulsion near liftoff,
 or limb placement during swing and landing without requiring one gain to serve
 all phases. Panel (b3) of Fig.~\ref{framwork} summarizes this topology across
-the nine muscle groups defined in
-Sec.~\ref{sec:musculoskeletal-model}, including the ankle-related TA, SOL, and
-GAS, the knee-related VAS and BIF, and the hip-related FEM, ILI, HAM, and GLU.
+the nine muscle groups defined in Sec.~\ref{sec:musculoskeletal-model}.
+The monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the
+knee, and ILI and GLU at the hip. The biarticular GAS spans the knee and ankle,
+whereas FEM and HAM span the hip and knee; their feedback can therefore affect
+coordination at both adjacent joints.
 
 Let $\phi(t)$ denote the current gait phase and let $\Gamma(\phi)$ denote its
 set of active parameter-sharing groups. For EarlyStance and LateStance,
 $\Gamma(\phi)=\{\mathrm{all},\mathrm{st}\}$; for Liftoff, Swing, and Landing,
-$\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$. Thus, the all-phase pathways are
-always active and are combined with either the stance or swing-related
-pathways. Each group $g\in\Gamma(\phi)$ forms a sparse directed feedback graph
+$\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$. In other words, the controller
+does not switch between three completely separate networks. The all-phase
+pathways remain active throughout the gait cycle, and their contributions are
+combined with the stance-specific pathways during EarlyStance and LateStance
+or with the swing-related pathways during Liftoff, Swing, and Landing. Each
+group $g\in\Gamma(\phi)$ forms a sparse directed feedback graph
 $\mathcal{G}_{g}$. A connection
 $i\leftarrow j$ uses a signal measured
 at source muscle $j$ to modify stimulation of target muscle $i$. Connections
