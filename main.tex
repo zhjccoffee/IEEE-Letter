@@ -231,6 +231,16 @@ $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$, and updates the policy to
 $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$ using off-policy
 Maximum a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
 
+The enlarged lower row of Fig.~\ref{framwork} makes the internal organization
+of module (b) explicit. Panel (b1) traces the closed proprioceptive control loop
+from muscle-spindle and Golgi-tendon-organ signals, through phase-dependent
+reflex integration and activation dynamics, to muscle force, joint moments, and
+movement. The resulting muscle length, velocity, and force close the sensory
+feedback loop. Panel (b2) specifies which reflex pathways are available in each
+of the five gait phases. Together, these panels distinguish the fixed
+neuromechanical structure from the four parameters that are adjusted online by
+the learned residual action.
+
 During execution, modules (a) and (b) form a state-feedback loop from
 $\mathbf{s}_t$ through residual parameter modulation and muscle stimulation to
 $\mathbf{s}_{t+1}$. During learning, module (c) forms a second loop that reuses
@@ -240,16 +250,18 @@ four-dimensional residual parameterization, and the MPO update used in these
 loops.
 
 \begin{figure*}[!t]
-\centerline{\includegraphics[width=\textwidth]{Picture1.png}}
+\centerline{\includegraphics[width=\textwidth]{framework_overview_v2.png}}
 \caption{Overview of the proposed Residual-Reflex RL framework. (a) The
 rollout policy maps the musculoskeletal state $\mathbf{s}_t$ to a
 four-dimensional residual action $\mathbf{a}_t$ and collects transitions
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The physiological
-environment combines a muscle-driven character with a phase-dependent
-residual-reflex-informed controller. The enlarged lower row shows (b1) the
-H0918v2j character, (b2) the nine bilateral muscle groups and their primary
-joint functions, and (b3) the phase-dependent reflex topology. Magenta
-entries denote the four reflex parameters modulated by $\mathbf{a}_t$.
+environment combines the muscle-driven character with a phase-dependent
+residual-reflex-informed controller. The enlarged lower row expands this
+environment. Panel (b1) shows the proprioceptive reflex control loop from
+muscle sensing to stimulation, activation, muscle--tendon force, skeletal
+motion, and updated sensory feedback. Panel (b2) shows the sparse
+phase-dependent reflex topology. Magenta entries denote the four reflex
+parameters modulated by $\mathbf{a}_t$.
 Superscripts $(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ identify
 parameters shared across all five phases, EarlyStance--LateStance, and
 Liftoff--Swing--Landing, respectively. The notation $i\leftarrow j$ indicates
@@ -266,6 +278,17 @@ collected transitions are stored in $\mathcal{D}$; the critic
 
 \subsection{Musculoskeletal Model}
 \label{sec:musculoskeletal-model}
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{musculoskeletal_character_model.png}
+    \caption{Muscle-driven character model. (a) Front and sagittal views of
+    the H0918v2j character used in the experiments. (b) Schematic arrangement
+    and primary joint functions of the nine bilateral muscle--tendon groups.
+    The complete character is actuated by 18 Hill-type muscle--tendon units,
+    with one instance of each modeled group on each leg.}
+    \label{fig:msk-character}
+\end{figure*}
+
 \paragraph{Simulation platform and character.}
 The physiological environment in module (b) is implemented with the Hyfydy
 musculoskeletal simulation engine \cite{hyfydy} through a Python-based
@@ -279,11 +302,11 @@ leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS),
 biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI),
 hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the
 rigid ground through spherical heel and toe contact elements. The controller
-is updated at fixed 0.005s intervals. Panels (b1) and (b2) of
-Fig.~\ref{framwork} show the simulated character and the modeled muscle groups,
-respectively.
+is updated at fixed 0.005s intervals. Figure~\ref{fig:msk-character}(a) shows
+the simulated character, while Fig.~\ref{fig:msk-character}(b) summarizes the
+modeled muscle--tendon paths and their principal joint actions.
 
-As illustrated by the muscle paths in panel (b2) of Fig.~\ref{framwork}, GLU
+As illustrated by the muscle paths in Fig.~\ref{fig:msk-character}(b), GLU
 and HAM contribute primarily to hip extension,
 whereas ILI and FEM contribute to hip flexion and leg advancement. VAS and BIF
 provide knee extension and flexion, respectively. At the ankle, SOL and GAS
@@ -353,25 +376,15 @@ here is a computational abstraction of this organization rather than a detailed
 neural model. Muscle-spindle-like pathways supply normalized length and velocity
 signals, Golgi-tendon-organ-like pathways supply normalized force signals, and
 their weighted contributions form the stimulation sent to the muscle activation
-dynamics described above. Figure~\ref{fig:reflex-physiology} makes this
-biological-to-computational correspondence explicit.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=\textwidth]{reflex_physiology_pathway.pdf}
-    \caption{Biological motivation and computational abstraction of the
-    proprioceptive reflex pathways. (a) Muscle spindles provide muscle-length
-    and contraction-velocity feedback, whereas Golgi tendon organs provide
-    force-related feedback. These afferent signals are transformed by spinal
-    circuitry into motoneuron drive that modulates muscle stimulation.
-    (b) The controller abstracts this organization using normalized length,
-    velocity, and force signals from source muscle $j$. Phase-dependent gains
-    and thresholds define sparse source-to-target pathways $i\leftarrow j$;
-    their weighted contributions form stimulation $u_i$, which is subsequently
-    converted into muscle activation $\alpha_i$. The diagram represents a
-    control abstraction rather than a detailed neural model.}
-    \label{fig:reflex-physiology}
-\end{figure*}
+dynamics described above. Figure~\ref{framwork}(b1) makes this
+biological-to-computational correspondence explicit and follows the complete
+closed loop. The controller first integrates phase-dependent proprioceptive
+feedback into muscle stimulation $u_i$. Activation dynamics convert $u_i$ to
+activation $\alpha_i$; muscle--tendon and skeletal dynamics then produce force,
+joint moments, and movement. The updated muscle length, velocity, and force are
+subsequently returned as the next proprioceptive input. Thus, panel (b1)
+represents a computational abstraction of spinal reflex regulation embedded in
+the physical character rather than a detailed anatomical neural model.
 
 \paragraph{Phase-dependent topology.}
 Reflex engagement also changes over the gait cycle. A finite-state controller
@@ -386,7 +399,7 @@ force-feedback gain used in EarlyStance and LateStance is distinct from the BIF
 force-feedback gain used in Liftoff, Swing, and Landing. Consequently, the same
 type of sensory feedback can serve loading in stance, propulsion near liftoff,
 or limb placement during swing and landing without requiring one gain to serve
-all phases. Panel (b3) of Fig.~\ref{framwork} summarizes this topology across
+all phases. Panel (b2) of Fig.~\ref{framwork} summarizes this topology across
 the nine muscle groups defined in Sec.~\ref{sec:musculoskeletal-model}.
 The monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the
 knee, and ILI and GLU at the hip. The biarticular GAS spans the knee and ankle,
@@ -506,7 +519,7 @@ than muscle stimulation directly, it changes how the controller responds to
 the current gait phase and sensory state. Its effect on motion is subsequently
 determined through muscle activation and musculoskeletal dynamics.
 
-The four modulated parameters are highlighted in bright magenta in panel (b3)
+The four modulated parameters are highlighted in bright magenta in panel (b2)
 of Fig.~\ref{framwork}. The corresponding pathway labels in
 Table~\ref{tab:residual_actions} follow the controller
 implementation notation. The five-bit code after ``S'' is the implementation's
