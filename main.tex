@@ -1103,7 +1103,7 @@ The corresponding continuous comparison is provided in the first part of the
 step-to-step smoothness more apparent than the five sampled poses alone.
 
 \begin{figure}[!t]
-\centerline{\includegraphics[width=\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
+\centerline{\includegraphics[width=0.82\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
 \caption{Qualitative gait snapshots over one detected gait cycle at
 1.2~m/s. Frames were sampled at 0\%, 25\%, 50\%, 75\%, and 100\% of the gait
 cycle detected from the corresponding STO trajectory and synchronized video.}
@@ -1152,11 +1152,10 @@ than maintaining the target speed at the cost of instability.
 Importantly, the slower gait was not simply a degraded survival behavior. The
 generated joint trajectories remained close to the human-reference kinematic
 profiles across the tested weakness levels, as shown in
-Table~\ref{tab:weakness_kinematic_scores} and
-Fig.~\ref{fig:weakness_kinematic_profiles}. Even at 83\% soleus strength, the
-policy still produced a full rollout with a kinematic-average score of
-89.0\%, indicating that the changed muscle model could be accommodated without
-retraining while preserving a natural gait pattern.
+Fig.~\ref{fig:weakness_kinematic_profiles}. Quantitative analysis of the hip,
+knee, and ankle profiles yielded a kinematic-average score of 89.0\% even at
+83\% soleus strength. The changed muscle model was therefore accommodated
+without retraining while preserving a natural gait pattern.
 The second part of the \suppvideo{} shows this adaptation continuously. As
 plantarflexor capacity is reduced, Residual-Reflex RL retains a recognizable
 stance--swing sequence and upright progression while walking more slowly. Under
@@ -1240,30 +1239,6 @@ weakness levels without retraining.}
 95\%  & 1.137 & 0.063 & 0.596 & 0.657 & \textbf{0.889} & 0.731 \\
 97\%  & 1.167 & 0.033 & 0.588 & 0.678 & \textbf{0.895} & 0.736 \\
 100\% & 1.201 & 0.001 & 0.580 & 0.681 & \textbf{0.898} & 0.753 \\
-\bottomrule
-\end{tabular*}
-\end{table}
-
-\begin{table}[!t]
-\centering
-\caption{Human-reference kinematic scores under soleus weakness. Scores are
-computed from normalized hip, knee, and ankle gait-cycle profiles.}
-\label{tab:weakness_kinematic_scores}
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}c c c c c}
-\toprule
-\textbf{Soleus} & \makecell{\textbf{Kinematic}\\\textbf{average}} &
-\textbf{Hip} & \textbf{Knee} & \textbf{Ankle} \\
-\midrule
-83\%  & 89.0 & 99.6 & 78.1 & 89.3 \\
-87\%  & 90.1 & 99.8 & 79.4 & 91.1 \\
-90\%  & 91.4 & 100.0 & 82.0 & 92.1 \\
-93\%  & 91.9 & 99.9 & 84.1 & 91.7 \\
-95\%  & 92.2 & 100.0 & 85.4 & 91.3 \\
-97\%  & 92.5 & 99.9 & 87.4 & 90.2 \\
-100\% & 92.4 & 99.6 & 89.0 & 88.7 \\
 \bottomrule
 \end{tabular*}
 \end{table}
@@ -1374,7 +1349,7 @@ remains stable for the full rollout, whereas accumulated disturbances in the
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=\textwidth]{push_perturbation_snapshots_100N.png}
+\includegraphics[width=0.82\textwidth]{push_perturbation_snapshots_100N.png}
 \caption{Time-aligned response to a 100N backward torso push applied for 0.1s
 at $t=3.0$s. The CMA-ES-optimized reflex controller (top) progressively loses
 upright balance and terminates at 4.57s. Residual-Reflex RL (bottom) modifies
