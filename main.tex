@@ -197,57 +197,84 @@ plantarflexor weakness, and external push perturbations.
 
 \subsection{Muscle-Driven Character Simulation}
 Physics-based muscle-driven simulation connects control decisions to internal
-muscle loading and mechanically consistent character motion. Predictive
-simulation and optimal-control studies have used this representation to
-generate normal and pathological gait, investigate energetic objectives, and
-study how morphology or task constraints shape locomotion
-\cite{anderson2001,ackermann2010,wang2010,wang2012,song2018,degroote2021}.
-Trajectory optimization and direct collocation provide efficient numerical
-tools for solving the resulting motion problem
-\cite{falisse2019,dembia2020}, while character-animation systems have improved
-the scalability and visual quality of muscle-actuated control
-\cite{geijtenbeek2013,lee2019}. These methods establish that realistic motion
-can emerge from muscle and contact dynamics. However, optimizing a trajectory
-or a set of controller parameters offline does not by itself provide a policy
-that changes its coordination strategy online when the body model or external
-loading changes.
+muscle loading and mechanically consistent character motion. In biomechanics,
+dynamic optimization and predictive simulation use musculoskeletal dynamics
+and task objectives to generate gait without prescribing the complete motion.
+They have been used to study healthy and pathological walking, energetic
+objectives, ageing, and the effects of model or task constraints
+\cite{anderson2001,ackermann2010,falisse2019,song2018,degroote2021}. Direct
+collocation and musculoskeletal optimal-control software have made these
+trajectory-level problems increasingly tractable \cite{falisse2019,dembia2020}.
+
+Graphics research has pursued a complementary goal by optimizing feedback
+controllers for uncertain environments and by incorporating biologically based
+actuators into character locomotion \cite{wang2010,wang2012}. Subsequent systems
+have improved the flexibility and scalability of muscle-actuated character
+simulation and control \cite{geijtenbeek2013,lee2019}. Together, these studies
+show that muscle and contact dynamics can produce plausible character motion,
+but they do not all provide the same form of adaptation. A trajectory optimized
+for one model and task is not itself a feedback policy. An optimized feedback
+controller can react within its designed operating regime, yet its coordination
+parameters generally remain fixed after optimization and need not accommodate
+unseen changes in muscle capacity or external loading.
 
 \subsection{Structured Neuromuscular Control}
-Biologically motivated controllers reduce muscle redundancy by organizing
-control through central pattern generators, muscle synergies, and sensory
-feedback pathways \cite{ijspeert2008,davella2003,meyer2016,dzeladini2014}.
-Reflex-based controllers are particularly relevant to muscle-driven gait
-because muscle length, velocity, and force feedback can be mapped directly to
-stimulation \cite{geyer2010,song2015}. Their feedback structure has produced
-stable walking and has supported studies of speed regulation, perturbation
-responses, and energy-efficient locomotion
-\cite{batts2015,koseki2024,schumacher2025}. The same compact structure also
-makes individual gains and thresholds biomechanically interpretable. In most
-implementations, however, these parameters are hand selected or optimized by an
-offline search and then held fixed during evaluation. Our work retains the
-reflex pathways but turns selected parameters into a state-dependent learning
-interface.
+Biologically motivated controllers introduce structure at different levels of
+muscle coordination. Central pattern generators organize rhythmic drive
+\cite{ijspeert2008}, muscle synergies couple the activation of multiple muscles
+through a smaller set of control signals \cite{davella2003,meyer2016}, and
+reflex models transform sensory feedback into corrective muscle stimulation
+\cite{geyer2010,song2015}. CPG and reflex components can also be combined within
+one neuromuscular controller \cite{dzeladini2014}. These mechanisms should not
+be treated as interchangeable, but each avoids representing locomotion as an
+arbitrary sequence of independent muscle commands.
+
+Reflex-based control is especially relevant here because muscle length,
+velocity, and force signals have direct computational counterparts in a
+musculoskeletal model. Sparse feedback pathways using these signals have
+generated stable and diverse locomotor behavior \cite{geyer2010,song2015},
+supported robust walking in bipedal robots \cite{batts2015}, and enabled the
+analysis of speed-dependent and energy-efficient gait \cite{koseki2024}. Their
+gains, thresholds, and source--target connections also retain an interpretable
+relationship to neuromuscular function. In many implementations, however,
+these parameters are manually specified or determined by offline optimization
+and then remain fixed during deployment. The resulting controller is closed
+loop at the sensory-feedback level, but it does not necessarily adapt the
+organization or strength of its reflex pathways when the body or environment
+changes.
 
 \subsection{Learning-Based Muscle Control}
-Deep reinforcement learning has produced complex locomotion for physics-based
-characters and muscle-driven models
-\cite{peng2017,peng2018,weng2021,devree2021,ogum2024}. End-to-end approaches
-learn muscle activations or excitations directly, avoiding a prescribed
-trajectory but exposing the policy to a redundant muscle-level action space.
-Hierarchical representations, imitation objectives, and structured exploration
-have been introduced to improve learning and motion quality
-\cite{song2021,nowakowski2021,su2023}. DEP-RL, for example, introduces
-embodied exploratory feedback that is effective in overactuated systems, while
-retaining a direct muscle-action interface \cite{deprl2023}. Other hybrid
-approaches combine learning with CPG or reflex structure
-\cite{li2024,schumacher2025}. Nevertheless, direct muscle-control policies must
-still explore a high-dimensional and highly redundant action space. Improving
-exploration can make this search more effective, but does not by itself impose
-a physiologically meaningful coordination structure. Consequently, successful
-task completion does not necessarily yield natural gait-cycle kinematics,
-realistic contact loading, or consistent coordination across strides. These
-limitations motivate learning representations that reduce muscle-level
-redundancy while retaining structured neuromuscular feedback.
+Deep reinforcement learning has enabled physics-based characters to acquire
+complex locomotion skills from interaction and motion examples
+\cite{peng2017,peng2018}. Extending this paradigm to musculoskeletal models,
+several studies learn policies that map body state directly to muscle
+activations or excitations \cite{weng2021,devree2021,ogum2024}. These methods
+avoid prescribing complete joint trajectories and demonstrate the potential of
+DRL for neuromechanical simulation \cite{song2021}, but place policy learning
+in a high-dimensional and redundant muscle-action space.
+
+Prior work has addressed different consequences of this formulation through
+different mechanisms. Bio-inspired reward reshaping encourages more plausible
+locomotor behavior \cite{nowakowski2021}, while model-based learning embeds
+musculoskeletal dynamics more explicitly in the optimization process
+\cite{su2023}. DEP-RL improves exploration in overactuated musculoskeletal
+systems through embodied exploratory feedback, although its learned policy
+still acts through the direct muscle-action interface \cite{deprl2023}.
+Biologically motivated task objectives can also improve the naturalness and
+robustness that emerge from direct muscle control \cite{schumacher2025}. A
+different line of work introduces structure into the controller itself. For
+example, AI-CPG combines a CPG-like feedforward generator with a learned reflex
+network that adapts the generated pattern from sensory feedback \cite{li2024}.
+
+Together, these studies show that reward design, model knowledge, exploratory
+feedback, and structured controller architectures can each improve learned
+muscle-driven locomotion. For direct muscle-control policies, however, better
+objectives or exploration do not remove the redundant muscle-level action
+interface, and successful task execution may not by itself ensure natural
+gait-cycle coordination or contact loading. Structured hybrid controllers
+reduce part of this burden, but do not formulate learning as low-dimensional,
+state-dependent regulation of selected reflex parameters. This distinction
+motivates the compact neuromuscular learning interface developed in this work.
 
 
 \section{Method}
