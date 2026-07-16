@@ -499,12 +499,14 @@ $a_4$ & $K_{F,\mathrm{VAS}}^{(\mathrm{st})}$ & S00011.vasti.KF & Knee extension 
 The residual formulation preserves a meaningful zero action. When
 $\mathbf{a}_t=\mathbf{0}$, the nominal reflex controller is recovered exactly;
 nonzero actions reshape its feedback gains or thresholds in response to the
-current state. Because the residual is applied to a controller parameter rather
-than directly added to muscle stimulation, its downstream effect remains
-mediated by gait phase, sensory feedback, activation dynamics, and muscle
-mechanics.
+current state. Because the residual action modifies a reflex parameter rather
+than muscle stimulation directly, it changes how the controller responds to
+the current gait phase and sensory state. Its effect on motion is subsequently
+determined through muscle activation and musculoskeletal dynamics.
 
-The pathway labels in Table~\ref{tab:residual_actions} follow the controller
+The four modulated parameters are highlighted in bright magenta in panel (b3)
+of Fig.~\ref{framwork}. The corresponding pathway labels in
+Table~\ref{tab:residual_actions} follow the controller
 implementation notation. The five-bit code after ``S'' is the implementation's
 phase-activation mask, while the mathematical superscripts state its semantic
 phase group explicitly. Thus, $a_1$ modulates the swing-related hamstrings
