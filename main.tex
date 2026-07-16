@@ -2,6 +2,12 @@
 % The previous double-column TOG layout is preserved in Git tag
 % acmtog-double-column-backup-2026-07-16.
 \documentclass[manuscript,screen,review]{acmart}
+\citestyle{acmauthoryear}
+\AtBeginDocument{%
+  \providecommand\BibTeX{{Bib\TeX}}}
+
+% Review metadata. Publication rights, DOI, volume, issue, and article number
+% will be supplied by ACM after acceptance.
 \setcopyright{none}
 \copyrightyear{2026}
 \acmYear{2026}
@@ -25,8 +31,6 @@
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 \title{
 Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation
@@ -34,16 +38,19 @@ Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculo
 \author{First A. Author}
 \affiliation{%
   \institution{University of Leeds}
+  \city{Leeds}
   \country{United Kingdom}}
 \email{author@example.com}
 \author{Second B. Author}
 \affiliation{%
   \institution{University of Leeds}
+  \city{Leeds}
   \country{United Kingdom}}
 \email{author@example.com}
 \author{Third C. Author}
 \affiliation{%
   \institution{University of Leeds}
+  \city{Leeds}
   \country{United Kingdom}}
 \email{author@example.com}
 
@@ -73,6 +80,17 @@ generation without abandoning neuromuscular feedback structure. The generated
 gaits and their responses to muscle weakness and external pushes are best viewed
 in the accompanying \suppvideo{}.
 \end{abstract}
+
+\begin{CCSXML}
+<ccs2012>
+ <concept>
+  <concept_id>10010147.10010257.10010258.10010259</concept_id>
+  <concept_desc>Computing methodologies~Reinforcement learning</concept_desc>
+  <concept_significance>500</concept_significance>
+ </concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Computing methodologies~Reinforcement learning}
 
 \keywords{Deep reinforcement learning, gait generation, musculoskeletal
 simulation, reflex control, residual reinforcement learning}
@@ -278,6 +296,11 @@ collected transitions are stored in $\mathcal{D}$; the critic
     and MPO updates the rollout policy from
     $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ to
     $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$.}
+\Description{The framework couples a four-dimensional residual-reflex policy
+to a muscle-driven character. An enlarged feedback loop shows proprioceptive
+sensing, reflex integration, activation and skeletal dynamics, while a second
+panel shows the phase-dependent reflex topology. An actor--critic module learns
+from replayed transitions.}
 \label{framwork}
 \end{figure*}
 
@@ -291,6 +314,9 @@ collected transitions are stored in $\mathcal{D}$; the critic
     and primary joint functions of the nine bilateral muscle--tendon groups.
     The complete character is actuated by 18 Hill-type muscle--tendon units,
     with one instance of each modeled group on each leg.}
+    \Description{Front and side views of the musculoskeletal character beside
+    a schematic of the nine bilateral muscle--tendon groups spanning the hip,
+    knee, and ankle.}
     \label{fig:msk-character}
 \end{figure*}
 
@@ -871,6 +897,9 @@ The kinematic average is the mean of the hip, knee, and ankle scores.}
 labels indicate the score of each bar. The Residual-Reflex RL controller achieves
 the highest kinematic-average score and especially improves knee and ankle
 components.}
+\Description{Grouped bars compare average hip, knee, and ankle kinematic scores
+for three controllers at three walking speeds. Residual-Reflex RL has the
+highest kinematic-average score at every speed.}
 \label{fig:gait_score_bars}
 \end{figure}
 
@@ -904,6 +933,8 @@ directly captured by joint-angle profiles alone.
 curves denote left and right gait cycles, respectively; the black curve is the
 cycle average and the gray band is the human-reference range. Horizontal axes
 show normalized gait cycle percentage.}
+\Description{Hip, knee, and ankle gait-cycle curves for three controllers at
+0.8 meters per second are compared with human-reference ranges.}
 \label{fig:gait_profiles_08}
 \end{figure}
 
@@ -914,6 +945,8 @@ show normalized gait cycle percentage.}
 curves denote left and right gait cycles, respectively; the black curve is the
 cycle average and the gray band is the human-reference range. Horizontal axes
 show normalized gait cycle percentage.}
+\Description{Hip, knee, and ankle gait-cycle curves for three controllers at
+1.0 meter per second are compared with human-reference ranges.}
 \label{fig:gait_profiles_10}
 \end{figure}
 
@@ -924,6 +957,8 @@ show normalized gait cycle percentage.}
 curves denote left and right gait cycles, respectively; the black curve is the
 cycle average and the gray band is the human-reference range. Horizontal axes
 show normalized gait cycle percentage.}
+\Description{Hip, knee, and ankle gait-cycle curves for three controllers at
+1.2 meters per second are compared with human-reference ranges.}
 \label{fig:gait_profiles_12}
 \end{figure}
 
@@ -976,6 +1011,9 @@ and right normalized gait cycles, respectively; the black curve denotes the
 cycle mean, the gray band denotes the human-reference range used for post-hoc
 evaluation, and the panel annotations report the GRF human-reference score.
 Horizontal axes show normalized gait cycle percentage.}
+\Description{A grid compares left and right vertical ground-reaction-force
+cycles for three controllers and three target speeds with human-reference
+ranges. Residual-Reflex RL produces the most concentrated curves.}
 \label{fig:grf_morphology}
 \end{figure}
 
@@ -1038,6 +1076,8 @@ more symmetric or more repeatable gait.}
 \centerline{\includegraphics[width=\columnwidth]{gait_symmetry_variability_bars.png}}
 \caption{Left--right waveform differences and stride variability across target
 speeds. Lower values indicate more symmetric and more repeatable gait cycles.}
+\Description{Bar charts compare bilateral waveform differences and stride
+variability. Residual-Reflex RL generally has the lowest values.}
 \label{fig:symmetry_variability_bars}
 \end{figure}
 
@@ -1071,6 +1111,8 @@ step-to-step smoothness more apparent than the five sampled poses alone.
 \caption{Qualitative gait snapshots over one detected gait cycle at
 1.2~m/s. Frames were sampled at 0\%, 25\%, 50\%, 75\%, and 100\% of the gait
 cycle detected from the corresponding STO trajectory and synchronized video.}
+\Description{Five gait phases for each controller show posture progression
+through one walking cycle.}
 \label{fig:qualitative_snapshots}
 \end{figure}
 
@@ -1209,6 +1251,8 @@ soleus force-feedback modulation defined in Table~\ref{tab:residual_actions}.}
 \caption{Speed adaptation under plantarflexor weakness. The same trained
 Residual-Reflex RL policy remains stable across weakened soleus models but
 adopts a slower realized speed as force capacity is reduced.}
+\Description{Realized speed decreases smoothly as soleus maximum isometric
+force is reduced from 100 to 83 percent.}
 \label{fig:weakness_speed_adaptation}
 \end{figure}
 
@@ -1219,6 +1263,9 @@ show that the trained policy continues to adjust all four selected reflex
 channels. Channel $a_3$ modulates soleus force feedback for ankle
 support/propulsion, whereas $a_4$ modulates vasti force feedback for knee
 extension and stance support.}
+\Description{Four curves show the root-mean-square magnitude of each residual
+reflex action across soleus strength levels. The soleus-related third channel
+has the largest magnitude.}
 \label{fig:weakness_residual_action_rms}
 \end{figure}
 
@@ -1228,6 +1275,8 @@ extension and stance support.}
 curves show the mean normalized gait-cycle profiles generated by the same
 trained Residual-Reflex RL policy under different soleus strength levels; the
 gray bands denote the human-reference ranges.}
+\Description{Hip, knee, and ankle gait-cycle curves at seven soleus strength
+levels remain near the human-reference ranges.}
 \label{fig:weakness_kinematic_profiles}
 \end{figure}
 
@@ -1317,6 +1366,9 @@ CMA-ES-optimized reflex controller (top) progressively loses upright balance
 and terminates at 4.57s. Residual-Reflex RL (bottom) modifies the following
 steps and continues walking for the full 25s rollout under the same
 perturbation. Red arrows indicate the applied force.}
+\Description{Two synchronized frame sequences compare recovery after a
+backward torso push. The optimized reflex controller falls, whereas
+Residual-Reflex RL reorganizes its steps and continues walking.}
 \label{fig:push_snapshots}
 \end{figure}
 
@@ -1389,197 +1441,197 @@ Future work will extend the framework to continuous speed transitions, broader
 character morphologies, and more diverse physical interactions.
 
 \begin{thebibliography}{99}
-\bibitem{anderson2001}
+\bibitem[Anderson and Pandy(2001)]{anderson2001}
 F. C. Anderson and M. G. Pandy, ``Dynamic optimization of human walking,''
 \textit{Journal of Biomechanical Engineering}, vol. 123, no. 5, pp. 381--390,
 2001.
 
-\bibitem{geijtenbeek2013}
+\bibitem[Geijtenbeek et~al.(2013)]{geijtenbeek2013}
 T. Geijtenbeek, M. van de Panne, and A. F. van der Stappen, ``Flexible
 muscle-based locomotion for bipedal creatures,'' \textit{ACM Transactions on
 Graphics}, vol. 32, no. 6, 2013.
 
-\bibitem{lee2019}
+\bibitem[Lee et~al.(2019)]{lee2019}
 S. Lee, M. Park, K. Lee, and J. Lee, ``Scalable muscle-actuated human
 simulation and control,'' \textit{ACM Transactions on Graphics}, vol. 38,
 no. 4, Art. no. 73, 2019.
 
-\bibitem{degroote2021}
+\bibitem[De Groote and Falisse(2021)]{degroote2021}
 F. De Groote and A. Falisse, ``Perspective on musculoskeletal modelling and
 predictive simulations of human movement to assess the neuromechanics of
 gait,'' \textit{Proceedings of the Royal Society B}, vol. 288, no. 1946, 2021.
 
-\bibitem{uchida2020}
+\bibitem[Uchida and Delp(2020)]{uchida2020}
 T. K. Uchida and S. L. Delp, \textit{Biomechanics of Movement: The Science of
 Sports, Robotics, and Rehabilitation}. Cambridge, MA, USA: MIT Press, 2020.
 
-\bibitem{grillner2020}
+\bibitem[Grillner and El Manira(2020)]{grillner2020}
 S. Grillner and A. El Manira, ``Current principles of motor control, with
 special reference to vertebrate locomotion,'' \textit{Physiological Reviews},
 vol. 100, no. 1, pp. 271--320, 2020.
 
-\bibitem{dominici2011}
+\bibitem[Dominici et~al.(2011)]{dominici2011}
 N. Dominici et al., ``Locomotor primitives in newborn babies and their
 development,'' \textit{Science}, vol. 334, no. 6058, pp. 997--999, 2011.
 
-\bibitem{wolpert2011}
+\bibitem[Wolpert et~al.(2011)]{wolpert2011}
 D. M. Wolpert, J. Diedrichsen, and J. R. Flanagan, ``Principles of sensorimotor
 learning,'' \textit{Nature Reviews Neuroscience}, vol. 12, no. 12,
 pp. 739--751, 2011.
 
-\bibitem{ackermann2010}
+\bibitem[Ackermann and van den Bogert(2010)]{ackermann2010}
 M. Ackermann and A. J. van den Bogert, ``Optimality principles for model-based
 prediction of human gait,'' \textit{Journal of Biomechanics}, vol. 43, no. 6,
 pp. 1055--1060, 2010.
 
-\bibitem{geijtenbeek2019}
+\bibitem[Geijtenbeek(2019)]{geijtenbeek2019}
 T. Geijtenbeek, ``SCONE: Open source software for predictive simulation of
 biological motion,'' \textit{Journal of Open Source Software}, vol. 4, no. 38,
 Art. no. 1421, 2019.
 
-\bibitem{falisse2019}
+\bibitem[Falisse et~al.(2019)]{falisse2019}
 A. Falisse, G. Serrancol{\'i}, C. L. Dembia, J. Gillis, I. Jonkers, and
 F. De Groote, ``Rapid predictive simulations with complex musculoskeletal
 models suggest that diverse healthy and pathological human gaits can emerge
 from similar control strategies,'' \textit{Journal of the Royal Society
 Interface}, vol. 16, no. 157, 2019.
 
-\bibitem{dembia2020}
+\bibitem[Dembia et~al.(2020)]{dembia2020}
 C. L. Dembia, N. A. Bianco, A. Falisse, J. L. Hicks, and S. L. Delp,
 ``OpenSim Moco: Musculoskeletal optimal control,'' \textit{PLOS Computational
 Biology}, vol. 16, no. 12, 2020.
 
-\bibitem{ezati2019}
+\bibitem[Ezati et~al.(2019)]{ezati2019}
 M. Ezati, B. Ghannadi, and J. McPhee, ``A review of simulation methods for
 human movement dynamics with emphasis on gait,'' \textit{Multibody System
 Dynamics}, vol. 47, pp. 265--292, 2019.
 
-\bibitem{wang2010}
+\bibitem[Wang et~al.(2010)]{wang2010}
 J. M. Wang, D. J. Fleet, and A. Hertzmann, ``Optimizing walking controllers for
 uncertain inputs and environments,'' \textit{ACM Transactions on Graphics},
 vol. 29, no. 4, Art. no. 73, 2010.
 
-\bibitem{wang2012}
+\bibitem[Wang et~al.(2012)]{wang2012}
 J. M. Wang, S. R. Hamner, S. L. Delp, and V. Koltun, ``Optimizing locomotion
 controllers using biologically-based actuators and objectives,'' \textit{ACM
 Transactions on Graphics}, vol. 31, no. 4, Art. no. 25, 2012.
 
-\bibitem{song2018}
+\bibitem[Song and Geyer(2018)]{song2018}
 S. Song and H. Geyer, ``Predictive neuromechanical simulations indicate why
 walking performance declines with ageing,'' \textit{The Journal of Physiology},
 vol. 596, no. 7, pp. 1199--1210, 2018.
 
-\bibitem{ijspeert2008}
+\bibitem[Ijspeert(2008)]{ijspeert2008}
 A. J. Ijspeert, ``Central pattern generators for locomotion control in animals
 and robots: A review,'' \textit{Neural Networks}, vol. 21, no. 4, pp.
 642--653, 2008.
 
-\bibitem{davella2003}
+\bibitem[d'Avella et~al.(2003)]{davella2003}
 A. d'Avella, P. Saltiel, and E. Bizzi, ``Combinations of muscle synergies in
 the construction of a natural motor behavior,'' \textit{Nature Neuroscience},
 vol. 6, no. 3, pp. 300--308, 2003.
 
-\bibitem{meyer2016}
+\bibitem[Meyer et~al.(2016)]{meyer2016}
 A. J. Meyer, I. Eskinazi, J. N. Jackson, A. V. Rao, C. Patten, and
 B. J. Fregly, ``Muscle synergies facilitate computational prediction of
 subject-specific walking motions,'' \textit{Frontiers in Bioengineering and
 Biotechnology}, vol. 4, Art. no. 77, 2016.
 
-\bibitem{geyer2010}
+\bibitem[Geyer and Herr(2010)]{geyer2010}
 H. Geyer and H. Herr, ``A muscle-reflex model that encodes principles of
 legged mechanics produces human walking dynamics and muscle activities,''
 \textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
 vol. 18, no. 3, pp. 263--273, 2010.
 
-\bibitem{song2015}
+\bibitem[Song and Geyer(2015)]{song2015}
 S. Song and H. Geyer, ``A neural circuitry that emphasizes spinal feedback
 generates diverse behaviours of human locomotion,'' \textit{The Journal of
 Physiology}, vol. 593, no. 16, pp. 3493--3511, 2015.
 
-\bibitem{dzeladini2014}
+\bibitem[Dzeladini et~al.(2014)]{dzeladini2014}
 F. Dzeladini, J. van den Kieboom, and A. Ijspeert, ``The contribution of a
 central pattern generator in a reflex-based neuromuscular model,''
 \textit{Frontiers in Human Neuroscience}, vol. 8, Art. no. 371, 2014.
 
-\bibitem{li2024}
+\bibitem[Li et~al.(2024)]{li2024}
 G. Li, A. Ijspeert, and M. Hayashibe, ``AI-CPG: Adaptive imitated central
 pattern generators for bipedal locomotion learned through reinforced reflex
 neural networks,'' \textit{IEEE Robotics and Automation Letters}, vol. 9,
 no. 6, pp. 5190--5197, 2024.
 
-\bibitem{batts2015}
+\bibitem[Batts et~al.(2015)]{batts2015}
 Z. Batts, S. Song, and H. Geyer, ``Toward a virtual neuromuscular control for
 robust walking in bipedal robots,'' in \textit{Proc. IEEE/RSJ International
 Conference on Intelligent Robots and Systems}, 2015, pp. 6318--6323.
 
-\bibitem{koseki2024}
+\bibitem[Koseki et~al.(2024)]{koseki2024}
 S. Koseki, M. Hayashibe, and D. Owaki, ``Identifying essential factors for
 energy-efficient walking control across a wide range of velocities in
 reflex-based musculoskeletal systems,'' \textit{PLOS Computational Biology},
 vol. 20, no. 1, 2024.
 
-\bibitem{schumacher2025}
+\bibitem[Schumacher et~al.(2025)]{schumacher2025}
 P. Schumacher, T. Geijtenbeek, V. Caggiano, V. Kumar, S. Schmitt, G. Martius,
 and D. F. B. Haeufle, ``Emergence of natural and robust bipedal walking by
 learning from biologically plausible objectives,'' \textit{iScience}, vol. 28,
 Art. no. 112203, 2025.
 
-\bibitem{peng2017}
+\bibitem[Peng and van de Panne(2017)]{peng2017}
 X. B. Peng and M. van de Panne, ``Learning locomotion skills using DeepRL:
 Does the choice of action space matter?'' in \textit{Proc. ACM SIGGRAPH /
 Eurographics Symposium on Computer Animation}, 2017.
 
-\bibitem{peng2018}
+\bibitem[Peng et~al.(2018)]{peng2018}
 X. B. Peng, P. Abbeel, S. Levine, and M. van de Panne, ``DeepMimic:
 Example-guided deep reinforcement learning of physics-based character skills,''
 \textit{ACM Transactions on Graphics}, vol. 37, no. 4, Art. no. 143, 2018.
 
-\bibitem{weng2021}
+\bibitem[Weng et~al.(2021)]{weng2021}
 J. Weng, E. Hashemi, and A. Arami, ``Natural walking with musculoskeletal
 models using deep reinforcement learning,'' \textit{IEEE Robotics and
 Automation Letters}, vol. 6, no. 2, pp. 4156--4162, 2021.
 
-\bibitem{devree2021}
+\bibitem[de Vree and Carloni(2021)]{devree2021}
 R. de Vree and R. Carloni, ``Deep reinforcement learning for physics-based
 musculoskeletal simulations of healthy subjects and transfemoral prostheses'
 users during normal walking,'' \textit{IEEE Transactions on Neural Systems and
 Rehabilitation Engineering}, 2021.
 
-\bibitem{ogum2024}
+\bibitem[Ogum et~al.(2024)]{ogum2024}
 B. N. Ogum, L. R. B. Schomaker, and R. Carloni, ``Learning to walk with deep
 reinforcement learning: Forward dynamic simulation of a physics-based
 musculoskeletal model of an osseointegrated transfemoral amputee,''
 \textit{IEEE Transactions on Neural Systems and Rehabilitation Engineering},
 2024.
 
-\bibitem{song2021}
+\bibitem[Song et~al.(2021)]{song2021}
 S. Song, {\L}. Kidzi{\'n}ski, X. B. Peng, C. Ong, J. Hicks, S. Levine,
 C. G. Atkeson, and S. L. Delp, ``Deep reinforcement learning for modeling
 human locomotion control in neuromechanical simulation,'' \textit{Journal of
 NeuroEngineering and Rehabilitation}, vol. 18, Art. no. 126, 2021.
 
-\bibitem{nowakowski2021}
+\bibitem[Nowakowski et~al.(2021)]{nowakowski2021}
 K. Nowakowski \textit{et al.}, ``Human locomotion with reinforcement learning
 using bioinspired reward reshaping strategies,'' \textit{Medical \&
 Biological Engineering \& Computing}, vol. 59, pp. 243--256, 2021.
 
-\bibitem{su2023}
+\bibitem[Su and Gutierrez-Farewik(2023)]{su2023}
 L. Su and E. M. Gutierrez-Farewik, ``Simulating human walking: A model-based
 reinforcement learning approach with musculoskeletal modeling,'' \textit{Frontiers
 in Neurorobotics}, vol. 17, 2023.
 
-\bibitem{deprl2023}
+\bibitem[Schumacher et~al.(2023)]{deprl2023}
 P. Schumacher, D. F. B. Haeufle, D. B{\"u}chler, S. Schmitt, and G. Martius,
 ``DEP-RL: Embodied exploration for reinforcement learning in overactuated and
 musculoskeletal systems,'' in \textit{International Conference on Learning
 Representations}, 2023.
 
-\bibitem{mpo2018}
+\bibitem[Abdolmaleki et~al.(2018)]{mpo2018}
 A. Abdolmaleki, J. T. Springenberg, Y. Tassa, R. Munos, N. Heess, and
 M. Riedmiller, ``Maximum a posteriori policy optimisation,'' in
 \textit{International Conference on Learning Representations}, 2018.
 
-\bibitem{hyfydy}
+\bibitem[Geijtenbeek(2021)]{hyfydy}
 T. Geijtenbeek, ``The Hyfydy simulation software,'' Nov. 2021. [Online].
 Available: https://hyfydy.com
 \end{thebibliography}
