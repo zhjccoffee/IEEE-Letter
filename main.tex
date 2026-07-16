@@ -23,6 +23,7 @@
 \usepackage{multirow}
 \usepackage{booktabs}
 \usepackage{makecell}
+\usepackage{placeins}
 
 \newcommand{\suppvideo}{\href{https://github.com/zhjccoffee/Supplementary-supporting-video}{supplementary video}}
 
@@ -57,31 +58,29 @@ Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculo
 Deep reinforcement learning (DRL) has enabled physically simulated characters
 to produce increasingly natural and complex locomotion. However, generating
 natural and adaptable muscle-driven gait remains challenging because direct
-muscle-control policies must explore a high-dimensional and redundant action
+muscle-control policies face a high-dimensional and redundant action
 space, while optimized neuromuscular controllers typically retain fixed
 parameters. To address these challenges, we propose
-Residual-Reflex RL, a low-dimensional reflex-informed DRL framework for
-musculoskeletal gait generation. The framework retains a phase-dependent reflex
-controller that maps delayed proprioceptive length, velocity, and force signals
-through sparse intra- and inter-muscle pathways to 18 muscle--tendon actuators.
-Instead of replacing this feedback organization, an MPO-trained policy outputs
-a four-dimensional residual action that continuously modulates selected reflex
-gains and thresholds governing hip swing, knee support, and ankle propulsion.
-The learned action therefore acts through gait phase, sensory feedback,
-activation dynamics, and muscle mechanics rather than directly specifying
-individual muscle excitations. We evaluate the framework at target speeds of
-0.8, 1.0, and 1.2m/s against end-to-end muscle-control and DEP-assisted DRL
-baselines. The proposed controller produces natural-looking, symmetric, and
-repeatable gait, with gait-cycle joint kinematics and vertical ground reaction
-forces that remain close to human reference data. We further evaluate the same
-trained 1.2m/s policy without fine-tuning after reducing soleus force capacity
-and applying unseen backward torso pushes. The policy maintains walking down to
-83\% soleus strength by adopting a slower compensatory gait and remains upright
-after a 100N push that terminates a CMA-ES-optimized reflex controller. These
-results demonstrate that learning a compact and interpretable residual over
-structured reflex pathways can support both natural muscle-driven gait and
-post-training adaptation without returning to direct muscle-level control. The
-behaviors are best viewed in the accompanying \suppvideo{}.
+Residual-Reflex RL, a hierarchical, low-dimensional reflex-informed DRL
+framework for musculoskeletal gait generation. The framework is implemented as
+a two-level control hierarchy. A five-phase reflex controller transforms
+delayed proprioceptive length, velocity, and force signals, together with
+postural feedback, into muscle stimulation through sparse intra- and
+inter-muscle pathways. An MPO-trained actor observes the current movement state
+and outputs a four-dimensional residual action that modulates the reflex
+controller online. Learning therefore operates through a compact and
+biomechanically interpretable reflex-parameter space rather than directly
+regulating individual muscle excitations. We implement the framework on a
+9-degree-of-freedom (DoF) musculoskeletal character actuated by 18 Hill-type
+muscle--tendon units. Experiments at three target speeds show that the
+proposed controller generates natural-looking, symmetric, and repeatable gait
+with human-reference-consistent joint kinematics and vertical ground reaction
+forces. Without retraining, the same trained policy also accommodates reduced
+soleus capacity and an unseen backward torso push, demonstrating adaptation to
+changes in both the body model and the external environment. These results show
+that Residual-Reflex RL combines a compact, interpretable control representation
+with state-dependent post-training adaptation. The behaviors are best viewed in
+the accompanying \suppvideo{}.
 \end{abstract}
 
 \begin{CCSXML}
@@ -1389,6 +1388,9 @@ Continuous nominal, plantarflexor-weakness, and push-response sequences are
 provided in the accompanying \suppvideo{}, including synchronized
 residual-action channels for the weakness trials.
 
+% Keep the perturbation comparison with the evaluation rather than allowing
+% the double-column float to drift into the discussion or references.
+\FloatBarrier
 \section{Discussion}
 \label{sec:discussion}
 The results show that residual reflex learning provides both a structured,
@@ -1453,6 +1455,7 @@ behavior must remain connected to interpretable neuromuscular mechanisms.
 Future work will extend the framework to continuous speed transitions, broader
 character morphologies, and more diverse physical interactions.
 
+\FloatBarrier
 \begin{thebibliography}{99}
 \bibitem[Anderson and Pandy(2001)]{anderson2001}
 F. C. Anderson and M. G. Pandy, ``Dynamic optimization of human walking,''
