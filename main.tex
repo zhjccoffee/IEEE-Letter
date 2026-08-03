@@ -55,32 +55,23 @@ Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculo
 \email{author@example.com}
 
 \begin{abstract}
-Deep reinforcement learning (DRL) has enabled physically simulated characters
-to produce increasingly natural and complex locomotion. However, generating
-natural and adaptable muscle-driven gait remains challenging because direct
-muscle-control policies face a high-dimensional and redundant action
-space, while optimized neuromuscular controllers typically retain fixed
-parameters. To address these challenges, we propose
-Residual-Reflex RL, a hierarchical, low-dimensional reflex-informed DRL
-framework for musculoskeletal gait generation. The framework is implemented as
-a two-level control hierarchy. A five-phase reflex controller transforms
-delayed proprioceptive length, velocity, and force signals, together with
-postural feedback, into muscle stimulation through sparse intra- and
-inter-muscle pathways. An MPO-trained actor observes the current movement state
-and outputs a four-dimensional residual action that modulates the reflex
-controller online. Learning therefore operates through a compact and
-biomechanically interpretable reflex-parameter space rather than directly
-regulating individual muscle excitations. We implement the framework on a
-9-degree-of-freedom (DoF) musculoskeletal character actuated by 18 Hill-type
-muscle--tendon units. Experiments at three target speeds show that the
-proposed controller generates natural-looking, symmetric, and repeatable gait
-with human-reference-consistent joint kinematics and vertical ground reaction
-forces. Without retraining, the same trained policy also accommodates reduced
-soleus capacity and an unseen backward torso push, demonstrating adaptation to
-changes in both the body model and the external environment. These results show
-that Residual-Reflex RL combines a compact, interpretable control representation
-with state-dependent post-training adaptation. The behaviors are best viewed in
-the accompanying \suppvideo{}.
+Muscle-driven gait controllers must coordinate many actuators and remain stable
+when muscle capacity or external loading changes. Direct muscle-control deep
+reinforcement learning (DRL) can adjust its actions from the current state but
+must learn muscle coordination from task rewards, whereas optimized reflex
+controllers encode coordination but keep their parameters fixed after
+optimization. We propose Residual-Reflex RL to combine structured reflex control
+with state-dependent parameter adjustment. A five-phase reflex controller maps
+delayed muscle and posture feedback to stimulation for 18 muscle--tendon units.
+At each control step, an MPO-trained policy outputs four residual values that
+modify selected reflex gains and thresholds for hip swing, knee support, and
+ankle propulsion; the policy does not command individual muscles directly. On a
+9-degree-of-freedom musculoskeletal character, the method achieved the smallest
+speed error and the highest average human-reference kinematic score at 0.8, 1.0,
+and 1.2~m/s among the tested controllers. The same 1.2~m/s policy completed full
+episodes with soleus strength reduced to 83\% and remained upright for 20.1~s in
+the single-100N-push test without retraining; the fixed reflex baseline
+terminated after 4.6~s in the same push test.
 \end{abstract}
 
 \begin{CCSXML}
@@ -102,90 +93,54 @@ simulation, reflex control, residual reinforcement learning}
 \section{Introduction}
 \label{sec:introduction}
 
-Muscle-driven characters promise more than visually plausible animation. By
-connecting neural stimulation, muscle force, skeletal motion, and physical
-contact, they provide a computational account of how locomotion emerges from the
-body. Such characters serve as computational bodies for studying human movement
-and as testbeds for bio-inspired assistive and robotic systems
-\cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}. This promise
-remains incomplete, however, when a controller reproduces only one nominal gait
-for an intact body in an undisturbed environment. Humans routinely preserve
-recognizable coordination when their physical capacity or surroundings change.
-Reduced plantarflexor capacity can be accommodated through a slower,
-redistributed gait, while an unexpected push evokes corrective steps without
-requiring locomotion to be learned again. A character that walks only under
-nominal conditions captures a motion, but not the adaptive organization that
-makes human locomotion compelling.
+Muscle-driven simulation generates movement from muscle stimulation,
+muscle--tendon force, skeletal dynamics, and physical contact. It is used to
+study human movement and to develop bio-inspired character and assistive control
+systems \cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}. A
+gait controller for these applications should both reproduce human-like walking
+and maintain walking when muscle strength or external loading changes.
 
-Human locomotion provides a useful clue for how such adaptability can be
-organized. Walking is not acquired as an arbitrary mapping from body state to
-every individual muscle excitation. The neuromuscular system provides spinal
-sensorimotor pathways that rapidly transform muscle and body feedback into
-corrective responses \cite{grillner2020}. Locomotor primitives present early in
-life are retained and expanded during development \cite{dominici2011}, while
-continued interaction with the environment refines sensorimotor coordination
-\cite{wolpert2011}. This layered organization allows coordination to improve
-without discarding the feedback mechanisms that stabilize the body. When
-physical capacity or external conditions change, adaptation can therefore
-reshape an existing sensorimotor organization rather than reconstructing muscle
-control from scratch.
+Current control formulations do not provide both properties reliably. A direct
+muscle-control DRL policy can change every muscle command from the current state,
+but it must learn coordination among redundant actuators from task rewards.
+Completing a speed-tracking task therefore does not by itself guarantee
+human-reference joint motion, contact loading, symmetry, or repeatability. A
+reflex controller instead specifies sparse, phase-dependent feedback pathways
+that coordinate muscles. This structure can generate stable nominal gait, but
+its gains and thresholds are normally fixed after offline optimization and
+cannot be adjusted to a weakened muscle model or a new external load. The
+specific problem addressed in this work is to retain the coordination structure
+of reflex control while allowing the controller to adjust it online.
 
-Translating this layered organization into a learned muscle-driven controller is
-nevertheless difficult. At the muscle level, locomotion is highly redundant.
-Many excitation patterns can realize the same task while producing different
-joint coordination and contact loading. Asking a policy to command every muscle
-independently therefore requires it to rediscover useful coordination within a
-large space of equivalent actions. Simply compressing that space into a fixed
-coordination pattern may ease the search, but can restrict the capacity to
-reorganize gait when the body or environment changes. The core challenge is
-therefore to reduce redundancy in muscle-driven control while preserving
-natural gait and retaining the ability to adapt coordination to changes in
-physical capacity and external conditions.
+We propose Residual-Reflex RL for this purpose. The low-level controller uses a
+five-phase reflex topology to convert delayed muscle length, velocity, force,
+and posture feedback into muscle stimulation. The learned policy does not output
+18 muscle stimulations. Instead, at every control step it outputs residual
+changes to four selected reflex gains and thresholds that control hip swing,
+knee support, and ankle propulsion. The fixed reflex topology supplies the
+coordination prior, and the four state-dependent residuals provide the online
+adjustment.
 
-These observations suggest that compactness and adaptability need not be
-competing objectives. Our key insight is that adaptability can arise not from
-learning more muscle commands, but from learning how to regulate a compact set
-of feedback pathways that already organize muscle coordination. This shifts the
-role of learning from muscle-excitation synthesis to state-dependent regulation
-of neuromuscular feedback.
-
-Based on this insight, we propose Residual-Reflex RL, a low-dimensional
-residual-reflex-informed deep reinforcement learning framework for muscle-driven
-gait generation. The framework retains a phase-dependent reflex controller as
-the low-level feedback organization. At each control step, a learned policy
-observes the musculoskeletal state and outputs residual changes to four selected
-reflex gains and thresholds associated with hip swing, ankle propulsion, and
-stance support. These actions reshape how sensory feedback is converted into
-muscle stimulation rather than adding muscle excitations directly. The learned
-interface is consequently compact and interpretable, while its state-dependent
-modulation allows the underlying coordination to change continuously with the
-body and environment. We evaluate nominal gait against direct muscle-control
-policies, and test the same trained controller under plantarflexor weakness and
-external push perturbations. The resulting gait is natural and repeatable under
-nominal conditions, while changes in muscle capacity and external disturbances
-are accommodated without retraining.
+We compare the method with direct muscle-control policies and a fixed
+CMA-ES-optimized reflex controller. Nominal experiments test speed tracking,
+joint kinematics, ground-reaction forces, symmetry, and cycle repeatability at
+0.8, 1.0, and 1.2~m/s. Additional experiments apply the same trained 1.2~m/s
+policy to reduced soleus strength and backward torso pushes without retraining.
 
 This study makes three main contributions.
 \begin{enumerate}
-    \item We introduce a hierarchical residual-reflex formulation that places
-    learning above a phase-dependent proprioceptive controller. The learned
-    policy regulates how structured length-, velocity-, force-, and
-    posture-feedback pathways contribute to movement, instead of replacing this
-    organization with direct muscle commands.
-    \item We construct a four-dimensional action representation that modulates
-    gait-critical reflex gains and thresholds governing hip swing, knee support,
-    and ankle propulsion. This representation reduces the learned control space
-    from direct coordination of 18 muscle--tendon actuators to four
-    biomechanically interpretable channels, while preserving the state-, phase-,
-    and sensory-dependent effects of the underlying controller.
-    \item We provide quantitative and visual evidence that this representation
-    supports both gait quality and post-training adaptation. Across three target
-    speeds, the learned controller produces human-reference-consistent joint and
-    ground-reaction-force profiles with symmetric and repeatable gait. Moreover,
-    the same 1.2m/s policy accommodates soleus strength reductions down to 83\%
-    and an unseen 100N backward torso push without retraining, whereas the fixed
-    CMA-ES-optimized reflex controller terminates under the corresponding altered
-    conditions.
+    \item We combine a fixed phase-dependent reflex topology with a learned
+    policy that adjusts reflex parameters from the current musculoskeletal state.
+    Learning changes the feedback controller instead of replacing it with direct
+    muscle commands.
+    \item We define a four-dimensional action space for selected hip-, knee-,
+    and ankle-related reflex gains and thresholds. This replaces 18 direct muscle
+    actions with four named control channels whose effects remain dependent on
+    gait phase and sensory feedback.
+    \item We evaluate nominal gait and adaptation separately. The nominal tests
+    compare speed, joint kinematics, ground-reaction forces, symmetry, and
+    repeatability at three speeds. The adaptation tests keep the trained policy
+    fixed while changing soleus strength and applying backward torso pushes.
 \end{enumerate}
 
 The remainder of the paper reviews related work, presents the residual-reflex
@@ -249,9 +204,10 @@ complex locomotion skills from interaction and motion examples
 \cite{peng2017,peng2018}. Extending this paradigm to musculoskeletal models,
 several studies learn policies that map body state directly to muscle
 activations or excitations \cite{weng2021,devree2021,ogum2024}. These methods
-avoid prescribing complete joint trajectories and demonstrate the potential of
-DRL for neuromechanical simulation \cite{song2021}, but place policy learning
-in a high-dimensional and redundant muscle-action space.
+avoid prescribing complete joint trajectories and apply DRL directly to
+neuromechanical simulation \cite{song2021}. They retain one action channel per
+muscle, so coordination is learned through the policy and reward rather than
+encoded in the action interface.
 
 Prior work has addressed different consequences of this formulation through
 different mechanisms. Bio-inspired reward reshaping encourages more plausible
@@ -280,36 +236,22 @@ motivates the compact neuromuscular learning interface developed in this work.
 \section{Method}
 \label{sec:method}
 \subsection{Framework Overview}
-Figure~\ref{framwork} summarizes the framework as three coupled modules. In
-module (a), the rollout policy $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ observes the current
-musculoskeletal state $\mathbf{s}_t$ and produces the four-dimensional residual
-action $\mathbf{a}_t$. In module (b), this action changes four parameters of the
-phase-dependent reflex controller described below. The modulated controller
-maps delayed muscle and body feedback to muscle stimulation; muscle activation
-and muscle--tendon forces then advance the skeletal dynamics and generate the
-next state and reward. Module (c) stores the collected transitions in a replay
-buffer $\mathcal{D}$, trains a critic
-$q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$, and updates the policy to
-$\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$ using off-policy
-Maximum a Posteriori Policy Optimization (MPO) \cite{mpo2018}.
+Figure~\ref{framwork} shows the execution loop and the learning loop. During
+execution, the policy maps the current musculoskeletal state $\mathbf{s}_t$ to a
+four-dimensional residual action $\mathbf{a}_t$. These four values modify four
+parameters of the phase-dependent reflex controller. The controller then maps
+delayed muscle and posture feedback to muscle stimulation, and the
+musculoskeletal simulation produces the next state $\mathbf{s}_{t+1}$ and
+reward. The reflex topology and muscle model remain fixed; only the four
+selected reflex parameters are adjusted online.
 
-The enlarged lower row of Fig.~\ref{framwork} makes the internal organization
-of module (b) explicit. Panel (b1) traces the closed proprioceptive control loop
-from muscle-spindle and Golgi-tendon-organ signals, through phase-dependent
-reflex integration and activation dynamics, to muscle force, joint moments, and
-movement. The resulting muscle length, velocity, and force close the sensory
-feedback loop. Panel (b2) specifies which reflex pathways are available in each
-of the five gait phases. Together, these panels distinguish the fixed
-neuromechanical structure from the four parameters that are adjusted online by
-the learned residual action.
-
-During execution, modules (a) and (b) form a state-feedback loop from
-$\mathbf{s}_t$ through residual parameter modulation and muscle stimulation to
-$\mathbf{s}_{t+1}$. During learning, module (c) forms a second loop that reuses
-the collected transitions to improve the rollout policy. The following sections
-define the musculoskeletal dynamics, the phase-dependent reflex pathways, the
-four-dimensional residual parameterization, and the MPO update used in these
-loops.
+During learning, transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$
+are stored in the replay buffer $\mathcal{D}$. A critic
+$q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ evaluates actions, and Maximum a
+Posteriori Policy Optimization (MPO) updates the rollout policy
+\cite{mpo2018}. Panels (b1) and (b2) in Fig.~\ref{framwork} show the fixed
+proprioceptive feedback loop and the phase-dependent reflex pathways,
+respectively. The following sections define each part of this computation.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=\textwidth]{framework_overview_v2.png}}
@@ -376,18 +318,6 @@ is updated at fixed 0.005s intervals. Figure~\ref{fig:msk-character}(a) shows
 the simulated character, while Fig.~\ref{fig:msk-character}(b) summarizes the
 modeled muscle--tendon paths and their principal joint actions.
 
-As illustrated by the muscle paths in Fig.~\ref{fig:msk-character}(b), GLU
-and HAM contribute primarily to hip extension,
-whereas ILI and FEM contribute to hip flexion and leg advancement. VAS and BIF
-provide knee extension and flexion, respectively. At the ankle, SOL and GAS
-generate plantarflexion for stance support and propulsion, while TA produces
-dorsiflexion for foot clearance and landing. The biarticular HAM, FEM, and GAS
-span two adjacent joints and mechanically couple their motion, allowing force
-and mechanical power to be redistributed across joints. Together with the
-overlapping functions of the monoarticular muscles, this coupling permits
-multiple muscle-recruitment patterns to produce similar joint-level motion and
-thereby contributes to the actuation redundancy of the muscle-driven system.
-
 \paragraph{Muscle-driven dynamics.}
 Within module (b), reflex-generated stimulation is applied to the character
 through activation dynamics, muscle--tendon mechanics, and forward skeletal
@@ -436,25 +366,14 @@ motion emerge through forward dynamics.
 
 \subsection{Phase-Dependent Reflex Controller}
 \paragraph{Physiological feedback abstraction.}
-The stimulation is generated by a phase-dependent reflex controller inspired
-by spinal sensorimotor feedback \cite{grillner2020}. In the biological system,
-muscle spindles encode muscle length and its rate of change, whereas Golgi tendon
-organs respond to muscle tension. Afferent signals from these proprioceptors are
-transformed through spinal circuitry into motoneuron drive, providing rapid
-feedback before slower voluntary correction is available. The controller used
-here is a computational abstraction of this organization rather than a detailed
-neural model. Muscle-spindle-like pathways supply normalized length and velocity
-signals, Golgi-tendon-organ-like pathways supply normalized force signals, and
-their weighted contributions form the stimulation sent to the muscle activation
-dynamics described above. Figure~\ref{framwork}(b1) makes this
-biological-to-computational correspondence explicit and follows the complete
-closed loop. The controller first integrates phase-dependent proprioceptive
-feedback into muscle stimulation $u_i$. Activation dynamics convert $u_i$ to
-activation $\alpha_i$; muscle--tendon and skeletal dynamics then produce force,
-joint moments, and movement. The updated muscle length, velocity, and force are
-subsequently returned as the next proprioceptive input. Thus, panel (b1)
-represents a computational abstraction of spinal reflex regulation embedded in
-the physical character rather than a detailed anatomical neural model.
+The low-level controller computes muscle stimulation from delayed, normalized
+muscle length, velocity, and force signals together with posture feedback.
+Length and velocity terms represent muscle-spindle feedback, and force terms
+represent Golgi-tendon-organ feedback \cite{grillner2020}. Their gains,
+thresholds, source muscles, target muscles, and active gait phases are specified
+explicitly below. As shown in Fig.~\ref{framwork}(b1), the resulting stimulation
+$u_i$ drives activation and muscle--tendon force; the updated muscle length,
+velocity, and force then provide the next feedback sample.
 
 \paragraph{Phase-dependent topology.}
 Reflex engagement also changes over the gait cycle. A finite-state controller
