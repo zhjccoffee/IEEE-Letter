@@ -33,8 +33,11 @@
 
 \begin{document}
 \title{
-Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation
+Reflex-Informed Neuromuscular Reinforcement Learning for Muscle-Driven Locomotion
 }
+% \title{
+% Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculoskeletal Gait Generation
+% }
 \author{First A. Author}
 \affiliation{%
   \institution{University of Leeds}
@@ -55,23 +58,26 @@ Low-Dimensional Residual-Reflex-Informed Deep Reinforcement Learning for Musculo
 \email{author@example.com}
 
 \begin{abstract}
-Muscle-driven gait controllers must coordinate many actuators and remain stable
-when muscle capacity or external loading changes. Direct muscle-control deep
-reinforcement learning (DRL) can adjust its actions from the current state but
-must learn muscle coordination from task rewards, whereas optimized reflex
-controllers encode coordination but keep their parameters fixed after
-optimization. We propose Residual-Reflex RL to combine structured reflex control
-with state-dependent parameter adjustment. A five-phase reflex controller maps
-delayed muscle and posture feedback to stimulation for 18 muscle--tendon units.
-At each control step, an MPO-trained policy outputs four residual values that
-modify selected reflex gains and thresholds for hip swing, knee support, and
-ankle propulsion; the policy does not command individual muscles directly. On a
-9-degree-of-freedom musculoskeletal character, the method achieved the smallest
-speed error and the highest average human-reference kinematic score at 0.8, 1.0,
-and 1.2~m/s among the tested controllers. The same 1.2~m/s policy completed full
-episodes with soleus strength reduced to 83\% and remained upright for 20.1~s in
-the single-100N-push test without retraining; the fixed reflex baseline
-terminated after 4.6~s in the same push test.
+% Muscle-driven gait controllers must coordinate many actuators and remain stable
+% when muscle capacity or external loading changes. Direct muscle-control deep
+% reinforcement learning (DRL) can adjust its actions from the current state but
+% must learn muscle coordination from task rewards, whereas optimized reflex
+% controllers encode coordination but keep their parameters fixed after
+% optimization. We propose Residual-Reflex RL to combine structured reflex control
+% with state-dependent parameter adjustment. A five-phase reflex controller maps
+% delayed muscle and posture feedback to stimulation for 18 muscle--tendon units.
+% At each control step, an MPO-trained policy outputs four residual values that
+% modify selected reflex gains and thresholds for hip swing, knee support, and
+% ankle propulsion; the policy does not command individual muscles directly. On a
+% 9-degree-of-freedom musculoskeletal character, the method achieved the smallest
+% speed error and the highest average human-reference kinematic score at 0.8, 1.0,
+% and 1.2~m/s among the tested controllers. The same 1.2~m/s policy completed full
+% episodes with soleus strength reduced to 83\% and remained upright for 20.1~s in
+% the single-100N-push test without retraining; the fixed reflex baseline
+% terminated after 4.6~s in the same push test.
+
+Muscle-driven locomotion provides a physically grounded approach to generating realistic human movement. However, achieving both physiological plausibility and adaptability remains a fundamental challenge in muscle-driven locomotion. To address this limitation, we propose a Reflex-Informed Neuromuscular Reinforcement Learning framework for muscle-driven locomotion. Within this framework, a fixed phase-dependent reflex controller serves as the underlying neuromuscular control mechanism, while the reinforcement learning policy produces four biomechanically meaningful residual parameters to modulate key reflex gains and thresholds associated with hip swing, knee support, and ankle propulsion according to the current state. Experimental results demonstrate that the proposed framework generates physiologically plausible locomotion with improved kinematic accuracy and dynamic consistency, as well as better bilateral symmetry and stride-to-stride consistency under nominal walking conditions. The learned policy remains robust under muscle weakness and external perturbations without retraining.
+
 \end{abstract}
 
 \begin{CCSXML}
@@ -92,166 +98,168 @@ simulation, reflex control, residual reinforcement learning}
 
 \section{Introduction}
 \label{sec:introduction}
+% 第一段：Problem（不是方法）
+% 随着物理驱动角色动画、数字人以及肌骨仿真的不断发展，肌肉驱动运动生成逐渐成为生成高真实性人体运动的重要研究方向。与直接指定关节轨迹或关节力矩不同，肌肉驱动模型通过神经肌肉系统、肌肉动力学和身体与环境之间的物理交互自然产生运动，因此能够生成具有更高物理一致性和生物合理性的角色动画。然而，对于一个真实的人体角色，生成的运动不仅需要具有接近人体的运动组织和动力学特征，还应能够在身体能力下降或环境发生变化时重新组织运动。因此，如何同时获得具有生理合理性的运动生成能力以及对身体和环境变化的适应能力，成为肌肉驱动角色动画中的关键挑战。
+Muscle-driven character animation has become an important paradigm for generating realistic human locomotion in physically based animation, digital humans, and musculoskeletal simulation. Unlike approaches that directly prescribe joint trajectories or joint torques, muscle-driven models allow movement to emerge naturally from neuromuscular control, muscle dynamics, and physical interactions between the body and the environment, resulting in motion with greater physical consistency and biological plausibility. However, realistic muscle-driven locomotion requires not only physiological plausibility, but also the ability to adapt naturally to changes in the musculoskeletal condition and the environment. Therefore, achieving both physiological plausibility and adaptability remains a key challenge in muscle-driven character animation.
 
-Muscle-driven simulation generates movement from muscle stimulation,
-muscle--tendon force, skeletal dynamics, and physical contact. It is used to
-study human movement and to develop bio-inspired character and assistive control
-systems \cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}. A
-gait controller for these applications should both reproduce human-like walking
-and maintain walking when muscle strength or external loading changes.
+% 第二段：Existing Paradigms（不是 Related Work）
+% 现有肌肉驱动控制方法大致体现了两种不同的控制思想。一类方法采用反射控制、中央模式发生器（CPG）、肌肉协同等结构化神经肌肉控制模型，将部分生物运动规律直接编码到控制器中，从而能够生成稳定且具有生理意义的运动。然而，这类控制器通常依赖人工设计或离线优化，其控制规律在部署过程中保持固定，因此难以适应身体能力或环境条件的变化。另一类方法采用强化学习直接学习肌肉动作，由策略根据当前状态生成各肌肉控制信号，从而具有较强的在线适应能力。然而，由于策略需要在高维且冗余的肌肉动作空间中重新学习肌肉协调关系，仅依靠任务奖励并不能保证生成运动具有接近人体的运动组织和动力学特征。现有方法因此往往在生理合理性与适应能力之间形成取舍：结构化控制保留了生物运动组织，却缺乏状态依赖调节；直接肌肉学习具有适应能力，却需要重新发现复杂的神经肌肉协调。
+Existing approaches to muscle-driven locomotion generally fall into two categories. One category employs structured neuromuscular controllers, such as reflex-based control, central pattern generators (CPGs), and muscle synergies, by explicitly embedding biological control principles into the controller. Such controllers naturally generate stable and physiologically meaningful locomotion. However, they are typically designed manually or optimized offline, and their control policies remain fixed during deployment, limiting their ability to adapt to changes in musculoskeletal conditions or the environment.
+The other category formulates locomotion as a reinforcement learning problem by directly learning muscle actions. Since muscle activations are generated online according to the current state, these methods exhibit strong adaptability. However, because the policy must rediscover complex neuromuscular coordination within a high-dimensional and redundant muscle action space, task rewards alone cannot guarantee physiologically organized movement or biologically plausible dynamics. Consequently, existing approaches often face a trade-off between physiological plausibility and adaptability: structured neuromuscular controllers preserve biological organization but lack state-dependent adaptation, whereas direct muscle learning remains adaptive but must rediscover complex neuromuscular coordination from scratch.
 
-Current control formulations do not provide both properties reliably. A direct
-muscle-control DRL policy can change every muscle command from the current state,
-but it must learn coordination among redundant actuators from task rewards.
-Completing a speed-tracking task therefore does not by itself guarantee
-human-reference joint motion, contact loading, symmetry, or repeatability. A
-reflex controller instead specifies sparse, phase-dependent feedback pathways
-that coordinate muscles. This structure can generate stable nominal gait, but
-its gains and thresholds are normally fixed after offline optimization and
-cannot be adjusted to a weakened muscle model or a new external load. The
-specific problem addressed in this work is to retain the coordination structure
-of reflex control while allowing the controller to adjust it online.
+% 第三段：Our Insight（全文灵魂）
+% 我们认为，上述取舍不仅来自所采用的学习算法，更来自于强化学习学习对象（learning target）的选择。现有强化学习通常将肌肉动作作为策略直接学习的对象，而任务奖励决定了"完成什么任务"，却并不能唯一决定"如何协调肌肉完成任务"。因此，策略需要从任务奖励中重新学习复杂的神经肌肉协调规律。然而，从生物运动控制的角度来看，人体运动并不是通过直接控制每块肌肉产生的，而是在已有神经肌肉控制机制基础上，通过感觉反馈、脊髓调节以及肌肉动力学共同组织形成。 换言之，大量局部协调和运动组织已经编码在神经肌肉控制过程中。如果这些控制规律已经存在，那么强化学习是否仍然需要重新学习它们，还是应该建立在这些已有控制规律之上？这一问题启发我们重新思考强化学习在肌肉驱动运动中的作用：学习不再直接合成肌肉动作，而是学习如何调节已有神经肌肉控制机制。 在这种学习表述下，神经肌肉控制负责组织运动，而强化学习负责根据当前身体状态调节这些控制机制，从而在保留已有运动组织规律的同时赋予其状态依赖的适应能力。
 
-We propose Residual-Reflex RL for this purpose. The low-level controller uses a
-five-phase reflex topology to convert delayed muscle length, velocity, force,
-and posture feedback into muscle stimulation. The learned policy does not output
-18 muscle stimulations. Instead, at every control step it outputs residual
-changes to four selected reflex gains and thresholds that control hip swing,
-knee support, and ankle propulsion. The fixed reflex topology supplies the
-coordination prior, and the four state-dependent residuals provide the online
-adjustment.
+We argue that this trade-off stems not only from the learning algorithm itself, but also from the choice of the learning target. Existing reinforcement learning approaches typically formulate muscle actions as the direct output of the policy. However, while task rewards define what should be achieved, they do not uniquely determine how muscles should be coordinated to achieve it. As a result, the policy is required to rediscover complex neuromuscular coordination solely from task rewards.
+From the perspective of biological motor control, however, such coordination is not generated by directly controlling individual muscles. Instead, human locomotion is organized through existing neuromuscular control mechanisms, where sensory feedback, spinal regulation, and muscle dynamics work together to coordinate movement. In other words, much of the local coordination and movement organization is already encoded within the neuromuscular control system. If these control principles already exist, should reinforcement learning still rediscover them, or should it instead build upon them?
+This question motivates us to rethink the role of reinforcement learning in muscle-driven locomotion. Rather than directly learning muscle actions, we formulate learning as the state-dependent regulation of existing neuromuscular control mechanisms. In this formulation, neuromuscular control is responsible for coordinating muscle activity, while reinforcement learning adjusts these control mechanisms according to the current state, enabling adaptation without relearning muscle coordination from scratch.
 
-We compare the method with direct muscle-control policies and a fixed
-CMA-ES-optimized reflex controller. Nominal experiments test speed tracking,
-joint kinematics, ground-reaction forces, symmetry, and cycle repeatability at
-0.8, 1.0, and 1.2~m/s. Additional experiments apply the same trained 1.2~m/s
-policy to reduced soleus strength and backward torso pushes without retraining.
+% ________________________________________
+% 第四段：Our Method
+% 基于这一思想，本文提出一种 Reflex-Informed Neuromuscular Learning 框架用于肌肉驱动运动生成，并以相位相关反射控制器作为神经肌肉控制机制的具体实现。在该框架中，强化学习策略不再直接输出18维肌肉动作，而是在每个控制时刻输出4个具有明确生物力学意义的残差，对髋部摆动、膝关节支撑和踝关节推进相关的反射增益与阈值进行状态依赖调节。固定反射控制器负责维持已有神经肌肉控制规律及运动组织，而学习策略则根据当前身体状态动态调节这些控制机制的工作方式，从而赋予控制器适应身体能力和环境变化的能力。由此，强化学习从直接学习肌肉执行转变为学习神经肌肉调节，使已有神经肌肉控制规律成为学习过程的一部分，而非需要重新学习的目标，并最终将高维肌肉动作学习重新表述为一个低维、可解释且具有生物学意义的神经肌肉调节问题。
 
-This study makes three main contributions.
+Motivated by this insight, we propose a Reflex-Informed Neuromuscular Learning framework for muscle-driven locomotion, where a fixed phase-dependent reflex controller provides the underlying neuromuscular control mechanism. Rather than directly outputting 18-dimensional muscle actions, the reinforcement learning policy produces four biomechanically meaningful residual signals at each control step to modulate the gains and thresholds associated with hip swing, knee support, and ankle propulsion in a state-dependent manner. This provides a compact, interpretable, and biologically meaningful learning interface for muscle-driven locomotion.
+% ________________________________________
+% 第五段：Experiments + Contribution
+% 为了验证所提出的 Reflex-Informed Neuromuscular Learning 框架是否能够同时实现生理合理性与适应能力，我们分别从这两个方面进行验证。正常步态实验通过人体参考运动学、地面反作用力、双侧对称性以及步间重复性等指标，评估生成运动是否具有接近人体的运动组织与动力学一致性；肌肉无力与外部扰动实验则分别评估策略在身体条件变化和环境变化下无需重新训练的适应能力。
+% 本文的主要贡献如下：
+To verify that the proposed Reflex-Informed Neuromuscular Learning framework provides both physiological plausibility and adaptability, we conduct complementary experiments under nominal walking, muscle weakness, and external perturbation conditions. Under nominal walking conditions, physiological plausibility is evaluated through human reference kinematics, ground reaction forces, bilateral symmetry, and stride-to-stride consistency. Muscle weakness and external perturbation experiments further evaluate the policy's ability to adapt to changes in musculoskeletal conditions and the environment without retraining. The main contributions of this work are summarized as follows:
 \begin{enumerate}
-    \item We combine a fixed phase-dependent reflex topology with a learned
-    policy that adjusts reflex parameters from the current musculoskeletal state.
-    Learning changes the feedback controller instead of replacing it with direct
-    muscle commands.
-    \item We define a four-dimensional action space for selected hip-, knee-,
-    and ankle-related reflex gains and thresholds. This replaces 18 direct muscle
-    actions with four named control channels whose effects remain dependent on
-    gait phase and sensory feedback.
-    \item We evaluate nominal gait and adaptation separately. The nominal tests
-    compare speed, joint kinematics, ground-reaction forces, symmetry, and
-    repeatability at three speeds. The adaptation tests keep the trained policy
-    fixed while changing soleus strength and applying backward torso pushes.
+
+% 1.	提出一种 Reflex-Informed Neuromuscular Learning 框架。 不同于直接学习肌肉动作，本文将强化学习重新表述为对已有神经肌肉控制机制进行状态依赖调节，并以固定相位相关反射控制器作为具体实现。 
+\item We propose a Reflex-Informed Neuromuscular Reinforcement Learning framework that reformulates reinforcement learning as the state-dependent regulation of existing neuromuscular control mechanisms, rather than directly learning muscle actions.
+% 2.	提出一种紧凑且可解释的神经肌肉调节学习接口。 通过四个具有明确生物力学意义的残差参数，对固定反射控制器中的关键反馈通路进行状态依赖调节，而无需直接控制全部肌肉动作，从而实现低维、可解释的神经肌肉调节。 
+\item We introduce a compact and interpretable learning interface that modulates key pathways of a fixed reflex controller through four biomechanically meaningful residual parameters, enabling neuromuscular regulation without directly controlling individual muscles.
+% 3.	系统验证所提出框架在生理合理性与适应能力上的优势。 通过正常步态、肌肉无力以及外部扰动实验，证明所提出框架能够在保持人体运动组织规律的同时，对身体和环境变化表现出良好的适应能力。
+\item We comprehensively demonstrate that the proposed framework simultaneously improves physiological plausibility and adaptability. Extensive experiments under nominal walking, muscle weakness, and external perturbation conditions show that the proposed framework preserves human-like locomotor organization while adapting effectively to changes in musculoskeletal conditions and the environment.
+
 \end{enumerate}
 
-The remainder of the paper reviews related work, presents the residual-reflex
-formulation, and evaluates the learned controller in nominal walking,
-plantarflexor weakness, and external push perturbations.
+% Muscle-driven simulation generates movement from muscle stimulation,
+% muscle--tendon force, skeletal dynamics, and physical contact. It is used to
+% study human movement and to develop bio-inspired character and assistive control
+% systems \cite{anderson2001,geijtenbeek2013,lee2019,degroote2021,uchida2020}. A
+% gait controller for these applications should both reproduce human-like walking
+% and maintain walking when muscle strength or external loading changes.
+
+% Current control formulations do not provide both properties reliably. A direct
+% muscle-control DRL policy can change every muscle command from the current state,
+% but it must learn coordination among redundant actuators from task rewards.
+% Completing a speed-tracking task therefore does not by itself guarantee
+% human-reference joint motion, contact loading, symmetry, or repeatability. A
+% reflex controller instead specifies sparse, phase-dependent feedback pathways
+% that coordinate muscles. This structure can generate stable nominal gait, but
+% its gains and thresholds are normally fixed after offline optimization and
+% cannot be adjusted to a weakened muscle model or a new external load. The
+% specific problem addressed in this work is to retain the coordination structure
+% of reflex control while allowing the controller to adjust it online.
+
+% We propose Residual-Reflex RL for this purpose. The low-level controller uses a
+% five-phase reflex topology to convert delayed muscle length, velocity, force,
+% and posture feedback into muscle stimulation. The learned policy does not output
+% 18 muscle stimulations. Instead, at every control step it outputs residual
+% changes to four selected reflex gains and thresholds that control hip swing,
+% knee support, and ankle propulsion. The fixed reflex topology supplies the
+% coordination prior, and the four state-dependent residuals provide the online
+% adjustment.
+
+% We compare the method with direct muscle-control policies and a fixed
+% CMA-ES-optimized reflex controller. Nominal experiments test speed tracking,
+% joint kinematics, ground-reaction forces, symmetry, and cycle repeatability at
+% 0.8, 1.0, and 1.2~m/s. Additional experiments apply the same trained 1.2~m/s
+% policy to reduced soleus strength and backward torso pushes without retraining.
+
+% This study makes three main contributions.
+% \begin{enumerate}
+%     \item We combine a fixed phase-dependent reflex topology with a learned
+%     policy that adjusts reflex parameters from the current musculoskeletal state.
+%     Learning changes the feedback controller instead of replacing it with direct
+%     muscle commands.
+%     \item We define a four-dimensional action space for selected hip-, knee-,
+%     and ankle-related reflex gains and thresholds. This replaces 18 direct muscle
+%     actions with four named control channels whose effects remain dependent on
+%     gait phase and sensory feedback.
+%     \item We evaluate nominal gait and adaptation separately. The nominal tests
+%     compare speed, joint kinematics, ground-reaction forces, symmetry, and
+%     repeatability at three speeds. The adaptation tests keep the trained policy
+%     fixed while changing soleus strength and applying backward torso pushes.
+% \end{enumerate}
+
+% The remainder of the paper reviews related work, presents the residual-reflex
+% formulation, and evaluates the learned controller in nominal walking,
+% plantarflexor weakness, and external push perturbations.
 
 \section{Related Work}
 \label{sec:related-work}
 
 \subsection{Muscle-Driven Character Simulation}
-Physics-based muscle-driven simulation connects control decisions to internal
-muscle loading and mechanically consistent character motion. In biomechanics,
-dynamic optimization and predictive simulation use musculoskeletal dynamics
-and task objectives to generate gait without prescribing the complete motion.
-They have been used to study healthy and pathological walking, energetic
-objectives, ageing, and the effects of model or task constraints
-\cite{anderson2001,ackermann2010,falisse2019,song2018,degroote2021}. Direct
-collocation and musculoskeletal optimal-control software have made these
-trajectory-level problems increasingly tractable \cite{falisse2019,dembia2020}.
+Musculoskeletal models driven by muscle–tendon dynamics have become a standard framework for studying and generating human locomotion by explicitly modeling muscle activation, muscle–tendon dynamics, skeletal dynamics, and body–environment interaction. In biomechanics, these models have been widely used to generate and analyze healthy and pathological gait, investigate locomotor strategies, study energetic objectives, and evaluate the effects of ageing and musculoskeletal impairments.\cite{anderson2001,ackermann2010,falisse2019,song2018,degroote2021}. In computer graphics, muscle-driven simulation has been adopted for physically based character animation, enabling realistic locomotion through muscle-actuated simulation and control \cite{wang2010,wang2012,geijtenbeek2013,lee2019}. Together, these studies establish muscle-driven simulation as a mature foundation for generating realistic human locomotion. Consequently, recent research has increasingly focused on how to design effective controllers for these musculoskeletal systems.
 
-Graphics research has pursued a complementary goal by optimizing feedback
-controllers for uncertain environments and by incorporating biologically based
-actuators into character locomotion \cite{wang2010,wang2012}. Subsequent systems
-have improved the flexibility and scalability of muscle-actuated character
-simulation and control \cite{geijtenbeek2013,lee2019}. Together, these studies
-show that muscle and contact dynamics can produce plausible character motion,
-but they do not all provide the same form of adaptation. A trajectory optimized
-for one model and task is not itself a feedback policy. An optimized feedback
-controller can react within its designed operating regime, yet its coordination
-parameters generally remain fixed after optimization and need not accommodate
-unseen changes in muscle capacity or external loading.
+% In computer graphics, Wang et al. optimized walking controllers for uncertain inputs and environments [2010] and used biologically based actuators and objectives for locomotion control [2012]. Geijtenbeek et al. developed flexible muscle-based locomotion for bipedal creatures [2013], and Lee et al. introduced a scalable framework for muscle-actuated human simulation and control [2019]. These studies establish muscle-driven simulation as a practical foundation for biomechanical analysis and physically based character animation. The central question for the present work is therefore not how to construct a musculoskeletal character, but how to control its muscles. The following sections review structured neuromuscular controllers and learning-based muscle control.
+
+
+% Physics-based muscle-driven simulation connects control decisions to internal
+% muscle loading and mechanically consistent character motion. In biomechanics,
+% dynamic optimization and predictive simulation use musculoskeletal dynamics
+% and task objectives to generate gait without prescribing the complete motion.
+% They have been used to study healthy and pathological walking, energetic
+% objectives, ageing, and the effects of model or task constraints
+% \cite{anderson2001,ackermann2010,falisse2019,song2018,degroote2021}. Direct
+% collocation and musculoskeletal optimal-control software have made these
+% trajectory-level problems increasingly tractable \cite{falisse2019,dembia2020}.
+
+
+
+% Graphics research has pursued a complementary goal by optimizing feedback
+% controllers for uncertain environments and by incorporating biologically based
+% actuators into character locomotion \cite{wang2010,wang2012}. Subsequent systems
+% have improved the flexibility and scalability of muscle-actuated character
+% simulation and control \cite{geijtenbeek2013,lee2019}. Together, these studies
+% show that muscle and contact dynamics can produce plausible character motion,
+% but they do not all provide the same form of adaptation. A trajectory optimized
+% for one model and task is not itself a feedback policy. An optimized feedback
+% controller can react within its designed operating regime, yet its coordination
+% parameters generally remain fixed after optimization and need not accommodate
+% unseen changes in muscle capacity or external loading.
 
 \subsection{Structured Neuromuscular Control}
-Biologically motivated controllers introduce structure at different levels of
-muscle coordination. Central pattern generators organize rhythmic drive
-\cite{ijspeert2008}, muscle synergies couple the activation of multiple muscles
-through a smaller set of control signals \cite{davella2003,meyer2016}, and
-reflex models transform sensory feedback into corrective muscle stimulation
-\cite{geyer2010,song2015}. CPG and reflex components can also be combined within
-one neuromuscular controller \cite{dzeladini2014}. These mechanisms should not
-be treated as interchangeable, but each avoids representing locomotion as an
-arbitrary sequence of independent muscle commands.
+Biologically inspired controllers introduce prior knowledge of human motor control directly into the control architecture. Representative approaches include central pattern generators (CPGs), muscle synergies, and reflex-based controllers. Ijspeert reviewed CPG-based locomotion control in animals and robots, where rhythmic movement is generated through coupled oscillatory networks \cite{ijspeert2008}. d'Avella et al. and Meyer et al. modeled muscle coordination using muscle synergies, representing muscle activation with a reduced set of coordinated control signals \cite{davella2003,meyer2016}. Geyer and Herr proposed a reflex-based controller that generates human walking through physiologically motivated sensory feedback \cite{geyer2010}, which was later extended by Song and Geyer to generate diverse locomotion behaviors across different walking speeds\cite{song2015}. Dzeladini et al. further combined CPGs and reflexes within a unified neuromuscular controller \cite{dzeladini2014}. 
 
-Reflex-based control is especially relevant here because muscle length,
-velocity, and force signals have direct computational counterparts in a
-musculoskeletal model. Sparse feedback pathways using these signals have
-generated stable and diverse locomotor behavior \cite{geyer2010,song2015},
-supported robust walking in bipedal robots \cite{batts2015}, and enabled the
-analysis of speed-dependent and energy-efficient gait \cite{koseki2024}. Their
-gains, thresholds, and source--target connections also retain an interpretable
-relationship to neuromuscular function. In many implementations, however,
-these parameters are manually specified or determined by offline optimization
-and then remain fixed during deployment. The resulting controller is closed
-loop at the sensory-feedback level, but it does not necessarily adapt the
-organization or strength of its reflex pathways when the body or environment
-changes.
+Among these approaches, reflex-based control is particularly relevant to muscle-driven locomotion because it directly maps muscle sensory feedback to muscle stimulation. Reflex-based controllers have been shown to generate stable locomotion in humans\cite{geyer2010,msong2015}, adaptive walking across a wide range of speeds \cite{koseki2024}, and robust locomotion in bipedal robots \cite{batts2015}. However, most existing reflex controllers rely on manually designed or offline-optimized parameters. Although muscle stimulation changes continuously with sensory feedback, the underlying reflex gains and thresholds are not updated online, limiting adaptation to changes in musculoskeletal conditions and the environment.
 
 \subsection{Learning-Based Muscle Control}
-Deep reinforcement learning has enabled physics-based characters to acquire
-complex locomotion skills from interaction and motion examples
-\cite{peng2017,peng2018}. Extending this paradigm to musculoskeletal models,
-several studies learn policies that map body state directly to muscle
-activations or excitations \cite{weng2021,devree2021,ogum2024}. These methods
-avoid prescribing complete joint trajectories and apply DRL directly to
-neuromechanical simulation \cite{song2021}. They retain one action channel per
-muscle, so coordination is learned through the policy and reward rather than
-encoded in the action interface.
+Deep reinforcement learning has enabled muscle-driven characters to acquire locomotion skills directly through interaction with the environment. Existing approaches typically formulate muscle activations as the policy output, allowing muscle control signals to be generated online according to the current state \cite{weng2021,devree2021,ogum2024,song2021}. Compared with manually designed controllers, these methods improve adaptability and can learn complex locomotion behaviors without explicitly specifying muscle coordination.
 
-Prior work has addressed different consequences of this formulation through
-different mechanisms. Bio-inspired reward reshaping encourages more plausible
-locomotor behavior \cite{nowakowski2021}, while model-based learning embeds
-musculoskeletal dynamics more explicitly in the optimization process
-\cite{su2023}. DEP-RL improves exploration in overactuated musculoskeletal
-systems through embodied exploratory feedback, although its learned policy
-still acts through the direct muscle-action interface \cite{deprl2023}.
-Biologically motivated task objectives can also improve the naturalness and
-robustness that emerge from direct muscle control \cite{schumacher2025}. A
-different line of work introduces structure into the controller itself. For
-example, AI-CPG combines a CPG-like feedforward generator with a learned reflex
-network that adapts the generated pattern from sensory feedback \cite{li2024}.
+Recent studies have further improved direct muscle-control reinforcement learning from different perspectives.Bio-inspired reward functions encourage more physiologically realistic gait patterns \cite{nowakowski2021，schumacher2025}.Model-based reinforcement learning incorporates musculoskeletal dynamics into policy optimization
+\cite{su2023}. DEP-RL improves exploration in overactuated musculoskeletal systems through embodied exploratory feedback\cite{schumacher2025}. More recently, AI-CPG combines a CPG-based feedforward controller with a learned reflex network to improve adaptive locomotion \cite{li2024}.
 
-Together, these studies show that reward design, model knowledge, exploratory
-feedback, and structured controller architectures can each improve learned
-muscle-driven locomotion. For direct muscle-control policies, however, better
-objectives or exploration do not remove the redundant muscle-level action
-interface, and successful task execution may not by itself ensure natural
-gait-cycle coordination or contact loading. Structured hybrid controllers
-reduce part of this burden, but do not formulate learning as low-dimensional,
-state-dependent regulation of selected reflex parameters. This distinction
-motivates the compact neuromuscular learning interface developed in this work.
+Overall, these studies indicate that existing approaches cannot simultaneously provide physiological plausibility and adaptability. Structured neuromuscular controllers can generate physiologically plausible movement but struggle to adapt to changes in the musculoskeletal model or the environment, whereas reinforcement learning-based muscle control improves adaptation in muscle-driven locomotion but often generates gait patterns that deviate from human kinematics and dynamics.
+
+
 
 
 \section{Method}
 \label{sec:method}
 \subsection{Framework Overview}
-Figure~\ref{framwork} shows the execution loop and the learning loop. During
-execution, the policy maps the current musculoskeletal state $\mathbf{s}_t$ to a
-four-dimensional residual action $\mathbf{a}_t$. These four values modify four
-parameters of the phase-dependent reflex controller. The controller then maps
-delayed muscle and posture feedback to muscle stimulation, and the
-musculoskeletal simulation produces the next state $\mathbf{s}_{t+1}$ and
-reward. The reflex topology and muscle model remain fixed; only the four
-selected reflex parameters are adjusted online.
+Figure~\ref{framwork}Figure 1 illustrates the proposed Reflex-Informed Neuromuscular Reinforcement Learning framework. A fixed phase-dependent reflex controller provides the underlying neuromuscular control mechanism, while the reinforcement learning policy generates four-dimensional residual actions that regulate selected reflex parameters according to the current musculoskeletal state. The resulting muscle stimulation drives the musculoskeletal simulation, which produces the next state and reward. During learning, transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$
+are stored in the replay buffer $\mathcal{D}$. Maximum a Posteriori Policy Optimization (MPO) updates the policy through an off-policy actor–critic framework using replayed transitions \cite{mpo2018}
 
-During learning, transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$
-are stored in the replay buffer $\mathcal{D}$. A critic
-$q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ evaluates actions, and Maximum a
-Posteriori Policy Optimization (MPO) updates the rollout policy
-\cite{mpo2018}. Panels (b1) and (b2) in Fig.~\ref{framwork} show the fixed
-proprioceptive feedback loop and the phase-dependent reflex pathways,
-respectively. The following sections define each part of this computation.
+% Figure~\ref{framwork} shows the execution loop and the learning loop. During
+% execution, the policy maps the current musculoskeletal state $\mathbf{s}_t$ to a
+% four-dimensional residual action $\mathbf{a}_t$. These four values modify four
+% parameters of the phase-dependent reflex controller. The controller then maps
+% delayed muscle and posture feedback to muscle stimulation, and the
+% musculoskeletal simulation produces the next state $\mathbf{s}_{t+1}$ and
+% reward. The reflex topology and muscle model remain fixed; only the four
+% selected reflex parameters are adjusted online.
+
+% During learning, transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$
+% are stored in the replay buffer $\mathcal{D}$. A critic
+% $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ evaluates actions, and Maximum a
+% Posteriori Policy Optimization (MPO) updates the rollout policy
+% \cite{mpo2018}. Panels (b1) and (b2) in Fig.~\ref{framwork} show the fixed
+% proprioceptive feedback loop and the phase-dependent reflex pathways,
+% respectively. The following sections define each part of this computation.
 
 \begin{figure*}[!t]
 \centerline{\includegraphics[width=\textwidth]{framework_overview_v2.png}}
@@ -301,49 +309,41 @@ from replayed transitions.}
     \label{fig:msk-character}
 \end{figure*}
 
-\paragraph{Simulation platform and character.}
-The physiological environment in module (b) is implemented with the Hyfydy
-musculoskeletal simulation engine \cite{hyfydy} through a Python-based
-SCONE Gym interface. We use the sagittal-plane H0918v2j human model, which
-contains a pelvis, a rigidly attached torso, and bilateral thigh, shank, and
-foot segments. Its nine generalized coordinates comprise horizontal and
-vertical pelvis translation, pelvis tilt, and bilateral hip flexion, knee
-flexion, and ankle plantarflexion--dorsiflexion. The character is actuated by
-18 Hill-type muscle--tendon units, corresponding to nine muscle groups on each
-leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS),
-biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI),
-hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the
-rigid ground through spherical heel and toe contact elements. The controller
-is updated at fixed 0.005s intervals. Figure~\ref{fig:msk-character}(a) shows
-the simulated character, while Fig.~\ref{fig:msk-character}(b) summarizes the
-modeled muscle--tendon paths and their principal joint actions.
+\subsubsection{Simulation platform and character.}
+The physiological environment module (b) is implemented in the Hyfydy musculoskeletal simulation engine \cite{hyfydy} through a Python-based SCONE Gym interface.We use the sagittal-plane H0918v2j human model, which consists of a pelvis, a rigidly attached torso, and bilateral thigh, shank, and foot segments with nine generalized coordinates. The character is actuated by 18 Hill-type muscle–tendon units representing nine muscle groups on each leg, including tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS), biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI), hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the ground through spherical heel and toe contact elements, and the controller is updated at 0.005 s intervals. Figure~\ref{fig:msk-character}(a) illustrates the musculoskeletal character, while Fig.~\ref{fig:msk-character}(b) summarizes the arrangement of the modeled muscle–tendon units and the joints they span.
 
-\paragraph{Muscle-driven dynamics.}
+% The physiological environment in module (b) is implemented with the Hyfydy
+% musculoskeletal simulation engine \cite{hyfydy} through a Python-based
+% SCONE Gym interface. We use the sagittal-plane H0918v2j human model, which
+% contains a pelvis, a rigidly attached torso, and bilateral thigh, shank, and
+% foot segments. Its nine generalized coordinates comprise horizontal and
+% vertical pelvis translation, pelvis tilt, and bilateral hip flexion, knee
+% flexion, and ankle plantarflexion--dorsiflexion. The character is actuated by
+% 18 Hill-type muscle--tendon units, corresponding to nine muscle groups on each
+% leg: tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS),
+% biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI),
+% hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the
+% rigid ground through spherical heel and toe contact elements. The controller
+% is updated at fixed 0.005s intervals. Figure~\ref{fig:msk-character}(a) shows
+% the simulated character, while Fig.~\ref{fig:msk-character}(b) summarizes the
+% modeled muscle--tendon paths and their principal joint actions.
+
+\subsubsection{Muscle-driven dynamics.}
 Within module (b), reflex-generated stimulation is applied to the character
-through activation dynamics, muscle--tendon mechanics, and forward skeletal
-dynamics. For muscle $i$, neural stimulation $u_i$ is first filtered by
-activation dynamics to obtain activation $\alpha_i$. The
-muscle--tendon model then converts activation, fiber length, and fiber velocity
-into tensile force,
+through activation dynamics, muscle--tendon mechanics, and forward dynamics. For muscle $i$, neural stimulation $u_i$ is first filtered by
+activation dynamics to obtain activation $\alpha_i$, after which the Hill-type muscle model computes the corresponding muscle–tendon force
 \begin{equation}
 \dot{\alpha}_i=\mathcal{A}_i(\alpha_i,u_i), \qquad
 F_i^{\mathrm{MT}}=\mathcal{F}_i(\alpha_i,l_i,\dot l_i),
 \end{equation}
 where $\mathcal{A}_i$ denotes the activation dynamics and $\mathcal{F}_i$
-denotes the Hill-type force relation. The geometry of each muscle path converts
-this tensile force into moments about the joints spanned by the muscle. For
-generalized coordinate $k$, these contributions are summed using the
-configuration-dependent muscle moment arms,
+denotes the Hill-type muscle mode. Muscle forces are then transformed into generalized joint moments through configuration-dependent muscle moment arms,
 \begin{equation}
 \tau_{\mathrm{mus},k}=
 \sum_{i\in\mathcal{M}_k}r_{i,k}(\mathbf{q})F_i^{\mathrm{MT}},
 \end{equation}
-where $r_{i,k}(\mathbf{q})$ is the signed perpendicular distance between the
-line of action of muscle $i$ and the rotation axis associated with coordinate
-$k$, and $\mathcal{M}_k$ is the set of muscles spanning that coordinate. Its
-sign determines the direction of the induced moment, and its dependence on
-$\mathbf{q}$ reflects the change in muscle geometry with posture. The resulting
-character motion follows
+where $r_{i,k}(\mathbf{q})$ is the configuration-dependent muscle moment arm of muscle i about generalized coordinate
+$k$, and $\mathcal{M}_k$ denotes the set of muscles spanning that coordinate. Finally, the generalized muscle moments drive the musculoskeletal system through forward dynamics,
 \begin{equation}
 \mathbf{M}(\mathbf{q})\ddot{\mathbf{q}}+
 \mathbf{h}(\mathbf{q},\dot{\mathbf{q}})=
@@ -352,70 +352,34 @@ character motion follows
 \end{equation}
 where $\mathbf{q}$, $\dot{\mathbf{q}}$, and $\ddot{\mathbf{q}}$ are the
 generalized coordinates, velocities, and accelerations, respectively;
-$\mathbf{M}(\mathbf{q})$ is the configuration-dependent mass matrix;
-$\mathbf{h}(\mathbf{q},\dot{\mathbf{q}})$ collects gravitational, Coriolis,
-and centrifugal terms; and $\boldsymbol{\tau}_{\mathrm{mus}}$ collects the
-generalized forces generated by all muscles. The vector $\mathbf{f}_{c}$
-contains the foot--ground contact forces, while the contact Jacobian
-$\mathbf{J}_{c}(\mathbf{q})$ maps generalized velocities to contact-point
-velocities; its transpose maps the contact forces back to generalized forces.
-The controller therefore neither prescribes joint trajectories nor applies
-joint torques directly. Instead, it generates muscle stimulation, from which
-activation, muscle--tendon forces, joint moments, and the resulting skeletal
-motion emerge through forward dynamics.
+$\mathbf{M}(\mathbf{q})$ is the mass matrix; $\mathbf{h}(\mathbf{q},\dot{\mathbf{q}})$ collects gravitational, Coriolis,
+and centrifugal terms; and $\boldsymbol{\tau}_{\mathrm{mus}}$ represents the generalized forces induced by foot–ground contact. 
 
-\subsection{Phase-Dependent Reflex Controller}
-\paragraph{Physiological feedback abstraction.}
-The low-level controller computes muscle stimulation from delayed, normalized
-muscle length, velocity, and force signals together with posture feedback.
-Length and velocity terms represent muscle-spindle feedback, and force terms
-represent Golgi-tendon-organ feedback \cite{grillner2020}. Their gains,
-thresholds, source muscles, target muscles, and active gait phases are specified
-explicitly below. As shown in Fig.~\ref{framwork}(b1), the resulting stimulation
-$u_i$ drives activation and muscle--tendon force; the updated muscle length,
-velocity, and force then provide the next feedback sample.
-
-\paragraph{Phase-dependent topology.}
-Reflex engagement also changes over the gait cycle. A finite-state controller
-divides walking into EarlyStance, LateStance, Liftoff, Swing, and Landing, and
-selects a sparse feedback subnetwork according to the current phase. The
-implementation contains three parameter-sharing groups: an all-phase group
+\subsection{Neuromuscular Control Mechanism}
+\subsubsection{Physiological feedback}
+The reflex controller computes muscle stimulation from delayed muscle sensory feedback and posture feedback. Muscle length and velocity approximate muscle-spindle feedback, whereas muscle force approximates Golgi tendon organ feedback \cite{grillner2020}. These sensory signals form the physiological inputs to the reflex controller. The corresponding gains, thresholds, source muscles, target muscles, and active gait phases are defined in the following sections. As illustrated in Fig. 1(b1), the resulting muscle stimulation drives activation and muscle–tendon force, while the updated muscle states provide sensory feedback for the next control step.
+% The low-level controller computes muscle stimulation from delayed, normalized
+% muscle length, velocity, and force signals together with posture feedback.
+% Length and velocity terms represent muscle-spindle feedback, and force terms
+% represent Golgi-tendon-organ feedback \cite{grillner2020}. Their gains,
+% thresholds, source muscles, target muscles, and active gait phases are specified
+% explicitly below. As shown in Fig.~\ref{framwork}(b1), the resulting stimulation
+% $u_i$ drives activation and muscle--tendon force; the updated muscle length,
+% velocity, and force then provide the next feedback sample.
+\subsubsection{Phase-dependent topology.}
+A finite-state controller divides the gait cycle into five phases: \textbf{EarlyStance}, \textbf{LateStance}, \textbf{Liftoff}, \textbf{Swing}, and \textbf{Landing}. Reflex pathways are organized into three parameter-sharing groups: an all-phase group
 $\Phi_{\mathrm{all}}=\{\mathrm{ES,LS,LF,SW,LA}\}$, a stance group
 $\Phi_{\mathrm{st}}=\{\mathrm{ES,LS}\}$, and a swing-related group
-$\Phi_{\mathrm{sw}}=\{\mathrm{LF,SW,LA}\}$. Parameters are shared by the
-phases within a group but are independent between groups. For example, the BIF
-force-feedback gain used in EarlyStance and LateStance is distinct from the BIF
-force-feedback gain used in Liftoff, Swing, and Landing. Consequently, the same
-type of sensory feedback can serve loading in stance, propulsion near liftoff,
-or limb placement during swing and landing without requiring one gain to serve
-all phases. Panel (b2) of Fig.~\ref{framwork} summarizes this topology across
-the nine muscle groups defined in Sec.~\ref{sec:musculoskeletal-model}.
-The monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the
-knee, and ILI and GLU at the hip. The biarticular GAS spans the knee and ankle,
-whereas FEM and HAM span the hip and knee; their feedback can therefore affect
-coordination at both adjacent joints.
+$\Phi_{\mathrm{sw}}=\{\mathrm{LF,SW,LA}\}$. Parameters are shared among phases within the same group but remain independent across groups. For example, the BIF force-feedback gain used during EarlyStance and LateStance differs from that used during Liftoff, Swing, and Landing, allowing the same sensory feedback to serve different functional roles across the gait cycle. Consequently, the same sensory feedback can serve different functions across the gait cycle, including stance support, push-off, and swing control, without requiring a separate parameter for every gait phase. Fig.~\ref{framwork} (b2) summarizes the resulting topology across the nine modeled muscle groups defined in Sec Fig.~\ref{framwork}. Monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the knee, and ILI and GLU at the hip. The biarticular muscles GAS, FEM, and HAM span two adjacent joints and therefore contribute to the control of both.
 
-Let $\phi(t)$ denote the current gait phase and let $\Gamma(\phi)$ denote its
-set of active parameter-sharing groups. For EarlyStance and LateStance,
-$\Gamma(\phi)=\{\mathrm{all},\mathrm{st}\}$; for Liftoff, Swing, and Landing,
-$\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$. In other words, the controller
-does not switch between three completely separate networks. The all-phase
-pathways remain active throughout the gait cycle, and their contributions are
-combined with the stance-specific pathways during EarlyStance and LateStance
-or with the swing-related pathways during Liftoff, Swing, and Landing. Each
-group $g\in\Gamma(\phi)$ forms a sparse directed feedback graph
-$\mathcal{G}_{g}$. A connection
-$i\leftarrow j$ uses a signal measured
-at source muscle $j$ to modify stimulation of target muscle $i$. Connections
-with $i=j$ implement self-feedback, whereas connections with $i\neq j$ encode
-inter-muscle coordination. Their gains and thresholds are indexed by the active
-phase group; an inactive connection has zero gain in the corresponding phase.
-The sign and magnitude of a gain determine how strongly its sensory signal
-facilitates or suppresses the target stimulation.
 
-\paragraph{Reflex control laws.}
-For an active group $g\in\Gamma(\phi(t))$, each connection contains length,
-velocity, and force feedback contributions.
+The active parameter-sharing groups are determined by the current gait phase. During EarlyStance and LateStance, the controller activates the all-phase and stance-specific pathways, whereas during Liftoff, Swing, and Landing, it activates the all-phase and swing-related pathways. For convenience, let $\phi(t)$ denote the current gait phase and $\Gamma(\phi)$ the corresponding set of active parameter-sharing groups, such that$\Gamma(\phi)=\{\mathrm{all},\mathrm{st}\}$ during EarlyStance and $\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$ during Liftoff, Swing, and Landing.
+
+Each active parameter-sharing group $g\in\Gamma(\phi)$ defines a sparse directed feedback graph $\mathcal{G}_{g}$. A connection $i\leftarrow j$ uses sensory feedback measured from source muscle $j$ to modulate the stimulation of target muscle $i$. Connections with $i=j$ implement self-feedback, whereas connections with $i\neq j$  encode inter-muscle coordination. Reflex gains and thresholds are indexed by the active parameter-sharing group, while inactive pathways have zero gain during the corresponding gait phases. The sign and magnitude of each gain determine how strongly the corresponding sensory feedback facilitates or suppresses the target muscle stimulation.
+
+
+\subsubsection{Reflex control laws.}
+For an active group $g\in\Gamma(\phi(t))$, muscle stimulation is computed from muscle length, velocity, and force feedback.
 \begin{align}
 u_{L,i\leftarrow j}^{(g)}(t) &= K_{L,i\leftarrow j}^{(g)}
 \max(0,\tilde{l}_j(t-t_D)-\tilde{l}_{0,i\leftarrow j}^{(g)}),\\
@@ -424,30 +388,21 @@ u_{V,i\leftarrow j}^{(g)}(t) &= K_{V,i\leftarrow j}^{(g)}
 u_{F,i\leftarrow j}^{(g)}(t) &= K_{F,i\leftarrow j}^{(g)}
 (\tilde{f}_j(t-t_D)-\tilde{f}_{0,i\leftarrow j}^{(g)}),
 \end{align}
-Here $u_{L,i\leftarrow j}^{(g)}$, $u_{V,i\leftarrow j}^{(g)}$, and
-$u_{F,i\leftarrow j}^{(g)}$ are the stimulation contributions from length,
-velocity, and force feedback, respectively. The variables $\tilde{l}_j$,
-$\tilde{v}_j$, and $\tilde{f}_j$ are normalized signals measured from source
-muscle $j$; their instantaneous values are not phase indexed. The offsets
-$\tilde{l}_{0,i\leftarrow j}^{(g)}$,
-$\tilde{v}_{0,i\leftarrow j}^{(g)}$, and
-$\tilde{f}_{0,i\leftarrow j}^{(g)}$ define group-dependent feedback
-thresholds, while $K_{L,i\leftarrow j}^{(g)}$,
-$K_{V,i\leftarrow j}^{(g)}$, and $K_{F,i\leftarrow j}^{(g)}$ are the
-corresponding group-dependent reflex gains. The term $t_D$ is a sensorimotor
-delay. A reflex-like postural feedback term is also used to couple trunk pitch
+Where $\tilde{l}_j$,$\tilde{v}_j$, and $\tilde{f}_j$ denote delayed normalized muscle length, velocity, and force measured from source muscle $j$, respectively. The corresponding gains $K_{L}$, $K_{V}$, and $K_{F}$ and thresholds $\tilde{l}_{0}$, $\tilde{v}_{0}$, and $\tilde{f}_{0}$ are indexed by the active parameter-sharing group g; and $t_D$ is the sensorimotor delay. 
+
+A reflex-like postural feedback term is also used to couple trunk pitch
 errors to selected lower-limb muscles.
 \begin{equation}
 u_{\text{PD},i}^{(g)}(t)=
 K_{P,i}^{(g)}(\theta(t-t_D)-\theta_{0,i}^{(g)})+
 K_{D,i}^{(g)}\dot{\theta}(t-t_D).
 \end{equation}
-Here $\theta$ and $\dot{\theta}$ are the delayed trunk pitch angle and angular
+Where $\theta$ and $\dot{\theta}$ are the delayed trunk pitch angle and angular
 velocity, $\theta_{0,i}^{(g)}$ is the target pitch offset for muscle $i$, and
 $K_{P,i}^{(g)}$ and $K_{D,i}^{(g)}$ are the proportional and derivative
 postural-feedback gains for the active group.
-The total stimulation of muscle $i$ is the sum of feedforward, local feedback,
-and postural feedback components from all groups enabled in the current phase.
+
+The total muscle stimulation of muscle $i$ is obtained by summing the constant background stimulation, muscle sensory feedback and postural feedback contributions from all active parameter-sharing groups.
 \begin{equation}
 \begin{aligned}
 u_i(t) = \sum_{g\in\Gamma(\phi(t))}\Bigg[
@@ -456,30 +411,19 @@ u_i(t) = \sum_{g\in\Gamma(\phi(t))}\Bigg[
 +u_{V,i\leftarrow j}^{(g)}(t)+u_{F,i\leftarrow j}^{(g)}(t)\right)\Bigg].
 \end{aligned}
 \end{equation}
-Here $u_{C,i}^{(g)}$ is the group-dependent feedforward stimulation and
+Where $u_{C,i}^{(g)}$ is the group-dependent constant background stimulation and
 $\mathcal{M}_{g}$ is the set of source muscles connected to target $i$ in the
-corresponding active group. This sparse source--target organization is important because the
-reflex controller is not a collection of independent muscle servos. It couples
-muscles that jointly control limb support, propulsion, swing, and posture.
-The five phase gates select which terms contribute to each muscle at a given
-time. Consequently, changes in muscle length, shortening velocity, force, or
-trunk posture immediately alter stimulation even when the reflex parameters are
-held fixed. The reflex controller therefore supplies an existing closed-loop
-coordination structure on which residual learning can act.
+corresponding active group. The resulting muscle stimulation drives the activation dynamics and musculoskeletal model described in Sec. 3.2.
 
-\subsection{Four-Dimensional Residual Modulation}
-The learned policy does not output the 18 muscle stimulations. Instead, it uses
-a four-dimensional residual action
-$\mathbf{a}_t\in\mathbb{R}^{4}$. Each action component modulates one selected
-reflex parameter around its nominal value.
+\subsection{Residual Neuromuscular Regulation}
+
+\subsubsection{Residual formulation}
+Rather than directly generating muscle stimulation, the reinforcement learning policy regulates the underlying neuromuscular controller through a four-dimensional residual action $\mathbf{a}_t\in\mathbb{R}^{4}$. Each action component modulates one selected reflex parameter around its nominal value,
 \begin{equation}
 p_i(t)=p_{i,0}(1+\lambda a_i(t)),
 \label{eq:residual_scaling}
 \end{equation}
-where $p_{i,0}$ is the nominal reflex parameter and $\lambda$ is the action
-scale. In the present implementation, $\lambda=0.5$. Thus $a_i(t)=0$ recovers
-the underlying reflex controller, while nonzero actions produce state-dependent
-residual modulation.
+where $p_{i,0}$ is the nominal reflex parameter and $\lambda$  is the action scale. In the present implementation, $\lambda=0.5$. When $a_i(t)=0$, the nominal reflex controller is recovered exactly, whereas nonzero actions produce state-dependent modulation of the selected reflex parameters. The resulting muscle stimulation is then computed by the underlying neuromuscular controller using the current muscle sensory feedback, gait phase, and the regulated reflex parameters.
 
 \begin{table}[!t]
 \caption{Selected Residual-Reflex Actions}
@@ -500,38 +444,16 @@ $a_4$ & $K_{F,\mathrm{VAS}}^{(\mathrm{st})}$ & S00011.vasti.KF & Knee extension 
 \end{tabularx}
 \end{table}
 
-The residual formulation preserves a meaningful zero action. When
-$\mathbf{a}_t=\mathbf{0}$, the nominal reflex controller is recovered exactly;
-nonzero actions reshape its feedback gains or thresholds in response to the
-current state. Because the residual action modifies a reflex parameter rather
-than muscle stimulation directly, it changes how the controller responds to
-the current gait phase and sensory state. Its effect on motion is subsequently
-determined through muscle activation and musculoskeletal dynamics.
+\subsubsection{Regulated reflex parameters}
 
-The four modulated parameters are highlighted in bright magenta in panel (b2)
-of Fig.~\ref{framwork}. The corresponding pathway labels in
-Table~\ref{tab:residual_actions} follow the controller
-implementation notation. The five-bit code after ``S'' is the implementation's
-phase-activation mask, while the mathematical superscripts state its semantic
-phase group explicitly. Thus, $a_1$ modulates the swing-related hamstrings
-length gain, $a_2$ changes the stance-phase iliopsoas length threshold, $a_3$
-modulates the all-phase soleus force-feedback gain for ankle plantarflexion,
-support, and propulsion, and $a_4$ modulates the stance-phase vasti
-force-feedback gain for knee extension and stance support. The channel $a_3$
-is therefore referred to as the soleus-related channel in the weakness
-analysis.
+The four regulated parameters are highlighted in bright magenta in Fig.~\ref{framwork} (b2), and their corresponding pathways are summarized in Table~\ref{tab:residual_actions}. In Table 1, pathway labels follow the naming convention of the controller implementation, while the superscripts (all), (st), and (sw) explicitly indicate the corresponding phase groups used in this paper. Specifically, $a_1$ modulates the swing-related hamstrings length gain to regulate hip extension and knee flexion during leg swing, $a_2$ adjusts the stance-phase iliopsoas length threshold for hip flexion and leg advancement, $a_3$ modulates the all-phase soleus force-feedback gain for ankle support and propulsion, and $a_4$ regulates the stance-phase vasti force-feedback gain for knee extension and stance support.
 
-These four parameters were selected because they act on gait-critical pathways,
-including hip flexion/extension for leg swing and placement, knee extension for
-stance support, and ankle plantarflexion for support and propulsion. This four-dimensional
-residual action space concentrates policy exploration on biomechanically
-meaningful feedback pathways while retaining an interpretable link between
-learned actions and neuromuscular function.
+These four parameters were selected because they regulate gait-critical functions across the major lower-limb joints while directly influencing the key biomechanical roles required for locomotion, including leg swing, stance support, and propulsion. By restricting policy outputs to these biomechanically meaningful reflex parameters, the proposed formulation concentrates policy exploration on neuromuscular mechanisms that are directly related to locomotor function while maintaining a compact and interpretable action space.
+
 
 \subsection{Policy Learning with MPO}
-Module (c) implements the off-policy actor--critic learning loop shown in
-Fig.~\ref{framwork}(c). Let $\mathbf{s}_t\in\mathbb{R}^{121}$ denote the
-observation received by the policy at time $t$,
+
+Policy learning follows an off-policy actor–critic framework optimized with Maximum a Posteriori Policy Optimization (MPO)\cite{mpo2018}. As illustrated in Fig.~\ref{framwork} (c), the actor receives the current musculoskeletal observation and outputs a four-dimensional residual action, while the critic evaluates the corresponding state–action pair. Let $\mathbf{s}_t\in\mathbb{R}^{121}$  denote the observation at time $t$,
 \begin{equation}
 \begin{aligned}
 \mathbf{s}_t = [
@@ -541,38 +463,34 @@ observation received by the policy at time $t$,
 &\mathbf{q}_t,\dot{\mathbf{q}}_t].
 \end{aligned}
 \end{equation}
+Here $\mathbf{l}$, $\dot{\mathbf{l}}$, and $\mathbf{f}$  are muscle-fiber
+lengths, velocities, and forces; $\mathbf{e}$ and $\boldsymbol{\alpha}$ denote muscle excitations and activations; $\mathbf{p}_{feet}$ represents foot positions relative to the body; $\boldsymbol{\psi}$ and
+$\dot{\mathbf{q}}$ are generalized coordinates and velocities.
+
+
+Module (c) implements the off-policy actor--critic learning loop shown in
+Fig.~\ref{framwork}(c). Let $\mathbf{s}_t\in\mathbb{R}^{121}$ denote the
+observation received by the policy at time $t$,
+\begin{equation}
+\begin{aligned}
+\mathbf{s}_t = [
+&\mathbf{l},\dot{\mathbf{l}},\mathbf{f},\mathbf{e},
+\boldsymbol{\alpha},\mathbf{p}_{feet},\mathbf{q},\dot{\mathbf{q}}].
+\end{aligned}
+\end{equation}
 Here $\mathbf{l}$, $\dot{\mathbf{l}}$, and $\mathbf{f}$ are muscle-fiber
 lengths, velocities, and forces; $\mathbf{e}$ and $\boldsymbol{\alpha}$ are
 muscle excitations and activations; $\mathbf{p}_{feet}$ represents foot
-positions relative to the body; $\boldsymbol{\psi}$ and $\boldsymbol{\Omega}$
-are body orientation and angular velocity; and $\mathbf{q}$ and
-$\dot{\mathbf{q}}$ are generalized coordinates and velocities.
+positions relative to the pelvis; $\mathbf{q}$ and
+$\dot{\mathbf{q}}$ denote the pelvis and joint degrees of freedom and their corresponding velocities, respectively.
 
-The actor and critic are multilayer perceptrons with two hidden layers of 256
-units and ReLU activations. Bold symbols denote vectors throughout this
-section. The actor $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ shown
-in Fig.~\ref{framwork} maps the 121-dimensional observation to the mean and
-standard deviation of a Gaussian action distribution. For Residual-Reflex RL,
-both outputs are four-dimensional and an action
-$\mathbf{a}_t\in[-1,1]^4$ is sampled during training. During deterministic
-evaluation, the distribution mean is used. Each action component corresponds
-to one reflex parameter in Table~\ref{tab:residual_actions}. The critic
-$q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ receives the observation--action
-pair and estimates its scalar value.
+The actor and critic are implemented as multilayer perceptrons with two hidden layers of 256 ReLU units. The actor $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ predicts the mean and standard deviation of a Gaussian policy, from which a four-dimensional residual action is sampled during training. During evaluation, the deterministic policy uses the action mean. The critic $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ estimates the corresponding action-value function $Q(\mathbf{s},\mathbf{a})$.
 
-Transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ are stored in
-the replay buffer $\mathcal{D}$. MPO trains the critic from replayed
-transitions, uses its value estimates to favor higher-valued sampled actions,
-and fits the updated actor
-$\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$ under a KL-divergence
-constraint. The constraint limits abrupt policy changes while retaining
-off-policy data reuse. We use the standard MPO update of
-Abdolmaleki et al.~\cite{mpo2018}; its derivation is not repeated here.
+Transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$ are stored in a replay buffer $\mathcal{D}$. MPO updates the critic from replayed transitions and optimizes the actor under a KL-divergence constraint, enabling stable off-policy learning while reusing collected experience. We follow the standard MPO update procedure and therefore omit the derivation here.
 
-The reward $r_t$ stored in each transition defines the learning objective used
-by the actor--critic update. It contains a target-speed term and positive costs
-that discourage excessive loading, unnecessary recruitment, abrupt control
-changes, joint-limit loading, and unstable trunk motion,
+Policy optimization is driven by the following reward function, which consists of a target-speed reward $r_v$ together with penalty terms for excessive contact loading ($c_{grf}$), temporal excitation variation ($c_e$), unnecessary muscle recruitment ($c_m$), joint-limit loading ($c_q$), pelvis instability ($c_{\theta},c_{\dot\theta},c_{com}$), and rapid changes in the residual action ($c_{\Delta a}$)
+
+
 \begin{equation}
 \begin{aligned}
 r_t={}&w_v r_v
@@ -583,64 +501,45 @@ r_t={}&w_v r_v
 -\lambda_{com}c_{com}-\lambda_{\Delta a}c_{\Delta a},
 \end{aligned}
 \end{equation}
-where all $\lambda$ values are nonnegative. Let $v_x$ and $v^*$ denote the
-forward center-of-mass speed and commanded speed, respectively. The plateaued
-speed reward is
+The target-speed reward is defined as
 \begin{equation}
 r_v=\begin{cases}
 \exp[-(v_x-v^*)^2], & v_x<v^*,\\
 1, & v_x\ge v^*.
 \end{cases}
 \end{equation}
-The contact-load cost is $c_{grf}=[L_c-1.2]_+$, where $L_c$ is the total
-contact load normalized by body weight and $[x]_+=\max(0,x)$. Temporal
-excitation variation is penalized by
-$c_e=N_m^{-1}\|\mathbf{e}_t-\mathbf{e}_{t-1}\|_2^2$, and $c_m$ is
-proportional to the number of muscles whose activation exceeds $0.15$.
-The term $c_q$ is the mean absolute joint-limit torque. For the
-residual-reflex controller, trunk and residual-action regularization are
-\begin{subequations}\label{eq:residual_regularization}
+where $v_x$ and $v^*$ denote the forward center-of-mass speed and the commanded speed, respectively. The individual penalty terms are defined as
 \begin{equation}
-c_{\theta}=(\theta_t-\theta^*)^2,
+\begin{aligned}
+c_{grf}&=[L_c-1.2]_+,\\
+c_e&=\frac{1}{N-1}\|\mathbf e_t-\mathbf e_{t-1}\|_2^2.
+\end{aligned}
+\label{eq:reward_cost1}
 \end{equation}
+where $L_c$ is the total contact load normalized by body weight; $N$ is the number of muscles; $\tau_i$ is the absolute joint-limit torque, and $[x]_+=\max(0,x)$.
 \begin{equation}
-c_{\dot\theta}=\dot\theta_t^2,
+\begin{aligned}
+c_\theta &= (\theta_t-\theta^*)^2,\\
+c_{\dot\theta} &= \dot{\theta}_t^{\,2},\\
+c_{com} &= (v_{com,y})^2,\\
+c_{\Delta a} &= \frac14\|\mathbf{a}_t-\mathbf{a}_{t-1}\|_2^2.
+\end{aligned}
+\label{eq:reward_cost3}
 \end{equation}
-\begin{equation}
-c_{com}=(v_{com,y})^2,
-\end{equation}
-\begin{equation}
-c_{\Delta a}=\tfrac{1}{4}\|\Delta\mathbf{k}_t-
-\Delta\mathbf{k}_{t-1}\|_2^2.
-\end{equation}
-\end{subequations}
-where $\theta^*$ is the target pelvis pitch, $v_{com,y}$ is vertical
-center-of-mass velocity, and $\Delta\mathbf{k}_t$ is the four-dimensional
-reflex-parameter change produced by the residual mapping in
-Eq.~\eqref{eq:residual_scaling}.
+where $\theta^*$ is the target pelvis pitch; $v_{com,y}$ is the vertical center-of-mass velocity; and $\mathbf a_t$ denotes the four-dimensional residual action produced by the policy.
+
+
 \section{Evaluation}
 \label{sec:evaluation-protocol}
 
-\subsection{Experimental Setup}
+\subsection{Evaluation Protocol}
+\subsubsection{Experimental Setup}
 The simulator, musculoskeletal character, muscle-driven dynamics, and
-foot--ground contact model are described in Section~\ref{sec:musculoskeletal-model}. The same character and
+foot--ground contact model are described in Sec.~\ref{sec:musculoskeletal-model}. The same character and
 simulation settings were used for all controllers unless a plantarflexor
 weakness condition was explicitly introduced.
 
-Four controllers were considered across the validation experiments.
-E2E-RL denotes an end-to-end reinforcement learning policy that directly
-outputs muscle-level control actions, following the direct muscle-control
-setting commonly used in musculoskeletal DRL studies
-\cite{weng2021,devree2021,ogum2024}. DEP-RL uses the same direct
-muscle-level action space, but adds DEP-style embodied exploration
-\cite{deprl2023}. The proposed Residual-Reflex RL controller learns
-four-dimensional residual actions that modulate the selected reflex parameters
-in Table~\ref{tab:residual_actions}. The CMA-ES-optimized reflex
-controller is the reflex controller obtained by offline parameter optimization;
-its parameters are not updated during evaluation. It is used as a non-learning
-reflex baseline in the weakness and perturbation tests. All DRL policies were
-trained with MPO-based off-policy reinforcement learning on the same
-musculoskeletal model.
+The evaluation compares four controllers, including two end-to-end reinforcement learning baselines (E2E-RL\cite{weng2021,devree2021,ogum2024} and DEP-RL\cite{deprl2023}), the proposed Residual-Reflex RL controller, and an offline CMA-ES-optimized reflex controller. Their control representations are summarized in Table 2. E2E-RL directly outputs 18 muscle-level control actions. DEP-RL uses the same action space but incorporates DEP-style embodied exploration. Residual-Reflex RL outputs four residual actions that modulate the selected reflex parameters listed in Table 1. The CMA-ES-optimized reflex controller serves as a non-learning baseline whose parameters remain fixed throughout evaluation. All reinforcement learning policies were trained using the same MPO framework and musculoskeletal model. Training was performed on a workstation equipped with an AMD Ryzen Threadripper PRO 9965WX CPU and 256 GB RAM.
 
 \begin{table}[!t]
 \centering
@@ -660,38 +559,18 @@ DEP-RL & 18 & Direct muscle-level control with DEP-style embodied exploration. \
 \end{tabularx}
 \end{table}
 
-\subsection{Tasks and Evaluation Metrics}
-The nominal walking experiment evaluates whether the proposed controller
-generates plausible steady gait under controlled target-speed tasks. Policies
-were evaluated at target walking speeds of 0.8, 1.0, and 1.2~m/s. For each
-trained policy, a 25s rollout was exported as an STO file for post-hoc gait
-analysis. All detected gait cycles in the rollout were normalized to 0--100\%
-gait cycle. The comparison
-includes E2E-RL, DEP-RL, and Residual-Reflex RL. Four groups of metrics are
-used, including task-level speed and stride measures, human-reference gait
-profiles, GRF morphology, and symmetry/repeatability.
+\subsubsection{Tasks and Evaluation Metrics}
+The evaluation consists of three complementary experiments designed to assess both physiological plausibility and adaptability. Nominal walking evaluates gait quality under controlled target-speed tasks, plantarflexor weakness evaluates adaptation to changes in musculoskeletal capacity, and external push perturbation evaluates recovery from environmental disturbances.
 
-\subsubsection{Speed tracking and stride measures}
-To verify that the policies satisfy the commanded locomotion task, we report
+For nominal walking, policies were evaluated at target walking speeds of 0.8, 1.0, and 1.2 m/s. Each policy was simulated for 25 s, and the resulting trajectories were exported as STO files for post-hoc gait analysis. All detected gait cycles were normalized to 0–100\% of the gait cycle. The comparison includes E2E-RL, DEP-RL, and Residual-Reflex RL. Four groups of metrics are used to evaluate task performance, physiological plausibility, and gait consistency.
+
+\paragraph{Speed tracking and stride measures}
+To evaluate task performance, we report
 realized walking speed, absolute speed error
-$|\hat{v}-v_{\mathrm{target}}|$, stride length, stride time, and the number of
-analyzed cycles. Lower speed error indicates better task tracking, whereas
-stride length and stride time describe the gait strategy used to achieve the
-target speed. The stride measures were computed from the detected gait cycles
-in each evaluated trajectory.
+$|\hat{v}-v_{\mathrm{target}}|$, stride length, stride time, and the number of analyzed cycles. The realized walking speed and speed error quantify how accurately the controller follows the commanded locomotion task, whereas stride length and stride time characterize the gait strategy adopted to achieve the target speed.
 
-\subsubsection{Human-reference kinematic gait analysis}
-To quantify whether the generated joint motion resembles human walking, we
-compared the simulated gait-cycle profiles with human-reference gait data for
-hip angle, knee angle, and ankle angle. The gray bands in
-the profile figures denote lower and upper bounds derived from the reference
-data. They were used only for post-hoc evaluation and were not included in the
-policy reward.
-For each quantity, left and right gait cycles were time-normalized
-and averaged to obtain a mean simulated profile $\bar{y}(x)$, where $x$
-denotes gait-cycle percentage. Let $y_{\min}(x_k)$ and $y_{\max}(x_k)$ denote
-the lower and upper human-reference bounds at sample point $x_k$. The
-normalized reference-range violation is
+\paragraph{Human-reference kinematic gait score}
+To evaluate kinematic plausibility,we compare the generated gait-cycle profiles with human-reference kinematic data for the hip, knee, and ankle joints. These reference profiles are used only for offline evaluation and are not included in the reinforcement learning reward. For each joint, left and right gait cycles were time-normalized and averaged to obtain a mean simulated profile $\bar{y}(x)$, where $x$ denotes the normalized gait-cycle percentage. Let $y_{\min}(x_k)$ and $y_{\max}(x_k)$ denote the lower and upper human-reference bounds at sample point $x_k$. The normalized reference-range violation is
 \begin{equation}
 e = \frac{1}{N}\sum_{k=1}^{N}
 \frac{
@@ -706,24 +585,13 @@ The corresponding score is
 \begin{equation}
 S = 100 \cdot \mathrm{clip}(1-e,0,1).
 \end{equation}
-Higher scores indicate that the averaged trajectory remains closer to the
-human-reference range; a score of 100 means that the mean profile stays entirely
-inside the reference bounds. The kinematic average score is the mean of the hip,
-knee, and ankle component scores.
+Higher scores indicate closer agreement with the human-reference gait profiles. A score of 100 indicates that the averaged trajectory remains entirely within the reference range. The overall kinematic score is computed as the average of the hip, knee, and ankle scores..
 
-\subsubsection{GRF morphology}
-Because vertical GRF directly reflects stance loading and push-off behavior, we
-also visualize individual left and right GRF gait cycles. This analysis is used
-to assess whether the controller produces repeatable stance-phase loading,
-reasonable double-support/propulsion morphology, and avoids abnormal impact
-peaks. The numerical GRF score is the GRF component of the human-reference
-range metric, applied separately to vertical GRF, while the cycle plots show
-left--right and stride-to-stride consistency.
+\paragraph{Vertical GRF human-reference score}
+To evaluate dynamic plausibility, we analyze the vertical ground reaction force (GRF), which directly reflects body loading and push-off behavior. Individual left and right GRF gait cycles are visualized to assess stance-phase loading patterns, double-support and propulsion behavior, and stride-to-stride consistency. The numerical GRF score is computed using the same human-reference range metric as in Sec. 4.2.2, applied to the vertical GRF profile, whereas the waveform plots provide a qualitative comparison of left–right symmetry and stride-to-stride repeatability.
 
-\subsubsection{Symmetry and repeatability}
-Finally, bilateral symmetry was quantified as the root-mean-square difference
-between the average left and right normalized profiles. For a gait-cycle
-quantity $y$, this waveform difference is
+\paragraph{Symmetry and repeatability score}
+To evaluate gait consistency and repeatability.we quantify bilateral symmetry and stride-to-stride repeatability. Bilateral symmetry is measured as the root-mean-square (RMS) difference between the average left and right normalized gait-cycle waveforms. For a gait-cycle quantity $y$, this waveform difference is
 \begin{equation}
 D_y =
 \sqrt{\frac{1}{N}\sum_{k=1}^{N}
@@ -734,38 +602,23 @@ gait-cycle sample, $N$ is the number of samples in the normalized gait cycle,
 and $\bar{y}_{L}$ and $\bar{y}_{R}$ are the average left- and right-side
 profiles computed over the analyzed cycles. In the results, lower $D_y$
 indicates more symmetric left--right motion.
-
-Stride-to-stride repeatability was quantified using the coefficient of
-variation (CV) of stride time and stride length.
+Stride-to-stride repeatability is quantified using the coefficient of variation (CV) of stride time and stride length,
 \begin{equation}
 \mathrm{CV}_{z}=100\frac{\sigma_z}{\mu_z},
 \end{equation}
 where $z$ denotes either stride time or stride length, $\mu_z$ is the mean
 value of $z$, and $\sigma_z$ is its standard deviation over the analyzed gait
-cycles. The factor 100 expresses CV as a percentage. In the results, lower
-$\mathrm{CV}_z$ indicates more repeatable gait cycles.
-Accordingly, the Hip, Knee, Ankle, and GRF columns in the symmetry table report
-$D_y$ for the corresponding left--right waveform pair, whereas the Time CV and
-Length CV columns report $\mathrm{CV}_z$ for stride time and stride length.
+cycles. The factor 100 expresses the coefficient of variation as a percentage. Lower $\mathrm{CV}_z$ indicates more repeatable gait cycles.
+In the reported results, the Hip, Knee, Ankle, and GRF columns correspond to $D_y$ for the respective left–right waveform pairs, whereas the Time CV and Length CV columns report $\mathrm{CV}_z$ for stride time and stride length, respectively.
 
 \subsection{Nominal Gait Generation}
+This experiment evaluates whether the proposed controller generates physiologically plausible locomotion under nominal walking conditions. Three controllers (E2E-RL, DEP-RL, and Residual-Reflex RL) are compared at target walking speeds of 0.8, 1.0, and 1.2 m/s. The evaluation proceeds from task performance to kinematic plausibility, dynamic plausibility, gait consistency, and qualitative motion analysis.
+
 \label{sec:nominal-gait}
-\subsubsection{Speed Tracking and Stride Measures}
-All three methods were able to generate sustained forward walking in
-the controlled speed tasks. Table~\ref{tab:spatiotemporal_metrics} shows that Residual-Reflex RL tracked the commanded
-speed most closely at all three target speeds, with absolute speed errors of
-0.01, 0.05, and 0.01~m/s. E2E-RL and DEP-RL also produced
-walking trials, but their realized speeds and stride measures varied more across
-conditions. For example, E2E-RL overshot the 1.0~m/s target, whereas DEP-RL
-overshot both the 1.0 and 1.2~m/s targets. These task-level results establish
-that the subsequent comparisons are made among controllers that can complete the
-basic walking objective, rather than between walking and failure cases. The
-stride measures also suggest different gait strategies. E2E-RL tends to use
-shorter and faster steps at lower speed, while DEP-RL and Residual-Reflex RL use
-longer strides. These task-level measures therefore motivate the following
-gait-cycle analyses, which examine whether successful walking is also
-accompanied by human-reference joint motion, contact loading, and repeatable
-left--right coordination.
+\subsubsection{Task Performance}
+The speed tracking and stride measures show that all three controllers successfully generated sustained forward walking under the commanded speed tasks. As summarized in Table 3, Residual-Reflex RL achieved the most accurate speed tracking at all target speeds, with absolute speed errors of 0.01, 0.05, and 0.01 m/s at 0.8, 1.0, and 1.2 m/s, respectively. E2E-RL and DEP-RL also completed all walking tasks, but exhibited larger speed errors, particularly at higher target speeds where both methods tended to overshoot the commanded velocity.
+
+These results establish that the subsequent comparisons are performed among controllers that all accomplish the locomotion task, rather than between successful and failed walking trials. The stride measures further reveal different gait strategies. E2E-RL tends to use shorter and faster steps at lower walking speeds, whereas DEP-RL and Residual-Reflex RL adopt longer strides. The following analyses therefore investigate whether successful task execution is also accompanied by human-like kinematics, dynamic consistency, and gait consistency.
 
 \begin{table}[!t]
 \centering
@@ -797,27 +650,11 @@ speed.}
 }
 \end{table}
 
-\subsubsection{Human-Reference Kinematic Gait Analysis}
-The kinematic gait-cycle scores reveal a clearer separation between the three
-methods. As listed in Table~\ref{tab:gait_similarity}, Residual-Reflex RL
-achieved the highest kinematic-average score at all three speeds, with an
-average of 88.0\% across the 0.8, 1.0, and 1.2~m/s tests. The improvement is
-most evident in the knee and ankle profiles, where the residual-reflex
-controller more consistently preserved reference-like joint coordination.
-E2E-RL retained relatively high hip scores, and in some cases high ankle
-scores, but its knee score was much less consistent. DEP-RL did not improve this
-pattern in the present validation data, especially at 1.2~m/s. Scores close to
-zero indicate that the averaged joint profile lies outside the human-reference
-range over most of the normalized gait cycle, rather than a small localized
-deviation. This contrast is important because E2E-RL and DEP-RL can complete the
-speed-tracking task, yet their joint trajectories can still deviate
-substantially from human-reference kinematics.
-The bar chart in Fig.~\ref{fig:gait_score_bars} makes this contrast visible.
-Residual-Reflex RL improves the kinematic-average score by producing more
-consistent hip, knee, and ankle profiles, rather than by matching only one
-isolated joint. In contrast, E2E-RL can obtain a high hip score while still
-showing poor knee or ankle agreement, which motivates the waveform-level
-inspection in Figs.~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12}.
+\subsubsection{Joint Kinematic Plausibility}
+The human-reference kinematic scores reveal a clear separation between the three controllers. As summarized in Table 4, Residual-Reflex RL achieved the highest joint-kinematic score at all target walking speeds, with an average score of 88.0\% across the 0.8, 1.0, and 1.2 m/s evaluations. The improvement is most pronounced in the knee and ankle joints, where the proposed controller consistently preserves human-reference joint coordination.In contrast, E2E-RL maintains relatively high hip scores but exhibits less consistent knee and ankle motion, whereas DEP-RL performs consistently worse, particularly at 1.2 m/s. Figure 3 summarizes these quantitative comparisons across all target speeds.
+
+Scores close to zero indicate that the averaged joint trajectory remains outside the human-reference range over most of the gait cycle, rather than exhibiting only localized deviations. This distinction is important because controllers can successfully complete the walking task while still producing joint motions that differ substantially from human gait.
+
 
 \begin{table}[!t]
 \centering
@@ -861,28 +698,9 @@ highest kinematic-average score at every speed.}
 \label{fig:gait_score_bars}
 \end{figure}
 
-The normalized kinematic profiles in
-Figs.~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12} explain these
-scores at the waveform level and also show how the controllers behave as target
-speed changes. At 0.8~m/s, E2E-RL produced a reasonable hip trajectory but
-failed to maintain reference-like knee and ankle profiles, whereas DEP-RL
-showed larger left--right and cycle-to-cycle spread. At 1.0~m/s, all methods
-were closer to the nominal walking pattern, but Residual-Reflex RL still
-produced the most compact waveform set and the highest overall score. At
-1.2~m/s, where the gait requires faster stance-to-swing transitions, the
-difference became clearer because Residual-Reflex RL kept the knee and ankle
-trajectories clustered around the human-reference ranges, while E2E-RL and DEP-RL
-showed larger deviations or more scattered cycles. These speed-dependent
-waveform observations are consistent with the knee and ankle scores in
-Table~\ref{tab:gait_similarity}.
-They also explain why the Residual-Reflex RL controller looks more repeatable in
-animation. The blue and red gait cycles occupy a narrower region, meaning that
-successive steps and the two legs follow more similar trajectories. For E2E-RL
-and DEP-RL, which directly output muscle-level actions, the larger waveform
-spread indicates less consistent joint coordination across steps within the same
-trial.
-GRF morphology is analyzed separately below because contact loading is not
-directly captured by joint-angle profiles alone.
+The waveform comparisons in Figs.~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12} further explain these quantitative results and illustrate how the controllers behave across different target speeds. At 0.8 m/s, E2E-RL produced a reasonable hip trajectory but failed to maintain human-reference knee and ankle profiles, whereas DEP-RL exhibited larger left–right differences and stride-to-stride variability. At 1.0 m/s, all controllers produced gait patterns closer to the reference trajectories, but Residual-Reflex RL still generated the most compact waveform distribution and the highest overall score. At 1.2 m/s, where faster stance-to-swing transitions are required, the difference became more pronounced. Residual-Reflex RL maintained knee and ankle trajectories clustered around the human-reference ranges, whereas E2E-RL and DEP-RL showed larger deviations and more scattered gait cycles.
+
+These observations are consistent with the quantitative scores reported in Table 4 and further explain why Residual-Reflex RL produces more repeatable locomotion. The narrower distributions of the left and right gait cycles indicate more consistent joint coordination across both successive gait cycles and bilateral limbs.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
@@ -920,26 +738,12 @@ show normalized gait cycle percentage.}
 \label{fig:gait_profiles_12}
 \end{figure}
 
-\subsubsection{GRF Morphology}
-Ground reaction force provides a direct view of how each controller loads and
-unloads the body during stance. Residual-Reflex RL produced smoother vertical
-GRF profiles with a more reference-consistent double-support pattern across the
-tested speeds, as summarized in Table~\ref{tab:grf_scores} and illustrated in
-Fig.~\ref{fig:grf_morphology}. E2E-RL showed
-abnormal or inconsistent loading despite visually plausible joint postures in
-some snapshots; this explains why its GRF scores were much lower than its hip
-or ankle scores. DEP-RL produced even larger early-stance peaks and
-stride-to-stride fluctuations at 1.0 and 1.2~m/s, leading to near-zero GRF
-agreement in those cases. In the GRF metric, a score of 0.0 means that the mean
-force profile stays outside the human-reference range after normalization, which
-matches the large impact-like peaks and irregular unloading visible in the DEP-RL
-panels. Residual-Reflex RL avoided these sharp loading transients and achieved
-the highest GRF scores at all three speeds.
-This is an important failure mode observed in E2E-RL and DEP-RL because the limbs can
-appear visually plausible in some frames, but still interact with the ground
-through abrupt or poorly timed contact forces. The smoother GRF curves of
-Residual-Reflex RL suggest that the reflex prior helps organize the stance
-phase, not only the joint-angle trajectories.
+\subsubsection{Dynamic Plausibility}
+The vertical GRF scores further distinguish the three controllers. As summarized in Table 5, Residual-Reflex RL consistently achieved the highest vertical GRF scores across all target walking speeds, indicating the closest agreement with the human-reference loading patterns. In contrast, both E2E-RL and DEP-RL produced substantially lower GRF morphology scores, with DEP-RL showing near-zero agreement at 1.0 and 1.2 m/s.
+
+The corresponding GRF waveforms are shown in Fig. 7. Residual-Reflex RL generated smoother vertical GRF profiles with a more human-reference double-support pattern throughout stance. In contrast, E2E-RL exhibited irregular loading despite producing visually plausible joint trajectories in some cases, whereas DEP-RL produced pronounced early-stance impact peaks and larger stride-to-stride variations, particularly at higher walking speeds.
+
+A GRF score of 0 indicates that the averaged force profile remains outside the human-reference range after normalization, rather than reflecting only localized deviations. This observation highlights an important distinction between kinematic and dynamic evaluation. Although E2E-RL and DEP-RL can generate visually plausible joint motion, their foot–ground interactions remain substantially less consistent with human walking dynamics. The smoother GRF profiles produced by Residual-Reflex RL therefore demonstrate that the proposed controller improves not only joint kinematics but also dynamic consistency during stance.
 
 \begin{table}[!t]
 \centering
@@ -975,28 +779,13 @@ ranges. Residual-Reflex RL produces the most concentrated curves.}
 \label{fig:grf_morphology}
 \end{figure}
 
-\subsubsection{Symmetry and Repeatability}
-The residual reflex representation also improved the regularity of the generated
-gait cycles. Table~\ref{tab:symmetry_variability} shows that Residual-Reflex RL
-consistently produced lower left--right waveform differences and lower stride
-time/length coefficients of variation than E2E-RL and DEP-RL. In this table,
-the Hip, Knee, Ankle, and GRF columns are the RMS differences between the
-average left and right gait-cycle waveforms for each quantity. The Time CV and
-Length CV columns are the coefficients of variation of stride time and stride
-length, computed as standard deviation divided by mean and multiplied by 100.
-The largest differences occurred in ankle symmetry and stride variability, where
-E2E-RL and DEP-RL produced visibly less repeatable cycles. These metrics support
-the visual observation that residual reflex modulation yields a more bilaterally
-symmetric and repeatable gait pattern, rather than merely producing occasional
-successful walking cycles.
-For example, at 1.2~m/s the stride time CV and stride length CV of
-Residual-Reflex RL were 0.70\% and 0.74\%, respectively, both below 1\%.
-These values come directly from $\mathrm{CV}_{z}=100\sigma_z/\mu_z$, meaning
-that the standard deviation of stride timing and length was less than 1\% of
-their corresponding mean values. E2E-RL and DEP-RL showed larger
-cycle-to-cycle variation. Thus, the proposed method did not only produce a good
-average gait cycle; it also generated more consistent steps throughout the
-analyzed trajectory.
+\subsubsection{Gait Consistency}
+The symmetry and repeatability scores demonstrate that Residual-Reflex RL consistently produces more symmetric and repeatable gait cycles than E2E-RL and DEP-RL. As summarized in Table~\ref{tab:symmetry_variability}, Residual-Reflex RL achieved lower left–right waveform differences and lower stride time and stride length coefficients of variation across all target walking speeds. The Hip, Knee, Ankle, and GRF columns report the left–right waveform difference$D_y$, whereas the Time CV and Length CV columns report the coefficient of variation of stride time and stride length, respectively. The largest improvements are observed in ankle symmetry and stride variability, where E2E-RL and DEP-RL exhibit substantially less repeatable gait cycles.
+
+These quantitative results are consistent with the waveform visualizations, indicating that residual-reflex modulation improves bilateral coordination as well as stride-to-stride repeatability. For example, at 1.2 m/s, Residual-Reflex RL achieved stride time and stride length coefficients of variation of only 0.70\% and 0.74\%, respectively, indicating that the standard deviations of these quantities were below 1\% of their corresponding mean values. In contrast, E2E-RL and DEP-RL exhibited considerably larger cycle-to-cycle variability.
+
+These results indicate that the proposed controller not only produces a physiologically plausible average gait cycle, but also maintains consistent locomotion over successive steps.
+
 
 \begin{table}[!t]
 \centering
@@ -1039,30 +828,18 @@ variability. Residual-Reflex RL generally has the lowest values.}
 \label{fig:symmetry_variability_bars}
 \end{figure}
 
-\subsubsection{Qualitative Gait Visualization}
-The qualitative snapshots in Fig.~\ref{fig:qualitative_snapshots} give an
-intuitive view of the same result at the body posture level. E2E-RL appears
-reasonable at first glance because the trunk remains upright, and the 0--100\% sequence
-contains recognizable stance and swing postures. This visual plausibility is
-consistent with its relatively high hip and ankle scores at 1.2~m/s. However,
-the motion is less convincing when interpreted together with the GRF result.
-The limb postures do not necessarily imply a smooth transfer of body weight, and
-the low GRF score indicates that the contact loading pattern is not
-reference-consistent.
+\subsubsection{Qualitative Motion Analysis}
+The qualitative gait snapshots in Fig.~\ref{fig:qualitative_snapshots} provide a visual interpretation of the quantitative results presented in the preceding sections. Representative frames sampled at 0\%, 25\%, 50\%, 75\%, and 100\% of the gait cycle illustrate how the different controllers organize stance, push-off, and swing throughout a complete walking cycle.
 
-DEP-RL shows the clearest qualitative deviations. Around 25\% of the sampled
-cycle, the body posture appears pitched forward and the swing leg is lifted with
-a less natural knee--ankle configuration. Around 75\%, the limb configuration is
-again less coordinated, with the leg appearing to advance without a smooth
-stance-to-swing transition. These snapshots are consistent with the lower knee,
-ankle, and GRF scores of DEP-RL, and with the irregular force profiles observed
-in Fig.~\ref{fig:grf_morphology}. In contrast, Residual-Reflex RL maintains a
-more upright trunk and a more gradual progression from stance to swing across
-the sampled cycle. Its posture sequence is not only visually smoother, but also
-supported quantitatively by high joint-angle scores and high GRF agreement.
-The corresponding continuous comparison is provided in the first part of the
-\suppvideo{}. It makes the temporal differences in weight transfer and
-step-to-step smoothness more apparent than the five sampled poses alone.
+Residual-Reflex RL produces the most natural-looking gait sequence. The body remains upright throughout the gait cycle, while the transition between stance and swing is smooth and well coordinated. These observations are consistent with its higher joint-kinematic, GRF, and gait-consistency scores, indicating that the proposed controller achieves both physiologically plausible joint motion and stable foot–ground interaction.
+
+E2E-RL also generates sustained walking and maintains visually reasonable postures throughout the gait cycle. However, when interpreted together with the quantitative results, the motion exhibits less coordinated limb movement and less consistent weight transfer, explaining its lower GRF and gait-consistency scores despite relatively good joint-kinematic performance in some conditions.
+
+DEP-RL exhibits the largest qualitative deviations. Around 25\% of the gait cycle, the body leans further forward while the swing leg adopts a less natural knee–ankle configuration. Similar deviations remain visible near 75\% of the gait cycle, resulting in less coordinated stance-to-swing transitions. These observations are consistent with its lower joint-kinematic, GRF, and gait-consistency scores.
+
+The accompanying \suppvideo{} further illustrates these differences over continuous motion. Compared with the sampled snapshots, the video more clearly reveals the temporal characteristics of weight transfer, limb coordination, and stride-to-stride consistency throughout the gait cycle.
+
+
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=1\columnwidth]{qualitative_gait_snapshots_1p2_one_cycle.png}}
@@ -1076,77 +853,27 @@ through one walking cycle.}
 
 \subsection{Adaptation to Plantarflexor Weakness}
 \label{sec:weakness-adaptation}
-This evaluation asks whether the trained residual-reflex controller remains
-usable after muscle capacity changes, without updating the policy. This
-directly tests state-dependent reflex modulation beyond a single
-offline-optimized parameter set. Plantarflexor weakness was simulated by
-reducing the maximum isometric force of the soleus muscles while keeping the
-trained 1.2m/s policy fixed. The evaluated strength levels were 83--100\% of
-the nominal soleus capacity. Residual-Reflex RL was compared with the
-CMA-ES-optimized reflex controller under the same weakened character models.
-We report rollout duration, realized speed, gait quality, and the
-root-mean-square magnitude of each residual-action channel,
+Beyond nominal walking, this experiment evaluates whether the trained Residual-Reflex RL controller adapts to changes in musculoskeletal capacity without retraining. Plantarflexor weakness was simulated by reducing the maximum isometric force of the soleus muscles while keeping the trained 1.2 m/s policy fixed. Soleus strength was varied from 83\% to 100\% of the nominal value. Residual-Reflex RL was compared with the CMA-ES-optimized reflex controller under the same weakened musculoskeletal models. To analyze the adaptation strategy, we additionally report the root-mean-square (RMS) magnitude of each residual-action channel,
+
 \begin{equation}
 A_i^{\mathrm{RMS}} =
 \sqrt{\frac{1}{T}\sum_{t=1}^{T}a_i(t)^2},
 \end{equation}
-where $a_i(t)$ is the $i$th residual action and $T$ is the number of evaluated
-policy steps. This magnitude measures how strongly a channel is used regardless
-of sign, because a residual action may increase and decrease the corresponding
-reflex parameter at different points in the gait cycle.
+where $a_i(t)$ is the $i$th residual action and $T$ is the number of evaluated policy steps. The RMS magnitude quantifies how strongly each residual channel is utilized regardless of sign.
 
-The comparison revealed a clear difference between state-dependent residual
-modulation and the fixed optimized reflex parameters. The CMA-ES-optimized
-reflex controller terminated early for all tested weakened models, whereas
-Residual-Reflex RL produced full 1000-step rollouts for soleus strength levels
-from 83\% to 100\%, as summarized in
-Table~\ref{tab:weakness_survival}.
+\subsubsection{Survival comparison}
+The survival results immediately distinguish the two controllers. As summarized in Table 7, Residual-Reflex RL completed the full 25 s evaluation at all tested weakness levels, whereas the CMA-ES-optimized reflex controller terminated early for every weakened model and remained stable only under the nominal condition. These results demonstrate that online residual-reflex modulation substantially improves robustness to changes in musculoskeletal capacity compared with fixed offline-optimized reflex parameters.
 
+\subsubsection{Speed adaptation analysis}
+The speed adaptation results further reveal how the learned controller responds to reduced plantarflexor capacity. As shown in
 Table~\ref{tab:weakness_adaptation} and
-Fig.~\ref{fig:weakness_speed_adaptation}
-show that the residual policy did not simply force the weakened model to keep
-the nominal 1.2~m/s speed. Instead, the realized speed decreased as soleus
-strength was reduced, from 1.20~m/s in the nominal model to 0.95~m/s at 83\%
-soleus strength. This behavior is consistent with a conservative adaptation
-strategy and resembles a common compensatory response in human gait. When lower
-limb force capacity is reduced, people often reduce walking speed to maintain
-comfort, stability, and coordinated limb motion. Similarly, the controller
-preserves stable and natural-looking walking by accepting a slower gait rather
-than maintaining the target speed at the cost of instability.
-Importantly, the slower gait was not simply a degraded survival behavior. The
-generated joint trajectories remained close to the human-reference kinematic
-profiles across the tested weakness levels, as shown in
-Fig.~\ref{fig:weakness_kinematic_profiles}. Quantitative analysis of the hip,
-knee, and ankle profiles yielded a kinematic-average score of 89.0\% even at
-83\% soleus strength. The changed muscle model was therefore accommodated
-without retraining while preserving a natural gait pattern.
-The second part of the \suppvideo{} shows this adaptation continuously. As
-plantarflexor capacity is reduced, Residual-Reflex RL retains a recognizable
-stance--swing sequence and upright progression while walking more slowly. Under
-the same weakened models, the CMA-ES-optimized reflex controller loses balance
-and terminates. The synchronized residual-action traces further show that the
-surviving motion is accompanied by ongoing modulation rather than playback of a
-fixed excitation sequence.
+Fig.~\ref{fig:weakness_speed_adaptation}， the realized walking speed decreased gradually from 1.20 m/s under the nominal model to 0.95 m/s at 83\% soleus strength. Rather than maintaining the commanded speed at the expense of stability, the controller adopted a slower but stable gait as muscle capacity decreased. This behavior resembles a common compensatory strategy observed in human walking, where reduced plantarflexor strength is accompanied by a reduction in preferred walking speed. Importantly, the slower gait was not merely a degraded survival behavior. As shown in Fig. Fig.~\ref{fig:weakness_kinematic_profiles}, the generated joint trajectories remained close to the human-reference profiles across all tested weakness levels, yielding a joint-kinematic score of 89.0\% even at 83\% soleus strength. These results demonstrate that the proposed controller accommodates substantial changes in muscle capacity while preserving physiologically plausible locomotion without retraining.
 
-The residual-action RMS values also show that the policy remains actively
-engaged under the weakened conditions. The channel definitions are given in
-Table~\ref{tab:residual_actions}; here we focus on how their modulation changes
-with soleus capacity. The soleus-related channel $a_3$ has the largest RMS
-magnitude across the weakness range, indicating that ankle support and
-propulsion remain strongly modulated as soleus force capacity changes. The
-policy does not, however, compensate by monotonically increasing $a_3$ as the
-muscle becomes weaker. Instead, it accepts a lower walking speed and
-redistributes modulation across the other pathways. The stronger response of
-$a_4$ under greater weakness is consistent with increased reliance on
-knee-extension support when ankle push-off capacity is reduced, whereas $a_1$
-and $a_2$ change more mildly. The paired trends of ($a_1$, $a_2$) and ($a_3$,
-$a_4$) therefore indicate coordinated redistribution across swing-related and
-stance-support pathways rather than single-parameter compensation. These
-results indicate that the
-four-dimensional residual action space acts as a compact adaptive interface on
-top of the reflex controller. The same trained policy can be transferred across
-weakened body models without retraining, while still modulating the underlying
-reflex pathways online.
+The accompanying \suppvideo{} further illustrates this adaptation continuously. As plantarflexor capacity decreases, Residual-Reflex RL maintains a recognizable stance–swing sequence and upright progression while gradually reducing walking speed. Under the same weakened models, the CMA-ES-optimized reflex controller loses balance and terminates, whereas the synchronized residual-action traces show continuous online modulation rather than playback of a fixed excitation pattern.
+
+\subsubsection{Residual-action analysis}
+The residual-action RMS values further explain the adaptation strategy adopted by the learned controller. Channel definitions are given in Table~\ref{tab:residual_actions}. Here we focus on how their modulation changes with soleus capacity. The soleus-related channel $a_3$ exhibits the largest RMS magnitude throughout the tested weakness range, indicating that ankle support and propulsion remain strongly regulated as plantarflexor capacity decreases. The policy does not compensate by monotonically increasing $a_3$. Instead, it accepts a lower walking speed while redistributing modulation across the remaining pathways. The stronger response of $a_4$ under greater weakness is consistent with increased reliance on knee-extension support when ankle push-off capacity is reduced, whereas $a_1$ and $a_2$ change more gradually. Together, the paired trends of ($a_1$,$a_2$) and ($a_3$,$a_4$) indicate coordinated redistribution across swing-related and stance-support pathways rather than single-parameter compensation. These results demonstrate that the four-dimensional residual action provides a compact adaptive interface for online neuromuscular regulation, enabling the same trained policy to generalize across weakened musculoskeletal models without retraining.
+
 
 \begin{table}[!t]
 \centering
@@ -1240,49 +967,13 @@ levels remain near the human-reference ranges.}
 
 \subsection{Recovery from External Pushes}
 \label{sec:push-recovery}
-This evaluation asks whether the unchanged trained policy can restore sustained
-walking after an environmental disturbance that was absent during training.
-The same 1.2m/s policy used for nominal walking and weakness evaluation was
-retained without further learning. Backward force pulses were applied to the
-torso for 0.1s starting at 3s. We tested 75N and 100N pushes as both single pulses and
-repeated pulses every 5s. Residual-Reflex RL was compared with the
-CMA-ES-optimized reflex controller under identical perturbation settings.
-Rollout duration and realized speed are reported to distinguish recovery of
-sustained walking from a brief delayed fall.
+This experiment evaluates whether the trained Residual-Reflex RL controller can recover from external disturbances without retraining. The same 1.2 m/s policy used in the nominal walking and plantarflexor-weakness experiments was retained without further learning. Backward force pulses were applied to the torso for 0.1 s starting at 3.0 s. Perturbation magnitudes of 75 N and 100 N were evaluated under both single-push and repeated-push (every 5 s) conditions. Residual-Reflex RL was compared with the CMA-ES-optimized reflex controller under identical perturbation settings.
 
-The comparison again revealed a clear difference between the two control
-representations. The CMA-ES-optimized reflex controller terminated after
-approximately 4.5--4.6s for both the single and repeated 75/100N settings. In
-contrast, Residual-Reflex RL produced representative full-episode recoveries
-under the same 75/100N single-push conditions.
+As summarized in Table~\ref{tab:push_perturbation}, Residual-Reflex RL successfully recovered from both 75 N and 100 N single backward pushes and maintained walking for the full 25 s evaluation. Under repeated perturbations, the controller also completed the full evaluation under the 75 N condition, whereas the more challenging 100 N repeated pushes resulted in termination after 20.1 s. In contrast, the CMA-ES-optimized reflex controller consistently failed after approximately 4.5–4.6 s under all perturbation conditions. These results demonstrate that the learned residual-reflex policy substantially improves recovery capability beyond fixed offline-optimized reflex gains.
 
-Table~\ref{tab:push_perturbation} summarizes the perturbation outcomes. Under
-single backward pushes of 75 and 100N, Residual-Reflex RL maintained walking
-for the full 25s evaluation window. Repeated perturbations every 5s were
-substantially harder. The 75N repeated-push case still produced a full rollout,
-whereas the 100N case lasted 20.1s. In comparison, the CMA-ES-optimized reflex
-controller did not recover beyond roughly 4.5s in the same perturbation
-settings. This pattern indicates that the learned reflex-parameter policy
-provides additional recovery capacity beyond the fixed optimized reflex gains.
-Together with the weakness test, these results support the central claim that
-the learned residual policy provides a flexible reflex-parameter modulation
-mechanism beyond offline optimized reflex gains.
-Figure~\ref{fig:push_snapshots} provides a time-aligned visual comparison for
-the 100N single-push condition. Before the push, both controllers produce an
-upright walking configuration. After the force pulse, the CMA-ES-optimized
-reflex controller progressively leans backward, loses support, and terminates
-at 4.57s. Under the identical disturbance, Residual-Reflex RL reorganizes the
-subsequent steps, remains upright, and continues walking for the full 25s
-evaluation. The matched frames therefore distinguish sustained post-push
-walking from a trajectory that only delays termination.
-The final part of the \suppvideo{} visualizes the disturbance and its temporal
-consequences. Residual-Reflex RL is displaced backward immediately after the
-force pulse, reorganizes the following steps, and resumes periodic forward
-walking in the successful trials. In contrast, the CMA-ES-optimized reflex
-controller does not restore a sustained gait cycle after the same pushes. The
-repeated-push sequences also show the limit of this recovery: the 75N condition
-remains stable for the full rollout, whereas accumulated disturbances in the
-100N condition eventually lead to termination.
+Figure~\ref{fig:push_snapshots} provides a qualitative comparison of the recovery process under the representative 100 N single-push condition. Before the perturbation, both controllers produce stable walking. Following the force pulse, the CMA-ES-optimized reflex controller progressively loses balance and terminates, whereas Residual-Reflex RL reorganizes the subsequent steps, restores upright walking, and completes the full evaluation. The matched frames therefore distinguish sustained recovery from trajectories that merely delay failure.
+
+The accompanying \suppvideo{} further illustrates the complete recovery process. Residual-Reflex RL rapidly reorganizes foot placement and resumes periodic walking after the disturbance, whereas the CMA-ES-optimized reflex controller fails to regain a stable gait. Under repeated perturbations, the video also demonstrates the limit of the learned recovery capability: the controller remains stable under repeated 75 N pushes but eventually fails under repeated 100 N disturbances. Together with the plantarflexor-weakness experiments, these results demonstrate that residual-reflex modulation provides a flexible online adaptation mechanism for changes in both musculoskeletal capacity and external disturbances.
 
 \begin{table}[!t]
 \centering
@@ -1330,73 +1021,23 @@ Residual-Reflex RL reorganizes its steps and continues walking.}
 \label{fig:push_snapshots}
 \end{figure*}
 
-Continuous nominal, plantarflexor-weakness, and push-response sequences are
-provided in the accompanying \suppvideo{}, including synchronized
-residual-action channels for the weakness trials.
+
 
 \section{Discussion}
 \label{sec:discussion}
-The results show that residual reflex learning provides both a structured,
-physiologically plausible gait pattern and state-dependent adaptation to the
-tested changes in body capacity and external loading. In the nominal-speed data, E2E-RL
-and DEP-RL can achieve successful forward walking, yet their gait-cycle profiles
-may deviate substantially from reference kinematics and GRF. This observation
-suggests that learned musculoskeletal gait should be assessed not only by task
-completion, but also through gait-cycle kinematics, GRF morphology, bilateral
-symmetry, and cycle-to-cycle repeatability.
+The experimental results demonstrate that regulating an existing neuromuscular controller through reinforcement learning provides a practical way to improve both physiological plausibility and adaptability in muscle-driven locomotion. Under nominal walking conditions, Residual-Reflex RL consistently achieved better joint kinematics, more human-like ground reaction forces, and higher gait consistency than end-to-end muscle-control policies. The weakness and perturbation experiments further showed that the same trained policy remained effective under changes in musculoskeletal capacity and external disturbances without retraining. Together, these results indicate that reinforcement learning can benefit from regulating neuromuscular control mechanisms rather than directly generating muscle actions.
 
-The observed improvement is consistent with the role of the reflex prior. In
-E2E-RL and DEP-RL, the policy must discover both the low-level muscle
-coordination and the task-level walking strategy directly in the muscle action
-space. In Residual-Reflex RL, the baseline reflex controller already provides
-phase-dependent sensory feedback and stance support, while the learned policy
-adjusts only a small set of interpretable reflex parameters. This restriction
-does not merely reduce dimensionality; it biases exploration toward coordinated
-changes in existing neuromechanical feedback pathways. The more clustered
-kinematic cycles, smoother GRF profiles, and lower stride variability are
-consistent with this structured action representation. The weakness and
-perturbation results further clarify why learning on top of the reflex
-controller is useful even when an optimized reflex baseline can walk in the
-nominal condition. A CMA-ES-optimized reflex controller uses feedback, but its
-parameters are selected offline and then held constant during evaluation.
-Residual-Reflex RL keeps the same feedback pathways while allowing the policy to
-reshape their effective gains and offsets online. This distinction becomes visible when muscle
-capacity is reduced or an external push is applied, because the residual policy can
-trade off speed, posture, and reflex modulation to maintain walking, whereas the
-offline optimized reflex parameters are more brittle.
+The observed improvements in joint kinematics, GRF morphology, and gait consistency can be understood from the learning formulation itself. In end-to-end muscle control, reinforcement learning directly operates in a high-dimensional and redundant muscle action space, where both muscle activation and the functional relationships among muscles must be learned from task rewards. In the proposed framework, the underlying neuromuscular topology is fixed by the phase-dependent reflex controller, such that the functional organization of sensory feedback pathways is explicitly defined. Reinforcement learning therefore no longer needs to construct this neuromuscular organization from scratch, but instead learns how to regulate a small set of biomechanically meaningful reflex parameters according to the current state. This allows learning to focus on state-dependent adaptation while preserving the existing neuromuscular organization.
+
+The weakness and perturbation experiments further clarify why this formulation improves adaptability. The CMA-ES-optimized reflex controller also relies on physiological feedback, but its parameters remain fixed once optimization is completed. In contrast, Residual-Reflex RL preserves the same neuromuscular control structure while continuously adjusting the selected reflex parameters according to the current musculoskeletal state. This adaptation mechanism becomes particularly important when muscle capacity changes or external disturbances occur, because the controller can continuously regulate the underlying reflex parameters instead of relying on a single fixed parameter set. These findings demonstrate that reflex-informed neuromuscular regulation provides an effective formulation for improving both physiological plausibility and adaptability in muscle-driven locomotion.
 
 
 \section{Conclusion}
-We presented Residual-Reflex RL for adaptive muscle-driven character
-locomotion. Rather than synthesizing all muscle excitations directly, the
-learned policy modulates four gait-relevant parameters of a phase-dependent
-reflex controller. This formulation reduces the learned action space while
-retaining the sensory feedback and muscle mechanics that organize the resulting
-motion.
+We presented a Reflex-Informed Neuromuscular Reinforcement Learning framework for adaptive muscle-driven locomotion. Instead of directly generating muscle excitations, the proposed framework learns to regulate four biomechanically meaningful residual parameters of a phase-dependent reflex controller. This formulation preserves the underlying neuromuscular control structure while enabling reinforcement learning to adapt reflex behavior online through a compact and interpretable control interface.
 
-Experiments in a Hyfydy-based musculoskeletal simulation showed that the
-Residual-Reflex RL controller produced gait cycles with higher
-human-reference gait scores than E2E-RL and DEP-RL at 0.8, 1.0, and 1.2~m/s.
-The improvement was most evident in knee kinematics, ankle kinematics, and
-vertical GRF morphology. Additional cycle-level analysis showed lower
-left--right waveform differences and lower stride variability, indicating more
-regular and symmetric gait patterns. Beyond nominal walking, the same trained
-policy preserved full-episode walking under reduced soleus strength by adopting
-a slower gait and modulating the selected reflex parameters. It also recovered
-from representative external push perturbations that caused the
-CMA-ES-optimized reflex controller to terminate.
-The accompanying \suppvideo{} further shows these behaviors as continuous
-animation. It visualizes the slower but coordinated gait that emerges under
-plantarflexor weakness and the corrective stepping response following an
-external push, temporal behaviors that cannot be conveyed fully by isolated
-poses or aggregate scores. For muscle-driven character animation, the framework
-therefore provides a compact control layer that preserves recognizable gait
-structure while allowing motion to reorganize when the character or its
-environment changes. The same property is also relevant to computational
-studies of human locomotion and bio-inspired assistive control, where adaptive
-behavior must remain connected to interpretable neuromuscular mechanisms.
-Future work will extend the framework to continuous speed transitions, broader
-character morphologies, and more diverse physical interactions.
+Experiments in a Hyfydy-based musculoskeletal simulation demonstrated that the proposed framework consistently improved physiological plausibility under nominal walking conditions. Compared with end-to-end muscle-control policies, Residual-Reflex RL generated more human-like joint kinematics, ground reaction forces, and gait consistency across walking speeds of 0.8, 1.0, and 1.2 m/s. Beyond nominal walking, the same trained policy remained effective under plantarflexor weakness and external perturbations without retraining, demonstrating improved adaptability while preserving physiologically plausible locomotion.
+
+These results demonstrate that integrating reinforcement learning with an existing neuromuscular control structure provides an effective formulation for simultaneously improving physiological plausibility and adaptability in muscle-driven locomotion. The proposed framework offers a compact and biologically meaningful learning interface that is applicable to muscle-driven character animation, computational studies of human locomotion, and bio-inspired locomotor control. Future work will extend the framework to continuous speed transitions, broader musculoskeletal morphologies, and more diverse physical interactions.
 
 \FloatBarrier
 \begin{thebibliography}{99}
