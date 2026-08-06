@@ -357,7 +357,7 @@ and centrifugal terms; and $\boldsymbol{\tau}_{\mathrm{mus}}$ represents the gen
 
 \subsection{Neuromuscular Control Mechanism}
 \subsubsection{Physiological feedback}
-The reflex controller computes muscle stimulation from delayed muscle sensory feedback and posture feedback. Muscle length and velocity approximate muscle-spindle feedback, whereas muscle force approximates Golgi tendon organ feedback \cite{grillner2020}. These sensory signals form the physiological inputs to the reflex controller. The corresponding gains, thresholds, source muscles, target muscles, and active gait phases are defined in the following sections. As illustrated in Fig. 1(b1), the resulting muscle stimulation drives activation and muscle–tendon force, while the updated muscle states provide sensory feedback for the next control step.
+The reflex controller computes muscle stimulation from delayed muscle sensory feedback and posture feedback. Muscle length and velocity approximate muscle-spindle feedback, whereas muscle force approximates Golgi tendon organ feedback \cite{grillner2020}. These sensory signals form the physiological inputs to the reflex controller. The corresponding gains, thresholds, source muscles, target muscles, and active gait phases are defined in the following sections. As illustrated in Fig.~\ref{framwork}(b1), the resulting muscle stimulation drives activation and muscle–tendon force, while the updated muscle states provide sensory feedback for the next control step.
 % The low-level controller computes muscle stimulation from delayed, normalized
 % muscle length, velocity, and force signals together with posture feedback.
 % Length and velocity terms represent muscle-spindle feedback, and force terms
@@ -446,7 +446,7 @@ $a_4$ & $K_{F,\mathrm{VAS}}^{(\mathrm{st})}$ & S00011.vasti.KF & Knee extension 
 
 \subsubsection{Regulated reflex parameters}
 
-The four regulated parameters are highlighted in bright magenta in Fig.~\ref{framwork} (b2), and their corresponding pathways are summarized in Table~\ref{tab:residual_actions}. In Table~\ref{tab:residual_actions}, pathway labels follow the naming convention of the controller implementation, while the superscripts (all), (st), and (sw) explicitly indicate the corresponding phase groups used in this paper. Specifically, $a_1$ modulates the swing-related hamstrings length gain to regulate hip extension and knee flexion during leg swing, $a_2$ adjusts the stance-phase iliopsoas length threshold for hip flexion and leg advancement, $a_3$ modulates the all-phase soleus force-feedback gain for ankle support and propulsion, and $a_4$ regulates the stance-phase vasti force-feedback gain for knee extension and stance support.
+The four regulated parameters are highlighted in bright magenta in Fig.~\ref{framwork}(b2), and their corresponding pathways are summarized in Table~\ref{tab:residual_actions}. In Table~\ref{tab:residual_actions}, pathway labels follow the naming convention of the controller implementation, while the superscripts (all), (st), and (sw) explicitly indicate the corresponding phase groups used in this paper. Specifically, $a_1$ modulates the swing-related hamstrings length gain to regulate hip extension and knee flexion during leg swing, $a_2$ adjusts the stance-phase iliopsoas length threshold for hip flexion and leg advancement, $a_3$ modulates the all-phase soleus force-feedback gain for ankle support and propulsion, and $a_4$ regulates the stance-phase vasti force-feedback gain for knee extension and stance support.
 
 These four parameters were selected because they regulate gait-critical functions across the major lower-limb joints while directly influencing the key biomechanical roles required for locomotion, including leg swing, stance support, and propulsion. By restricting policy outputs to these biomechanically meaningful reflex parameters, the proposed formulation concentrates policy exploration on neuromuscular mechanisms that are directly related to locomotor function while maintaining a compact and interpretable action space.
 
@@ -497,11 +497,19 @@ where $v_x$ and $v^*$ denote the forward center-of-mass speed and the commanded 
 \begin{equation}
 \begin{aligned}
 c_{grf}&=[L_c-1.2]_+,\\
-c_e&=\frac{1}{N-1}\|\mathbf e_t-\mathbf e_{t-1}\|_2^2.
+c_e&=\frac{1}{N}\|\mathbf e_t-\mathbf e_{t-1}\|_2^2,\\
+c_m&=\frac{1}{d_a}\sum_{i=1}^{N}
+\mathbb{I}\!\left[\alpha_i>0.15\right],\\
+c_q&=\frac{1}{J}\sum_{j=1}^{J}
+\operatorname{mean}\!\left(\left|\boldsymbol{\tau}^{\mathrm{lim}}_j\right|\right).
 \end{aligned}
 \label{eq:reward_cost1}
 \end{equation}
-where $L_c$ is the total contact load normalized by body weight; $N$ is the number of muscles; $\tau_i$ is the absolute joint-limit torque, and $[x]_+=\max(0,x)$.
+where $L_c$ is the total contact load normalized by body weight; $N$ is the
+number of muscles; $d_a$ is the action-space dimension; $J$ is the number of
+joints; $\boldsymbol{\tau}^{\mathrm{lim}}_j$ is the joint-limit torque of joint
+$j$; $\mathbb{I}[\cdot]$ is the indicator function; and
+$[x]_+=\max(0,x)$.
 \begin{equation}
 \begin{aligned}
 c_\theta &= (\theta_t-\theta^*)^2,\\
@@ -608,7 +616,7 @@ This experiment evaluates whether the proposed controller generates physiologica
 
 \label{sec:nominal-gait}
 \subsubsection{Task Performance}
-The speed tracking and stride measures show that all three controllers successfully generated sustained forward walking under the commanded speed tasks. As summarized in Table 3, Residual-Reflex RL achieved the most accurate speed tracking at all target speeds, with absolute speed errors of 0.01, 0.05, and 0.01 m/s at 0.8, 1.0, and 1.2 m/s, respectively. E2E-RL and DEP-RL also completed all walking tasks, but exhibited larger speed errors, particularly at higher target speeds where both methods tended to overshoot the commanded velocity.
+The speed tracking and stride measures show that all three controllers successfully generated sustained forward walking under the commanded speed tasks. As summarized in Table~\ref{tab:spatiotemporal_metrics}, Residual-Reflex RL achieved the most accurate speed tracking at all target speeds, with absolute speed errors of 0.01, 0.05, and 0.01 m/s at 0.8, 1.0, and 1.2 m/s, respectively. E2E-RL and DEP-RL also completed all walking tasks, but exhibited larger speed errors, particularly at higher target speeds where both methods tended to overshoot the commanded velocity.
 
 These results establish that the subsequent comparisons are performed among controllers that all accomplish the locomotion task, rather than between successful and failed walking trials. The stride measures further reveal different gait strategies. E2E-RL tends to use shorter and faster steps at lower walking speeds, whereas DEP-RL and Residual-Reflex RL adopt longer strides. The following analyses therefore investigate whether successful task execution is also accompanied by human-like kinematics, dynamic consistency, and gait consistency.
 
@@ -692,7 +700,7 @@ highest kinematic-average score at every speed.}
 
 The waveform comparisons in Figs.~\ref{fig:gait_profiles_08}--\ref{fig:gait_profiles_12} further explain these quantitative results and illustrate how the controllers behave across different target speeds. At 0.8 m/s, E2E-RL produced a reasonable hip trajectory but failed to maintain human-reference knee and ankle profiles, whereas DEP-RL exhibited larger left–right differences and stride-to-stride variability. At 1.0 m/s, all controllers produced gait patterns closer to the reference trajectories, but Residual-Reflex RL still generated the most compact waveform distribution and the highest overall score. At 1.2 m/s, where faster stance-to-swing transitions are required, the difference became more pronounced. Residual-Reflex RL maintained knee and ankle trajectories clustered around the human-reference ranges, whereas E2E-RL and DEP-RL showed larger deviations and more scattered gait cycles.
 
-These observations are consistent with the quantitative scores reported in Table 4 and further explain why Residual-Reflex RL produces more repeatable locomotion. The narrower distributions of the left and right gait cycles indicate more consistent joint coordination across both successive gait cycles and bilateral limbs.
+These observations are consistent with the quantitative scores reported in Table~\ref{tab:gait_similarity} and further explain why Residual-Reflex RL produces more repeatable locomotion. The narrower distributions of the left and right gait cycles indicate more consistent joint coordination across both successive gait cycles and bilateral limbs.
 
 \begin{figure}[!t]
 \centerline{\includegraphics[width=\columnwidth]{gait_analysis_residual_vs_e2e_0p8.png}}
@@ -731,9 +739,9 @@ show normalized gait cycle percentage.}
 \end{figure}
 
 \subsubsection{Dynamic Plausibility}
-The vertical GRF scores further distinguish the three controllers. As summarized in Table 5, Residual-Reflex RL consistently achieved the highest vertical GRF scores across all target walking speeds, indicating the closest agreement with the human-reference loading patterns. In contrast, both E2E-RL and DEP-RL produced substantially lower GRF morphology scores, with DEP-RL showing near-zero agreement at 1.0 and 1.2 m/s.
+The vertical GRF scores further distinguish the three controllers. As summarized in Table~\ref{tab:grf_scores}, Residual-Reflex RL consistently achieved the highest vertical GRF scores across all target walking speeds, indicating the closest agreement with the human-reference loading patterns. In contrast, both E2E-RL and DEP-RL produced substantially lower GRF morphology scores, with DEP-RL showing near-zero agreement at 1.0 and 1.2 m/s.
 
-The corresponding GRF waveforms are shown in Fig. 7. Residual-Reflex RL generated smoother vertical GRF profiles with a more human-reference double-support pattern throughout stance. In contrast, E2E-RL exhibited irregular loading despite producing visually plausible joint trajectories in some cases, whereas DEP-RL produced pronounced early-stance impact peaks and larger stride-to-stride variations, particularly at higher walking speeds.
+The corresponding GRF waveforms are shown in Fig.~\ref{fig:grf_morphology}. Residual-Reflex RL generated smoother vertical GRF profiles with a more human-reference double-support pattern throughout stance. In contrast, E2E-RL exhibited irregular loading despite producing visually plausible joint trajectories in some cases, whereas DEP-RL produced pronounced early-stance impact peaks and larger stride-to-stride variations, particularly at higher walking speeds.
 
 A GRF score of 0 indicates that the averaged force profile remains outside the human-reference range after normalization, rather than reflecting only localized deviations. This observation highlights an important distinction between kinematic and dynamic evaluation. Although E2E-RL and DEP-RL can generate visually plausible joint motion, their foot–ground interactions remain substantially less consistent with human walking dynamics. The smoother GRF profiles produced by Residual-Reflex RL therefore demonstrate that the proposed controller improves not only joint kinematics but also dynamic consistency during stance.
 
@@ -855,7 +863,7 @@ A_i^{\mathrm{RMS}} =
 where $a_i(t)$ is the $i$th residual action and $T$ is the number of evaluated policy steps. The RMS magnitude quantifies how strongly each residual channel is utilized regardless of sign.
 
 \subsubsection{Survival comparison}
-The survival results immediately distinguish the two controllers. As summarized in Table 7, Residual-Reflex RL completed the full 25 s evaluation at all tested weakness levels, whereas the CMA-ES-optimized reflex controller terminated early for every weakened model and remained stable only under the nominal condition. These results demonstrate that online residual-reflex modulation substantially improves robustness to changes in musculoskeletal capacity compared with fixed offline-optimized reflex parameters.
+The survival results immediately distinguish the two controllers. As summarized in Table~\ref{tab:weakness_survival}, Residual-Reflex RL completed the full 25 s evaluation at all tested weakness levels, whereas the CMA-ES-optimized reflex controller terminated early for every weakened model and remained stable only under the nominal condition. These results demonstrate that online residual-reflex modulation substantially improves robustness to changes in musculoskeletal capacity compared with fixed offline-optimized reflex parameters.
 
 \subsubsection{Speed adaptation analysis}
 The speed adaptation results further reveal how the learned controller responds to reduced plantarflexor capacity. As shown in
