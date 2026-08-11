@@ -256,8 +256,8 @@ are stored in the replay buffer $\mathcal{D}$. Maximum a Posteriori Policy Optim
 % are stored in the replay buffer $\mathcal{D}$. A critic
 % $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ evaluates actions, and Maximum a
 % Posteriori Policy Optimization (MPO) updates the rollout policy
-% \cite{mpo2018}. Panels (b1) and (b2) in Fig.~\ref{framwork} show the fixed
-% proprioceptive feedback loop and the phase-dependent reflex pathways,
+% \cite{mpo2018}. Panels (b1) and (b2) in Fig.~\ref{framwork} show the
+% phase-dependent reflex pathways and fixed proprioceptive feedback loop,
 % respectively. The following sections define each part of this computation.
 
 \begin{figure*}[!t]
@@ -267,11 +267,11 @@ rollout policy maps the musculoskeletal state $\mathbf{s}_t$ to a
 four-dimensional residual action $\mathbf{a}_t$ and collects transitions
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The physiological
 environment combines the muscle-driven character with a phase-dependent
-residual-reflex-informed controller. In the enlarged lower row, panel (b2) on
-the left shows the sparse phase-dependent reflex topology, while panel (b1) on
+residual-reflex-informed controller. In the enlarged lower row, panel (b1) on
+the left shows the sparse phase-dependent reflex topology, while panel (b2) on
 the right shows the proprioceptive control loop from muscle sensing to
 stimulation, activation, muscle--tendon force, skeletal motion, and updated
-sensory feedback. Magenta entries in (b2) denote the four reflex parameters
+sensory feedback. Magenta entries in (b1) denote the four reflex parameters
 modulated by $\mathbf{a}_t$. Superscripts $(\mathrm{all})$, $(\mathrm{st})$,
 and $(\mathrm{sw})$ identify parameters shared across all five phases,
 Early Stance--Late Stance, and Liftoff--Swing--Landing, respectively. The
@@ -354,13 +354,13 @@ and centrifugal terms; and $\boldsymbol{\tau}_{\mathrm{mus}}$ represents the gen
 
 \subsection{Neuromuscular Control Mechanism}
 \subsubsection{Physiological feedback}
-The reflex controller computes muscle stimulation from delayed muscle sensory feedback and posture feedback. Muscle length and velocity approximate muscle-spindle feedback, whereas muscle force approximates Golgi tendon organ feedback \cite{grillner2020}. These sensory signals form the physiological inputs to the reflex controller. The corresponding gains, thresholds, source muscles, target muscles, and active gait phases are defined in the following sections. As illustrated in Fig.~\ref{framwork}(b1), the resulting muscle stimulation drives activation and muscle–tendon force, while the updated muscle states provide sensory feedback for the next control step.
+The reflex controller computes muscle stimulation from delayed muscle sensory feedback and posture feedback. Muscle length and velocity approximate muscle-spindle feedback, whereas muscle force approximates Golgi tendon organ feedback \cite{grillner2020}. These sensory signals form the physiological inputs to the reflex controller. The corresponding gains, thresholds, source muscles, target muscles, and active gait phases are defined in the following sections. As illustrated in Fig.~\ref{framwork}(b2), the resulting muscle stimulation drives activation and muscle–tendon force, while the updated muscle states provide sensory feedback for the next control step.
 % The low-level controller computes muscle stimulation from delayed, normalized
 % muscle length, velocity, and force signals together with posture feedback.
 % Length and velocity terms represent muscle-spindle feedback, and force terms
 % represent Golgi-tendon-organ feedback \cite{grillner2020}. Their gains,
 % thresholds, source muscles, target muscles, and active gait phases are specified
-% explicitly below. As shown in Fig.~\ref{framwork}(b1), the resulting stimulation
+% explicitly below. As shown in Fig.~\ref{framwork}(b2), the resulting stimulation
 % $u_i$ drives activation and muscle--tendon force; the updated muscle length,
 % velocity, and force then provide the next feedback sample.
 \subsubsection{Phase-dependent topology.}
@@ -372,7 +372,7 @@ A finite-state controller divides the gait cycle into five phases: \textbf{Early
 \Phi_{\mathrm{sw}}  &= \{\mathrm{LF,SW,LA}\}.
 \end{aligned}
 \end{equation*}
-Parameters are shared among phases within the same group but remain independent across groups. For example, the BIF force-feedback gain used during Early Stance and Late Stance differs from that used during Liftoff, Swing, and Landing, allowing the same sensory feedback to serve different functional roles across the gait cycle. Consequently, the same sensory feedback can serve different functions across the gait cycle, including stance support, push-off, and swing control, without requiring a separate parameter for every gait phase. Fig.~\ref{framwork}(b2) summarizes the resulting topology across the nine modeled muscle groups. Monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the knee, and ILI and GLU at the hip. The biarticular muscles GAS, FEM, and HAM span two adjacent joints and therefore contribute to the control of both.
+Parameters are shared among phases within the same group but remain independent across groups. For example, the BIF force-feedback gain used during Early Stance and Late Stance differs from that used during Liftoff, Swing, and Landing, allowing the same sensory feedback to serve different functional roles across the gait cycle. Consequently, the same sensory feedback can serve different functions across the gait cycle, including stance support, push-off, and swing control, without requiring a separate parameter for every gait phase. Fig.~\ref{framwork}(b1) summarizes the resulting topology across the nine modeled muscle groups. Monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the knee, and ILI and GLU at the hip. The biarticular muscles GAS, FEM, and HAM span two adjacent joints and therefore contribute to the control of both.
 
 
 The active parameter-sharing groups are determined by the current gait phase. During Early Stance and Late Stance, the controller activates the all-phase and stance-specific pathways, whereas during Liftoff, Swing, and Landing, it activates the all-phase and swing-related pathways. For convenience, let $\phi(t)$ denote the current gait phase and $\Gamma(\phi)$ the corresponding set of active parameter-sharing groups, such that $\Gamma(\phi)=\{\mathrm{all},\mathrm{st}\}$ during Early Stance and $\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$ during Liftoff, Swing, and Landing.
@@ -448,7 +448,7 @@ $a_4$ & $K_{F,\mathrm{VAS}}^{(\mathrm{st})}$ & S00011.vasti.KF & Knee extension 
 
 \subsubsection{Regulated reflex parameters}
 
-The four regulated parameters are highlighted in bright magenta in Fig.~\ref{framwork}(b2), and their corresponding pathways are summarized in Table~\ref{tab:residual_actions}. In Table~\ref{tab:residual_actions}, pathway labels follow the naming convention of the controller implementation, while the superscripts (all), (st), and (sw) explicitly indicate the corresponding phase groups used in this paper. Specifically, $a_1$ modulates the swing-related hamstrings length gain to regulate hip extension and knee flexion during leg swing, $a_2$ adjusts the stance-phase iliopsoas length threshold for hip flexion and leg advancement, $a_3$ modulates the all-phase soleus force-feedback gain for ankle support and propulsion, and $a_4$ regulates the stance-phase vasti force-feedback gain for knee extension and stance support.
+The four regulated parameters are highlighted in bright magenta in Fig.~\ref{framwork}(b1), and their corresponding pathways are summarized in Table~\ref{tab:residual_actions}. In Table~\ref{tab:residual_actions}, pathway labels follow the naming convention of the controller implementation, while the superscripts (all), (st), and (sw) explicitly indicate the corresponding phase groups used in this paper. Specifically, $a_1$ modulates the swing-related hamstrings length gain to regulate hip extension and knee flexion during leg swing, $a_2$ adjusts the stance-phase iliopsoas length threshold for hip flexion and leg advancement, $a_3$ modulates the all-phase soleus force-feedback gain for ankle support and propulsion, and $a_4$ regulates the stance-phase vasti force-feedback gain for knee extension and stance support.
 
 These four parameters were selected because they regulate gait-critical functions across the major lower-limb joints while directly influencing the key biomechanical roles required for locomotion, including leg swing, stance support, and propulsion. By restricting policy outputs to these biomechanically meaningful reflex parameters, the proposed formulation concentrates policy exploration on neuromuscular mechanisms that are directly related to locomotor function while maintaining a compact and interpretable action space.
 
