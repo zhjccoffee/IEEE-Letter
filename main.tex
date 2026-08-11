@@ -100,7 +100,7 @@ simulation, reflex control, residual reinforcement learning}
 \label{sec:introduction}
 % 第一段：Problem（不是方法）
 % 随着物理驱动角色动画、数字人以及肌骨仿真的不断发展，肌肉驱动运动生成逐渐成为生成高真实性人体运动的重要研究方向。与直接指定关节轨迹或关节力矩不同，肌肉驱动模型通过神经肌肉系统、肌肉动力学和身体与环境之间的物理交互自然产生运动，因此能够生成具有更高物理一致性和生物合理性的角色动画。然而，对于一个真实的人体角色，生成的运动不仅需要具有接近人体的运动组织和动力学特征，还应能够在身体能力下降或环境发生变化时重新组织运动。因此，如何同时获得具有生理合理性的运动生成能力以及对身体和环境变化的适应能力，成为肌肉驱动角色动画中的关键挑战。
-Muscle-driven simulation plays an integral role in physically based character animation and the modeling of human locomotion. Unlike approaches that directly generate motion through joint trajectories or joint torques, muscle-driven models allow movement to emerge naturally from neuromuscular control, muscle dynamics, and physical interactions between the body and the environment, resulting in motion with greater physical consistency and biological plausibility. However, realistic muscle-driven locomotion requires not only physiological plausibility, but also the ability to adapt naturally to changes in the musculoskeletal condition and the environment. Therefore, achieving both physiological plausibility and adaptability remains a key challenge in muscle-driven character animation.
+Muscle-driven simulation plays an integral role in physically based character animation and the modeling of human locomotion \cite{sun2024,schumacher2025}. Unlike approaches that directly generate motion through joint trajectories or joint torques, muscle-driven models allow movement to emerge naturally from neuromuscular control, muscle dynamics, and physical interactions between the body and the environment, resulting in motion with greater physical consistency and biological plausibility. However, realistic muscle-driven locomotion requires not only physiological plausibility, but also the ability to adapt naturally to changes in the musculoskeletal condition and the environment. Therefore, achieving both physiological plausibility and adaptability remains a key challenge in muscle-driven character animation.
 
 % 第二段：Existing Paradigms（不是 Related Work）
 % 现有肌肉驱动控制方法大致体现了两种不同的控制思想。一类方法采用反射控制、中央模式发生器（CPG）、肌肉协同等结构化神经肌肉控制模型，将部分生物运动规律直接编码到控制器中，从而能够生成稳定且具有生理意义的运动。然而，这类控制器通常依赖人工设计或离线优化，其控制规律在部署过程中保持固定，因此难以适应身体能力或环境条件的变化。另一类方法采用强化学习直接学习肌肉动作，由策略根据当前状态生成各肌肉控制信号，从而具有较强的在线适应能力。然而，由于策略需要在高维且冗余的肌肉动作空间中重新学习肌肉协调关系，仅依靠任务奖励并不能保证生成运动具有接近人体的运动组织和动力学特征。现有方法因此往往在生理合理性与适应能力之间形成取舍：结构化控制保留了生物运动组织，却缺乏状态依赖调节；直接肌肉学习具有适应能力，却需要重新发现复杂的神经肌肉协调。
@@ -193,7 +193,7 @@ To verify that the proposed Reflex-Informed Neuromuscular Learning framework pro
 \label{sec:related-work}
 
 \subsection{Muscle-Driven Character Simulation}
-Musculoskeletal models driven by muscle–tendon dynamics have become a standard framework for studying and generating human locomotion by explicitly modeling muscle activation, muscle–tendon dynamics, skeletal dynamics, and body–environment interaction. In biomechanics, these models have been widely used to generate and analyze healthy and pathological gait, investigate locomotor strategies, study energetic objectives, and evaluate the effects of ageing and musculoskeletal impairments \cite{anderson2001,ackermann2010,falisse2019,song2018,degroote2021}. In computer graphics, muscle-driven simulation has been adopted for physically based character animation, enabling realistic locomotion through muscle-actuated simulation and control \cite{wang2010,wang2012,geijtenbeek2013,lee2019}. Together, these studies establish muscle-driven simulation as a mature foundation for generating realistic human locomotion. Consequently, recent research has increasingly focused on how to design effective controllers for these musculoskeletal systems.
+Musculoskeletal models driven by muscle–tendon dynamics have become a standard framework for studying and generating human locomotion by explicitly modeling muscle activation, muscle–tendon dynamics, skeletal dynamics, and body–environment interaction. In biomechanics, these models have been widely used to generate and analyze healthy and pathological gait, investigate locomotor strategies, study energetic objectives, and evaluate the effects of ageing and musculoskeletal impairments \cite{anderson2001,ackermann2010,falisse2019,song2018,degroote2021,uchida2020,ezati2019,dembia2020}. In computer graphics, muscle-driven simulation has been adopted for physically based character animation, enabling realistic locomotion through muscle-actuated simulation and control \cite{wang2010,wang2012,geijtenbeek2013,lee2019}. Together, these studies establish muscle-driven simulation as a mature foundation for generating realistic human locomotion. Consequently, recent research has increasingly focused on how to design effective controllers for these musculoskeletal systems.
 
 % In computer graphics, Wang et al. optimized walking controllers for uncertain inputs and environments [2010] and used biologically based actuators and objectives for locomotion control [2012]. Geijtenbeek et al. developed flexible muscle-based locomotion for bipedal creatures [2013], and Lee et al. introduced a scalable framework for muscle-actuated human simulation and control [2019]. These studies establish muscle-driven simulation as a practical foundation for biomechanical analysis and physically based character animation. The central question for the present work is therefore not how to construct a musculoskeletal character, but how to control its muscles. The following sections review structured neuromuscular controllers and learning-based muscle control.
 
@@ -228,10 +228,10 @@ Biologically inspired controllers introduce prior knowledge of human motor contr
 Among these approaches, reflex-based control is particularly relevant to muscle-driven locomotion because it directly maps muscle sensory feedback to muscle stimulation. Reflex-based controllers have been shown to generate stable locomotion in humans \cite{geyer2010,song2015}, adaptive walking across a wide range of speeds \cite{koseki2024}, and robust locomotion in bipedal robots \cite{batts2015}. However, most existing reflex controllers rely on manually designed or offline-optimized parameters. Although muscle stimulation changes continuously with sensory feedback, the underlying reflex gains and thresholds are not updated online, limiting adaptation to changes in musculoskeletal conditions and the environment.
 
 \subsection{Learning-Based Muscle Control}
-Deep reinforcement learning has enabled muscle-driven characters to acquire locomotion skills directly through interaction with the environment. Existing approaches typically formulate muscle activations as the policy output, allowing muscle control signals to be generated online according to the current state \cite{weng2021,devree2021,ogum2024,song2021}. Compared with manually designed controllers, these methods improve adaptability and can learn complex locomotion behaviors without explicitly specifying muscle coordination.
+Deep reinforcement learning has enabled physics-based characters to acquire locomotion skills directly through interaction with the environment, while prior work has shown that the action representation and reference-motion objective strongly affect the learned behavior \cite{peng2017,peng2018}. For muscle-driven characters, existing approaches typically formulate muscle activations as the policy output, allowing muscle control signals to be generated online according to the current state \cite{weng2021,devree2021,ogum2024,song2021}. Compared with manually designed controllers, these methods improve adaptability and can learn complex locomotion behaviors without explicitly specifying muscle coordination.
 
 Recent studies have further improved direct muscle-control reinforcement learning from different perspectives. Bio-inspired reward functions encourage more physiologically realistic gait patterns \cite{nowakowski2021,schumacher2025}. Model-based reinforcement learning incorporates musculoskeletal dynamics into policy optimization
-\cite{su2023}. DEP-RL improves exploration in overactuated musculoskeletal systems through embodied exploratory feedback \cite{schumacher2025}. More recently, AI-CPG combines a CPG-based feedforward controller with a learned reflex network to improve adaptive locomotion \cite{li2024}.
+\cite{su2023}. DEP-RL improves exploration in overactuated musculoskeletal systems through embodied exploratory feedback \cite{deprl2023}. More recently, AI-CPG combines a CPG-based feedforward controller with a learned reflex network to improve adaptive locomotion \cite{li2024}.
 
 Overall, these studies indicate that existing approaches cannot simultaneously provide physiological plausibility and adaptability. Structured neuromuscular controllers can generate physiologically plausible movement but struggle to adapt to changes in the musculoskeletal model or the environment, whereas reinforcement learning-based muscle control improves adaptation in muscle-driven locomotion but often generates gait patterns that deviate from human kinematics and dynamics.
 
@@ -262,34 +262,32 @@ are stored in the replay buffer $\mathcal{D}$. Maximum a Posteriori Policy Optim
 % respectively. The following sections define each part of this computation.
 
 \begin{figure*}[!t]
-\centerline{\includegraphics[width=\textwidth]{framework_overview_v2.png}}
+\centerline{\includegraphics[width=\textwidth]{framework_overview_recomposed.png}}
 \caption{Overview of the proposed Residual-Reflex RL framework. (a) The
 rollout policy maps the musculoskeletal state $\mathbf{s}_t$ to a
 four-dimensional residual action $\mathbf{a}_t$ and collects transitions
 $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$. (b) The physiological
 environment combines the muscle-driven character with a phase-dependent
-residual-reflex-informed controller. The enlarged lower row expands this
-environment. Panel (b1) shows the proprioceptive reflex control loop from
-muscle sensing to stimulation, activation, muscle--tendon force, skeletal
-motion, and updated sensory feedback. Panel (b2) shows the sparse
-phase-dependent reflex topology. Magenta entries denote the four reflex
-parameters modulated by $\mathbf{a}_t$.
-Superscripts $(\mathrm{all})$, $(\mathrm{st})$, and $(\mathrm{sw})$ identify
-parameters shared across all five phases, EarlyStance--LateStance, and
-Liftoff--Swing--Landing, respectively. The notation $i\leftarrow j$ indicates
-that feedback measured from source muscle $j$ modulates target muscle $i$;
-terms without an indicated source are self-feedback pathways. Horizontal
-placement within a merged all-phase block is for layout only. (c) The
+residual-reflex-informed controller. In the enlarged lower row, panel (b2) on
+the left shows the sparse phase-dependent reflex topology, while panel (b1) on
+the right shows the proprioceptive control loop from muscle sensing to
+stimulation, activation, muscle--tendon force, skeletal motion, and updated
+sensory feedback. Magenta entries in (b2) denote the four reflex parameters
+modulated by $\mathbf{a}_t$. Superscripts $(\mathrm{all})$, $(\mathrm{st})$,
+and $(\mathrm{sw})$ identify parameters shared across all five phases,
+EarlyStance--LateStance, and Liftoff--Swing--Landing, respectively. The
+notation $i\leftarrow j$ indicates that feedback from source muscle $j$
+modulates target muscle $i$; entries without a source are self-feedback
+pathways. (c) The
 collected transitions are stored in $\mathcal{D}$; the critic
     $q(\mathbf{s},\mathbf{a};\boldsymbol{\omega})$ evaluates candidate actions
     and MPO updates the rollout policy from
     $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{now}})$ to
     $\pi(\mathbf{s};\boldsymbol{\theta}_{\mathrm{new}})$.}
 \Description{The framework couples a four-dimensional residual-reflex policy
-to a muscle-driven character. An enlarged feedback loop shows proprioceptive
-sensing, reflex integration, activation and skeletal dynamics, while a second
-panel shows the phase-dependent reflex topology. An actor--critic module learns
-from replayed transitions.}
+to a muscle-driven character. The lower row shows the reflex topology on the
+left and the proprioceptive reflex control loop on the right. An actor--critic
+module learns from replayed transitions.}
 \label{framwork}
 \end{figure*}
 
@@ -310,7 +308,7 @@ from replayed transitions.}
 \end{figure*}
 
 \subsubsection{Simulation platform and character.}
-The physiological environment module (b) is implemented in the Hyfydy musculoskeletal simulation engine \cite{hyfydy} through a Python-based SCONE Gym interface. We use the sagittal-plane H0918v2j human model, which consists of a pelvis, a rigidly attached torso, and bilateral thigh, shank, and foot segments with nine generalized coordinates. The character is actuated by 18 Hill-type muscle–tendon units representing nine muscle groups on each leg, including tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS), biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI), hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the ground through spherical heel and toe contact elements, and the controller is updated at 0.005 s intervals. Figure~\ref{fig:msk-character}(a) illustrates the musculoskeletal character, while Fig.~\ref{fig:msk-character}(b) summarizes the arrangement of the modeled muscle–tendon units and the joints they span.
+The physiological environment module (b) is implemented in the Hyfydy musculoskeletal simulation engine \cite{hyfydy} through the Python-based SCONE Gym interface \cite{geijtenbeek2019}. We use the sagittal-plane H0918v2j human model, which consists of a pelvis, a rigidly attached torso, and bilateral thigh, shank, and foot segments with nine generalized coordinates. The character is actuated by 18 Hill-type muscle–tendon units representing nine muscle groups on each leg, including tibialis anterior (TA), soleus (SOL), gastrocnemius (GAS), vasti (VAS), biceps femoris short head (BIF), rectus femoris (FEM), iliopsoas (ILI), hamstrings (HAM), and gluteus maximus (GLU). Each foot interacts with the ground through spherical heel and toe contact elements, and the controller is updated at 0.005 s intervals. Figure~\ref{fig:msk-character}(a) illustrates the musculoskeletal character, while Fig.~\ref{fig:msk-character}(b) summarizes the arrangement of the modeled muscle–tendon units and the joints they span.
 
 % The physiological environment in module (b) is implemented with the Hyfydy
 % musculoskeletal simulation engine \cite{hyfydy} through a Python-based
@@ -1055,6 +1053,11 @@ S. Lee, M. Park, K. Lee, and J. Lee, ``Scalable muscle-actuated human
 simulation and control,'' \textit{ACM Transactions on Graphics}, vol. 38,
 no. 4, Art. no. 73, 2019.
 
+\bibitem[Sun et~al.(2024)]{sun2024}
+L. Sun, Y. Wang, and W. Qin, ``A language-directed virtual human motion
+generation approach based on musculoskeletal models,'' \textit{Computer
+Animation and Virtual Worlds}, vol. 35, no. 3, Art. no. e2257, 2024.
+
 \bibitem[De Groote and Falisse(2021)]{degroote2021}
 F. De Groote and A. Falisse, ``Perspective on musculoskeletal modelling and
 predictive simulations of human movement to assess the neuromechanics of
@@ -1068,15 +1071,6 @@ Sports, Robotics, and Rehabilitation}. Cambridge, MA, USA: MIT Press, 2020.
 S. Grillner and A. El Manira, ``Current principles of motor control, with
 special reference to vertebrate locomotion,'' \textit{Physiological Reviews},
 vol. 100, no. 1, pp. 271--320, 2020.
-
-\bibitem[Dominici et~al.(2011)]{dominici2011}
-N. Dominici et al., ``Locomotor primitives in newborn babies and their
-development,'' \textit{Science}, vol. 334, no. 6058, pp. 997--999, 2011.
-
-\bibitem[Wolpert et~al.(2011)]{wolpert2011}
-D. M. Wolpert, J. Diedrichsen, and J. R. Flanagan, ``Principles of sensorimotor
-learning,'' \textit{Nature Reviews Neuroscience}, vol. 12, no. 12,
-pp. 739--751, 2011.
 
 \bibitem[Ackermann and van den Bogert(2010)]{ackermann2010}
 M. Ackermann and A. J. van den Bogert, ``Optimality principles for model-based
