@@ -32,6 +32,7 @@
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
 \begin{document}
+\raggedbottom
 \title{
 Reflex-Informed Neuromuscular Reinforcement Learning for Muscle-Driven Locomotion
 }
@@ -274,7 +275,7 @@ stimulation, activation, muscle--tendon force, skeletal motion, and updated
 sensory feedback. Magenta entries in (b2) denote the four reflex parameters
 modulated by $\mathbf{a}_t$. Superscripts $(\mathrm{all})$, $(\mathrm{st})$,
 and $(\mathrm{sw})$ identify parameters shared across all five phases,
-EarlyStance--LateStance, and Liftoff--Swing--Landing, respectively. The
+Early Stance--Late Stance, and Liftoff--Swing--Landing, respectively. The
 notation $i\leftarrow j$ indicates that feedback from source muscle $j$
 modulates target muscle $i$; entries without a source are self-feedback
 pathways. (c) The
@@ -364,13 +365,18 @@ The reflex controller computes muscle stimulation from delayed muscle sensory fe
 % $u_i$ drives activation and muscle--tendon force; the updated muscle length,
 % velocity, and force then provide the next feedback sample.
 \subsubsection{Phase-dependent topology.}
-A finite-state controller divides the gait cycle into five phases: \textbf{EarlyStance}, \textbf{LateStance}, \textbf{Liftoff}, \textbf{Swing}, and \textbf{Landing}. Reflex pathways are organized into three parameter-sharing groups: an all-phase group
-$\Phi_{\mathrm{all}}=\{\mathrm{ES,LS,LF,SW,LA}\}$, a stance group
-$\Phi_{\mathrm{st}}=\{\mathrm{ES,LS}\}$, and a swing-related group
-$\Phi_{\mathrm{sw}}=\{\mathrm{LF,SW,LA}\}$. Parameters are shared among phases within the same group but remain independent across groups. For example, the BIF force-feedback gain used during EarlyStance and LateStance differs from that used during Liftoff, Swing, and Landing, allowing the same sensory feedback to serve different functional roles across the gait cycle. Consequently, the same sensory feedback can serve different functions across the gait cycle, including stance support, push-off, and swing control, without requiring a separate parameter for every gait phase. Fig.~\ref{framwork}(b2) summarizes the resulting topology across the nine modeled muscle groups. Monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the knee, and ILI and GLU at the hip. The biarticular muscles GAS, FEM, and HAM span two adjacent joints and therefore contribute to the control of both.
+A finite-state controller divides the gait cycle into five phases: \textbf{Early Stance}, \textbf{Late Stance}, \textbf{Liftoff}, \textbf{Swing}, and \textbf{Landing}. Reflex pathways are organized into an all-phase group, a stance group, and a swing-related group:
+\begin{equation*}
+\begin{aligned}
+\Phi_{\mathrm{all}} &= \{\mathrm{ES,LS,LF,SW,LA}\},\\
+\Phi_{\mathrm{st}}  &= \{\mathrm{ES,LS}\},\\
+\Phi_{\mathrm{sw}}  &= \{\mathrm{LF,SW,LA}\}.
+\end{aligned}
+\end{equation*}
+Parameters are shared among phases within the same group but remain independent across groups. For example, the BIF force-feedback gain used during Early Stance and Late Stance differs from that used during Liftoff, Swing, and Landing, allowing the same sensory feedback to serve different functional roles across the gait cycle. Consequently, the same sensory feedback can serve different functions across the gait cycle, including stance support, push-off, and swing control, without requiring a separate parameter for every gait phase. Fig.~\ref{framwork}(b2) summarizes the resulting topology across the nine modeled muscle groups. Monoarticular pathways involve TA and SOL at the ankle, VAS and BIF at the knee, and ILI and GLU at the hip. The biarticular muscles GAS, FEM, and HAM span two adjacent joints and therefore contribute to the control of both.
 
 
-The active parameter-sharing groups are determined by the current gait phase. During EarlyStance and LateStance, the controller activates the all-phase and stance-specific pathways, whereas during Liftoff, Swing, and Landing, it activates the all-phase and swing-related pathways. For convenience, let $\phi(t)$ denote the current gait phase and $\Gamma(\phi)$ the corresponding set of active parameter-sharing groups, such that$\Gamma(\phi)=\{\mathrm{all},\mathrm{st}\}$ during EarlyStance and $\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$ during Liftoff, Swing, and Landing.
+The active parameter-sharing groups are determined by the current gait phase. During Early Stance and Late Stance, the controller activates the all-phase and stance-specific pathways, whereas during Liftoff, Swing, and Landing, it activates the all-phase and swing-related pathways. For convenience, let $\phi(t)$ denote the current gait phase and $\Gamma(\phi)$ the corresponding set of active parameter-sharing groups, such that $\Gamma(\phi)=\{\mathrm{all},\mathrm{st}\}$ during Early Stance and $\Gamma(\phi)=\{\mathrm{all},\mathrm{sw}\}$ during Liftoff, Swing, and Landing.
 
 Each active parameter-sharing group $g\in\Gamma(\phi)$ defines a sparse directed feedback graph $\mathcal{G}_{g}$. A connection $i\leftarrow j$ uses sensory feedback measured from source muscle $j$ to modulate the stimulation of target muscle $i$. Connections with $i=j$ implement self-feedback, whereas connections with $i\neq j$  encode inter-muscle coordination. Reflex gains and thresholds are indexed by the active parameter-sharing group, while inactive pathways have zero gain during the corresponding gait phases. The sign and magnitude of each gain determine how strongly the corresponding sensory feedback facilitates or suppresses the target muscle stimulation.
 
