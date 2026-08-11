@@ -241,7 +241,7 @@ Overall, these studies indicate that existing approaches cannot simultaneously p
 \label{sec:method}
 \subsection{Framework Overview}
 Figure~\ref{framwork} illustrates the proposed Reflex-Informed Neuromuscular Reinforcement Learning framework. A fixed phase-dependent reflex controller provides the underlying neuromuscular control mechanism, while the reinforcement learning policy generates four-dimensional residual actions that regulate selected reflex parameters according to the current musculoskeletal state. The resulting muscle stimulation drives the musculoskeletal simulation, which produces the next state and reward. During learning, transitions $(\mathbf{s}_t,\mathbf{a}_t,r_t,\mathbf{s}_{t+1})$
-are stored in the replay buffer $\mathcal{D}$. Maximum a Posteriori Policy Optimization (MPO) updates the policy through an off-policy actor–critic framework using replayed transitions \cite{mpo2018}
+are stored in the replay buffer $\mathcal{D}$. Maximum a Posteriori Policy Optimization (MPO) updates the policy through an off-policy actor–critic framework using replayed transitions \cite{mpo2018}.
 
 % Figure~\ref{framwork} shows the execution loop and the learning loop. During
 % execution, the policy maps the current musculoskeletal state $\mathbf{s}_t$ to a
@@ -334,7 +334,7 @@ activation dynamics to obtain activation $\alpha_i$, after which the Hill-type m
 F_i^{\mathrm{MT}}=\mathcal{F}_i(\alpha_i,l_i,\dot l_i),
 \end{equation}
 where $\mathcal{A}_i$ denotes the activation dynamics and $\mathcal{F}_i$
-denotes the Hill-type muscle mode. Muscle forces are then transformed into generalized joint moments through configuration-dependent muscle moment arms,
+denotes the Hill-type muscle model. Muscle forces are then transformed into generalized joint moments through configuration-dependent muscle moment arms,
 \begin{equation}
 \tau_{\mathrm{mus},k}=
 \sum_{i\in\mathcal{M}_k}r_{i,k}(\mathbf{q})F_i^{\mathrm{MT}},
