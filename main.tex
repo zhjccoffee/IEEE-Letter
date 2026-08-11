@@ -226,7 +226,6 @@ Musculoskeletal models driven by muscle–tendon dynamics have become a standard
 Biologically inspired controllers introduce prior knowledge of human motor control directly into the control architecture. Representative approaches include central pattern generators (CPGs), muscle synergies, and reflex-based controllers. Ijspeert reviewed CPG-based locomotion control in animals and robots, where rhythmic movement is generated through coupled oscillatory networks \cite{ijspeert2008}. d'Avella et al. and Meyer et al. modeled muscle coordination using muscle synergies, representing muscle activation with a reduced set of coordinated control signals \cite{davella2003,meyer2016}. Geyer and Herr proposed a reflex-based controller that generates human walking through physiologically motivated sensory feedback \cite{geyer2010}, which was later extended by Song and Geyer to generate diverse locomotion behaviors across different walking speeds \cite{song2015}. Dzeladini et al. further combined CPGs and reflexes within a unified neuromuscular controller \cite{dzeladini2014}. 
 
 Among these approaches, reflex-based control is particularly relevant to muscle-driven locomotion because it directly maps muscle sensory feedback to muscle stimulation. Reflex-based controllers have been shown to generate stable locomotion in humans \cite{geyer2010,song2015}, adaptive walking across a wide range of speeds \cite{koseki2024}, and robust locomotion in bipedal robots \cite{batts2015}. However, most existing reflex controllers rely on manually designed or offline-optimized parameters. Although muscle stimulation changes continuously with sensory feedback, the underlying reflex gains and thresholds are not updated online, limiting adaptation to changes in musculoskeletal conditions and the environment.
-
 \subsection{Learning-Based Muscle Control}
 Deep reinforcement learning has enabled physics-based characters to acquire locomotion skills directly through interaction with the environment, while prior work has shown that the action representation and reference-motion objective strongly affect the learned behavior \cite{peng2017,peng2018}. For muscle-driven characters, existing approaches typically formulate muscle activations as the policy output, allowing muscle control signals to be generated online according to the current state \cite{weng2021,devree2021,ogum2024,song2021}. Compared with manually designed controllers, these methods improve adaptability and can learn complex locomotion behaviors without explicitly specifying muscle coordination.
 
@@ -262,7 +261,7 @@ are stored in the replay buffer $\mathcal{D}$. Maximum a Posteriori Policy Optim
 % respectively. The following sections define each part of this computation.
 
 \begin{figure*}[!t]
-\centerline{\includegraphics[width=\textwidth]{framework_overview_recomposed.png}}
+\centerline{\includegraphics[width=\textwidth]{framwork1.png}}
 \caption{Overview of the proposed Residual-Reflex RL framework. (a) The
 rollout policy maps the musculoskeletal state $\mathbf{s}_t$ to a
 four-dimensional residual action $\mathbf{a}_t$ and collects transitions
